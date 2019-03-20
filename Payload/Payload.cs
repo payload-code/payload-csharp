@@ -1,4 +1,6 @@
 using System;
+using System.Dynamic;
+using System.Linq;
 using Payload.ARM;
 
 namespace Payload {
@@ -8,24 +10,43 @@ namespace Payload {
 		private static string _url = URL;
 		public static string api_key { get; set; }
 		public static string api_url { get { return _url; } set { _url = value; } }
-		public static dynamic attr = new Attr("");
+		public static dynamic attr = new Attr(null);
+
+		public static dynamic create(dynamic objects) {
+			return new ARMRequest().create(objects);
+		}
+
+		public static dynamic update( dynamic objects ) {
+			return new ARMRequest().update(objects);
+		}
+
+		public static dynamic delete( dynamic objects ) {
+			return new ARMRequest().delete(objects);
+		}
 
 		public class Account : ARMObject<Account>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="account" };
 			}
 		}
 
 		public class Customer : ARMObject<Customer>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="account", polymorphic=new { type="customer" } };
 			}
 			public Customer(dynamic obj){Populate(obj);}
 			public Customer(){}
+
+			public Payment charge( dynamic obj ) {
+				dynamic data = new ExpandoObject();
+				Utils.PopulateExpando( data, obj );
+				data.customer_id = this["id"];
+				return Payment.create(data);
+			}
 		}
 
 		public class ProcessingAccount : ARMObject<ProcessingAccount>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="account", polymorphic=new { type="processing" } };
 			}
 			public ProcessingAccount(dynamic obj){Populate(obj);}
@@ -33,7 +54,7 @@ namespace Payload {
 		}
 
 		public class Org : ARMObject<Org>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="org", endpoint = "/accounts/orgs" };
 			}
 			public Org(dynamic obj){Populate(obj);}
@@ -41,7 +62,7 @@ namespace Payload {
 		}
 
 		public class User : ARMObject<User>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="user" };
 			}
 			public User(dynamic obj){Populate(obj);}
@@ -49,7 +70,7 @@ namespace Payload {
 		}
 
 		public class Transaction : ARMObject<Transaction>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="transaction" };
 			}
 			public Transaction(dynamic obj){Populate(obj);}
@@ -57,15 +78,24 @@ namespace Payload {
 		}
 
 		public class Payment : ARMObject<Payment>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="transaction", polymorphic=new { type="payment" } };
 			}
 			public Payment(dynamic obj){Populate(obj);}
 			public Payment(){}
+
+			public Refund refund() {
+				return pl.Refund.select("*", pl.attr.ledger ).create(new {
+					amount=this["amount"],
+					ledger=new[]{
+						new pl.Ledger(new{ assoc_transaction_id=this["id"] })
+					}
+				});
+			}
 		}
 
 		public class Refund : ARMObject<Refund>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="transaction", polymorphic=new { type="refund" } };
 			}
 			public Refund(dynamic obj){Populate(obj);}
@@ -73,7 +103,7 @@ namespace Payload {
 		}
 
 		public class Ledger : ARMObject<Ledger>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="transaction_ledger" };
 			}
 			public Ledger(dynamic obj){Populate(obj);}
@@ -81,7 +111,7 @@ namespace Payload {
 		}
 
 		public class PaymentMethod : ARMObject<PaymentMethod>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="payment_method" };
 			}
 			public PaymentMethod(dynamic obj){Populate(obj);}
@@ -89,23 +119,79 @@ namespace Payload {
 		}
 
 		public class Card : ARMObject<Card>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="payment_method", polymorphic=new { type="card" } };
 			}
 			public Card(dynamic obj){Populate(obj);}
 			public Card(){}
+
+			public string card_number {
+				get {
+					return (string)((Dynamo)this["card"])
+						.Properties["card_number"];
+				}
+				set {
+					if (!this.Properties.ContainsKey("card"))
+						this["card"] = new Dynamo();
+
+					((Dynamo)this["card"])
+						.Properties["card_number"] = value;
+				}
+			}
 		}
 
 		public class BankAccount : ARMObject<BankAccount>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="payment_method", polymorphic=new { type="bank_account" } };
 			}
 			public BankAccount(dynamic obj){Populate(obj);}
 			public BankAccount(){}
+
+			public string account_number {
+				get {
+					return (string)((Dynamo)this["bank_account"])
+						.Properties["account_number"];
+				}
+				set {
+					if (!this.Properties.ContainsKey("bank_account"))
+						this["bank_account"] = new Dynamo();
+
+					((Dynamo)this["bank_account"])
+						.Properties["account_number"] = value;
+				}
+			}
+
+			public string routing_number {
+				get {
+					return (string)((Dynamo)this["bank_account"])
+						.Properties["routing_number"];
+				}
+				set {
+					if (!this.Properties.ContainsKey("bank_account"))
+						this["bank_account"] = new Dynamo();
+
+					((Dynamo)this["bank_account"])
+						.Properties["routing_number"] = value;
+				}
+			}
+
+			public string account_type {
+				get {
+					return (string)((Dynamo)this["bank_account"])
+						.Properties["account_type"];
+				}
+				set {
+					if (!this.Properties.ContainsKey("bank_account"))
+						this["bank_account"] = new Dynamo();
+
+					((Dynamo)this["bank_account"])
+						.Properties["account_type"] = value;
+				}
+			}
 		}
 
 		public class BillingSchedule : ARMObject<BillingSchedule>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="billing_schedule" };
 			}
 			public BillingSchedule(dynamic obj){Populate(obj);}
@@ -113,7 +199,7 @@ namespace Payload {
 		}
 
 		public class BillingCharge : ARMObject<BillingCharge>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="billing_charge" };
 			}
 			public BillingCharge(dynamic obj){Populate(obj);}
@@ -121,7 +207,7 @@ namespace Payload {
 		}
 
 		public class Invoice : ARMObject<Invoice>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="invoice" };
 			}
 			public Invoice(dynamic obj){Populate(obj);}
@@ -129,7 +215,7 @@ namespace Payload {
 		}
 
 		public class LineItem : ARMObject<LineItem>, IARMObject {
-			public new dynamic GetSpec() {
+			public override dynamic GetSpec() {
 				return new { sobject="line_item" };
 			}
 			public LineItem(dynamic obj){Populate(obj);}
@@ -137,16 +223,16 @@ namespace Payload {
 		}
 
 		public class ChargeItem : ARMObject<ChargeItem>, IARMObject {
-			public new dynamic GetSpec() {
-				return new { sobject="line_item", polymorphic=new { type="charge" } };
+			public override dynamic GetSpec() {
+				return new { sobject="line_item", polymorphic=new { entry_type="charge" } };
 			}
 			public ChargeItem(dynamic obj){Populate(obj);}
 			public ChargeItem(){}
 		}
 
 		public class PaymentItem : ARMObject<PaymentItem>, IARMObject {
-			public new dynamic GetSpec() {
-				return new { sobject="line_item", polymorphic=new { type="payment" } };
+			public override dynamic GetSpec() {
+				return new { sobject="line_item", polymorphic=new { entry_type="payment" } };
 			}
 			public PaymentItem(dynamic obj){Populate(obj);}
 			public PaymentItem(){}

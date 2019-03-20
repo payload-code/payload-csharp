@@ -22,19 +22,22 @@ namespace Payload.ARM {
 		}
 	}
 
-    public class Attr : DynamicObject, IDynamicMetaObjectProvider {
+	public class Attr : DynamicObject, IDynamicMetaObjectProvider {
 		public string param;
-		public Attr parent;
-		public string key;
+		public Attr parent = null;
+		public string key = null;
+		public bool is_method = false;
 
-		public Attr(string param, Attr parent=null) {
+		public Attr(string param, Attr parent=null, bool is_method=false) {
 			this.param = param;
-			this.parent = parent;
+			if ( parent != null && parent.param != null )
+				this.parent = parent;
+			this.is_method = is_method;
 
 			if ( this.parent == null )
 				this.key = this.param;
 			else
-				this.key = String.Format("{0}[{1}]", this.parent.key, this.param );
+				this.key = String.Format("{0}[{1}]", this.parent.key, this.param);
 		}
 
 		public override bool TryGetMember(GetMemberBinder binder, out object result) {
@@ -42,8 +45,14 @@ namespace Payload.ARM {
 			return true;
 		}
 
+		public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result) {
+			result = new Attr(binder.Name, this, true);
+			return true;
+		}
 
 		public override string ToString() {
+			if ( this.is_method )
+				return String.Format("{0}({1})", this.param, this.parent.key );
 			return this.key;
 		}
 

@@ -10,12 +10,13 @@ using System.Dynamic;
 using System.Linq;
 using Payload;
 
-
 namespace Payload.ARM {
 
 	public class ARMRequest {
 
-		public dynamic Object;
+		public static bool DEBUG = false;
+
+		public dynamic Object = null;
 		public Dictionary<string, string> _filters;
 		public List<object> _attrs;
 		public List<object> _group_by;
@@ -24,8 +25,9 @@ namespace Payload.ARM {
 			NullValueHandling = NullValueHandling.Ignore
 		};
 
-		public ARMRequest( Type type ) {
-			this.Object = (IARMObject)Activator.CreateInstance(type);
+		public ARMRequest( Type type=null ) {
+			if ( type != null )
+				this.Object = (IARMObject)Activator.CreateInstance(type);
 			this._filters  = new Dictionary<string, string>();
 			this._attrs    = new List<object>();
 			this._group_by = new List<object>();
@@ -40,7 +42,7 @@ namespace Payload.ARM {
 				endpoint += "/" + id;
 
 			for ( int i = 0; i < this._attrs.Count; i++ )
-				this._filters.Add( "attrs["+i.ToString()+"]", (string)this._attrs[i] );
+				this._filters.Add( "fields["+i.ToString()+"]", (string)this._attrs[i] );
 
 			if ( this._filters.Count > 0 || parameters != null )
 				endpoint += "?";
@@ -68,6 +70,11 @@ namespace Payload.ARM {
 					json, Formatting.None, jsonsettings);
 				var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(post_data);
 
+				if ( DEBUG ) {
+					Console.WriteLine("-------------------REQ-------------------");
+					Console.WriteLine(post_data);
+				}
+
 				req.ContentType = "application/json";
 				req.ContentLength = bytes.Length;
 
@@ -80,17 +87,16 @@ namespace Payload.ARM {
 			var reader = new StreamReader(response.GetResponseStream());
 			var response_value = reader.ReadToEnd();
 
+			if ( DEBUG ) {
+				Console.WriteLine("-------------------RESP------------------");
+				Console.WriteLine(response_value);
+			}
+
 			var obj = JsonConvert.DeserializeObject<ARMObject<object>>(response_value);
 
 			if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list") ) ) {
 
-				dynamic result;
-				if (!ARMObjectCache._cache.TryGetValue((string)obj["id"], out result)) {
-					var type = Payload.Utils.GetObjectClass(obj);
-					result = (IARMObject)Activator.CreateInstance(type);
-				}
-
-				result.Populate( obj );
+				dynamic result = ARMObjectCache.GetOrCreate(obj);
 
 				return result;
 			} else {
@@ -99,13 +105,8 @@ namespace Payload.ARM {
 				foreach( var i in (Newtonsoft.Json.Linq.JArray)obj["values"] ) {
 					var item = i.ToObject<ARMObject<object>>();
 
-					dynamic result;
-					if (!ARMObjectCache._cache.TryGetValue((string)item["id"], out result)) {
-						var type = Utils.GetObjectClass(item);
-						result = (IARMObject)Activator.CreateInstance(type);
-					}
+					dynamic result = ARMObjectCache.GetOrCreate(item);
 
-					result.Populate( item );
 					return_list.Add(result);
 				}
 
@@ -129,9 +130,10 @@ namespace Payload.ARM {
 
 			dynamic obj = new ExpandoObject();
 			if (data is IList<dynamic>) {
-
 				var list = new List<dynamic>();
 				foreach ( var item in data ) {
+
+					_check_type( item );
 
 					dynamic row = new ExpandoObject();
 					Utils.PopulateExpando( row, item );
@@ -160,6 +162,9 @@ namespace Payload.ARM {
 
 			if (updates is IList<dynamic>) {
 				for ( int i = 0; i < updates.Count; i++ ) {
+
+					_check_type( updates[i][0] );
+
 					var upd = new ExpandoObject();
 					((IDictionary<string, object>)upd).Add("id", updates[i][0]["id"]);
 					Utils.PopulateExpando( upd, updates[i][1] );
@@ -179,7 +184,12 @@ namespace Payload.ARM {
 		public dynamic delete( dynamic objects ) {
 
 			if (objects is IList<dynamic>) {
-				string id_query = String.Join("|", (from o in (List<dynamic>)objects select o.id).ToArray());
+
+				for ( int i = 0; i < objects.Count; i++ )
+					_check_type( objects[i] );
+
+				string id_query = String.Join("|",
+					(from o in (List<dynamic>)objects select o.id).ToArray());
 
 				return this.request("DELETE", parameters: new {mode="query", id=id_query} );
 			}
@@ -207,6 +217,18 @@ namespace Payload.ARM {
 
 		public dynamic all() {
 			return this.request("GET");
+		}
+
+		private void _check_type( dynamic obj ) {
+
+			if ( Utils.IsSubclassOfRawGeneric(typeof(ARMObject<>), obj.GetType()) ) {
+				if ( this.Object == null )
+					this.Object = (IARMObject)Activator.CreateInstance(obj.GetType());
+				else if ( this.Object.GetType() != obj.GetType() )
+					throw new Exception("Bulk create requires all objects to be of the same type");
+			} else if ( this.Object == null ) {
+				throw new Exception("Bulk create requires ARMObject object types");
+			}
 		}
 	}
 }

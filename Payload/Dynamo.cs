@@ -71,7 +71,7 @@ namespace Payload {
 		}
 
 		public object this[string key] {
-            get {
+			get {
 				if ( Properties.ContainsKey(key) )
 					return Properties[key];
 
@@ -80,7 +80,7 @@ namespace Payload {
 					return result;
 
 				throw new KeyNotFoundException();
-            }
+			}
 
 			set {
 				if (!SetMember(key, MemberTypes.Property, value) )
