@@ -1,6 +1,6 @@
 # Payload C# Library
 
-A C# library for integrating Payload
+A C# library for integrating [Payload](https://payload.co).
 
 ## Installation
 
@@ -11,7 +11,7 @@ version from GitHub.
 
 ### 2) Include in Project
 
-Include the **Payload** folter in your VisualStudio project.
+Include the **Payload** folder in your Visual Studio project.
 
 ### NuGet
 
@@ -68,7 +68,7 @@ Console.WriteLine(customer["email"]);
 
 ### Updating an Object
 
-Updating an object is a simple call to the object method, `update`.
+Updating an object is a simple call to the `update` object method.
 
 ```csharp
 // Updating a customer's email
@@ -77,7 +77,7 @@ customer.update(new { email="matt.perez@newwork.com" });
 
 ### Selecting Objects
 
-Selecting object is simple and robust.
+Objects can be selected using any of their attributes.
 
 ```csharp
 // Select a customer by email
