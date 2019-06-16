@@ -15,7 +15,7 @@ Include the **Payload** folder in your Visual Studio project.
 
 ### NuGet
 
-*Coming Soon*
+nuget install payload-api
 
 ## Get Started
 
