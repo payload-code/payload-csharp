@@ -237,5 +237,58 @@ namespace Payload {
 			public PaymentItem(dynamic obj){Populate(obj);}
 			public PaymentItem(){}
 		}
+
+		public class UnknownResponse : PayloadError {
+			public UnknownResponse(){}
+			public UnknownResponse(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class BadRequest : PayloadError {
+			public override int GetCode() { return 400; }
+			public BadRequest(){}
+			public BadRequest(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class InvalidAttributes : PayloadError {
+			public override int GetCode() { return 400; }
+			public InvalidAttributes(){}
+			public InvalidAttributes(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class Unauthorized : PayloadError {
+			public override int GetCode() { return 401; }
+			public Unauthorized(){}
+			public Unauthorized(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class Forbidden : PayloadError {
+			public override int GetCode() { return 403; }
+			public Forbidden(){}
+			public Forbidden(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class NotFound : PayloadError {
+			public override int GetCode() { return 404; }
+			public NotFound(){}
+			public NotFound(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class TooManyRequests : PayloadError {
+			public override int GetCode() { return 429; }
+			public TooManyRequests(){}
+			public TooManyRequests(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class InternalServerError : PayloadError {
+			public override int GetCode() { return 500; }
+			public InternalServerError(){}
+			public InternalServerError(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class ServiceUnavailable : PayloadError {
+			public override int GetCode() { return 503; }
+			public ServiceUnavailable(){}
+			public ServiceUnavailable(string message, ARMObject<object> response) : base(message, response) {}
+		}
 	}
 }

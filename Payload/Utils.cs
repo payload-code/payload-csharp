@@ -54,6 +54,32 @@ namespace Payload {
 			return class_found;
 		}
 
+		static public Type GetErrorClass(Dynamo obj, int code) {
+			var typelist = from t in Assembly.GetExecutingAssembly().GetTypes()
+				where t.IsClass && t.Namespace == "Payload"
+				select t;
+
+			Type class_found = null;
+
+			foreach (var type in typelist) {
+				if ( !IsSubclassOfRawGeneric(typeof(PayloadError), type) )
+					continue;
+
+				if ( !type.Name.Equals(obj["error_type"]) )
+					continue;
+
+				var obj_template = (IPayloadError)Activator.CreateInstance(type);
+
+				if(obj_template.GetCode() != code)
+					continue;
+
+				class_found = type;
+				break;
+			}
+
+			return class_found;
+		}
+
 		static public void PopulateExpando( dynamic obj, dynamic data ) {
 			if ( data == null ) return;
 			var dictionary = (IDictionary<string, object>)obj;

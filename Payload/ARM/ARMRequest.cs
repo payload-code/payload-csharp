@@ -83,7 +83,14 @@ namespace Payload.ARM {
 			} else
 				req.ContentLength = 0;
 
-			var response = (HttpWebResponse)req.GetResponse();
+			HttpWebResponse response = null;
+			try {
+				response = (HttpWebResponse)req.GetResponse();
+			} catch (WebException we) {
+				response = we.Response as HttpWebResponse;
+				if (response == null)
+					throw;
+			}
 			var reader = new StreamReader(response.GetResponseStream());
 			var response_value = reader.ReadToEnd();
 
@@ -94,23 +101,31 @@ namespace Payload.ARM {
 
 			var obj = JsonConvert.DeserializeObject<ARMObject<object>>(response_value);
 
-			if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list") ) ) {
+			if (response.StatusCode == HttpStatusCode.OK) {
 
-				dynamic result = ARMObjectCache.GetOrCreate(obj);
+				if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list") ) ) {
 
-				return result;
-			} else {
-				var return_list = new List<dynamic>();
+					dynamic result = ARMObjectCache.GetOrCreate(obj);
 
-				foreach( var i in (Newtonsoft.Json.Linq.JArray)obj["values"] ) {
-					var item = i.ToObject<ARMObject<object>>();
+					return result;
+				} else {
+					var return_list = new List<dynamic>();
 
-					dynamic result = ARMObjectCache.GetOrCreate(item);
+					foreach( var i in (Newtonsoft.Json.Linq.JArray)obj["values"] ) {
+						var item = i.ToObject<ARMObject<object>>();
 
-					return_list.Add(result);
+						dynamic result = ARMObjectCache.GetOrCreate(item);
+
+						return_list.Add(result);
+					}
+
+					return return_list;
 				}
-
-				return return_list;
+			} else {
+				Type type = Utils.GetErrorClass(obj, (int)response.StatusCode);
+				if ( type != null )
+					throw (PayloadError)Activator.CreateInstance(type, (string)obj["error_description"], obj);
+				throw new pl.UnknownResponse((string)obj["error_description"], obj);
 			}
 		}
 

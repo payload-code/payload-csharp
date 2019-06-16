@@ -24,7 +24,7 @@ include the `Payload` namespace to get started.
 
 All Payload objects and methods are accessible using the `pl` static class.
 
-### API authentication
+### API Authentication
 
 To authenticate with the Payload API, you'll need a live or test API key. API
 keys are accessible from within the Payload dashboard.

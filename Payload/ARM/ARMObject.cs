@@ -104,7 +104,7 @@ namespace Payload.ARM {
 
 		public string json() {
 			return JsonConvert.SerializeObject(
-					this, Formatting.None);
+					this.Properties, Formatting.Indented);
 		}
 
 		public void update( dynamic update ) {
