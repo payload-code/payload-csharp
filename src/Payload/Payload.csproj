@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Payload is C# library for the Payload API (https://payload.co).</Description>
+    <RootNamespace>Payload</RootNamespace>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <AssemblyTitle>Payload</AssemblyTitle>
+    <VersionPrefix>0.1.5</VersionPrefix>
+    <Version>0.1.5</Version>
+    <Authors>Payload, Ian Halpern</Authors>
+    <AssemblyName>Payload</AssemblyName>
+    <PackageId>payload-api</PackageId>
+    <PackageTags>payload;payment;credit;cards;money;gateway</PackageTags>
+    <PackageIconUrl>https://avatars0.githubusercontent.com/u/42856588</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/payload-code/payload-csharp</PackageProjectUrl>
+    <PackageLicense>MIT</PackageLicense>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+  </ItemGroup>
+</Project>
