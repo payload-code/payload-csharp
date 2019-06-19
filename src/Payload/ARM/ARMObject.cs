@@ -20,6 +20,8 @@ namespace Payload.ARM {
 			dynamic result;
 			if (!ARMObjectCache._cache.TryGetValue((string)obj["id"], out result)) {
 				var type = Payload.Utils.GetObjectClass(obj);
+				if ( type == null )
+					return obj;
 				result = (IARMObject)Activator.CreateInstance(type);
 			}
 
