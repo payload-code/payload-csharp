@@ -238,6 +238,22 @@ namespace Payload {
 			public PaymentItem(){}
 		}
 
+		public class Webhook : ARMObject<Webhook>, IARMObject {
+			public override dynamic GetSpec() {
+				return new { sobject="webhook" };
+			}
+			public Webhook(dynamic obj){Populate(obj);}
+			public Webhook(){}
+		}
+
+		public class PaymentLink : ARMObject<PaymentLink>, IARMObject {
+			public override dynamic GetSpec() {
+				return new { sobject="payment_link" };
+			}
+			public PaymentLink(dynamic obj){Populate(obj);}
+			public PaymentLink(){}
+		}
+
 		public class UnknownResponse : PayloadError {
 			public UnknownResponse(){}
 			public UnknownResponse(string message, ARMObject<object> response) : base(message, response) {}
