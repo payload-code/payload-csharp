@@ -277,10 +277,10 @@ namespace Payload {
 			public Unauthorized(string message, ARMObject<object> response) : base(message, response) {}
 		}
 
-		public class Forbidden : PayloadError {
+		public class NotPermitted : PayloadError {
 			public override int GetCode() { return 403; }
-			public Forbidden(){}
-			public Forbidden(string message, ARMObject<object> response) : base(message, response) {}
+			public NotPermitted(){}
+			public NotPermitted(string message, ARMObject<object> response) : base(message, response) {}
 		}
 
 		public class NotFound : PayloadError {
