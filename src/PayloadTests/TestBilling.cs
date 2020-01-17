@@ -60,6 +60,22 @@ namespace Payload.Tests
 
             Assert.AreEqual(typeof(pl.BillingCharge), billing_charge.GetType());
         }
+
+
+        [Test]
+        public void test_billing_schedule_one()
+        {
+            Assert.NotNull(pl.BillingSchedule.filter_by(new { type = this.billing_schedule.type }).one());
+            Assert.AreEqual(typeof(pl.BillingSchedule), pl.BillingSchedule.filter_by(new { type = billing_schedule.type }).one().GetType());
+        }
+
+        [Test]
+        public void test_billing_charge_one()
+        {
+            Assert.NotNull(pl.BillingCharge.filter_by(new { type = this.billing_schedule.charges[0].type }).one());
+
+            Assert.AreEqual(typeof(pl.BillingCharge), pl.BillingCharge.filter_by(new { type = this.billing_schedule.charges[0].type }).one().GetType());
+        }
     }
 }
 

@@ -37,6 +37,19 @@ namespace Payload.Tests
             Assert.NotNull(this.processing_account.id);
         }
 
+        [Test]
+        public void test_customer_account_one()
+        {
+            Assert.NotNull(pl.Account.filter_by(new { email = customer_account.email }).one());
+            Assert.AreEqual(typeof(pl.Customer), pl.Account.filter_by(new { email = customer_account.email }).one().GetType());
+        }
+
+        [Test]
+        public void test_processing_account_one()
+        {
+            Assert.NotNull(pl.Account.filter_by(new { email = processing_account.email }).one());
+            Assert.AreEqual(typeof(pl.ProcessingAccount), pl.Account.filter_by(new { email = processing_account.email }).one().GetType());
+        }
 
         [Test]
         public void test_delete()
@@ -88,7 +101,7 @@ namespace Payload.Tests
                     }
             );
 
-            var customers = pl.Customer.filter_by(new { order_by = "created_at", limit = "3", offset = "1" }).all();
+            var customers = pl.Customer.filter_by(new { order_by = "created_at", limit = 3, offset = 1 }).all();
 
             Assert.True(customers.Count == 3);
             Assert.True(Convert.ToDateTime(customers[0].created_at) < Convert.ToDateTime(customers[1].created_at));

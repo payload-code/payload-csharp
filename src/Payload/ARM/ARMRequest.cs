@@ -17,7 +17,7 @@ namespace Payload.ARM {
 		public static bool DEBUG = false;
 
 		public dynamic Object = null;
-		public Dictionary<string, string> _filters;
+		public Dictionary<string, dynamic> _filters;
 		public List<object> _attrs;
 		public List<object> _group_by;
 
@@ -28,7 +28,7 @@ namespace Payload.ARM {
 		public ARMRequest( Type type=null ) {
 			if ( type != null )
 				this.Object = (IARMObject)Activator.CreateInstance(type);
-			this._filters  = new Dictionary<string, string>();
+			this._filters  = new Dictionary<string, dynamic>();
 			this._attrs    = new List<object>();
 			this._group_by = new List<object>();
 		}
@@ -232,6 +232,10 @@ namespace Payload.ARM {
 
 		public dynamic all() {
 			return this.request("GET");
+		}
+
+		public dynamic one() {
+			return this.request("GET", parameters: new {limit=1}) != null ? this.request("GET", parameters: new {limit=1})[0] : null ;
 		}
 
 		private void _check_type( dynamic obj ) {

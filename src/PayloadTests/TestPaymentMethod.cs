@@ -1,7 +1,4 @@
 using NUnit.Framework;
-using System;
-using System.Linq;
-using System.Collections.Generic;
 
 
 namespace Payload.Tests
@@ -9,9 +6,8 @@ namespace Payload.Tests
     public class TestPaymentMethod
     {
 
-        dynamic bank_payment;
-        dynamic card_payment;
-        dynamic proccessing_account;
+        dynamic bank_payment_method;
+        dynamic card_payment_method;
 
         [OneTimeSetUp]
         public void ClassInit()
@@ -22,169 +18,28 @@ namespace Payload.Tests
         [SetUp]
         public void Setup()
         {
-            this.bank_payment = Fixtures.bank_payment();
-            this.card_payment = Fixtures.card_payment();
-            this.proccessing_account = Fixtures.processing_account();
-        }
-
-
-
-        [Test]
-        public void test_create_payment_card()
-        {
-            Assert.AreEqual(typeof(pl.Payment), this.card_payment.GetType());
-            Assert.AreEqual("processed", this.card_payment.status);
-        }
-
-        [Test]
-        public void test_create_payment_bank()
-        {
-            Assert.AreEqual(typeof(pl.Payment), this.bank_payment.GetType());
-            Assert.AreEqual("processed", this.card_payment.status);
-
-        }
-
-        [Test]
-        public void test_payment_filters_1()
-        {
-            String rand_description = Fixtures.RandomString(10);
-
-            var card_payment = pl.Payment.create(new
+            this.card_payment_method = pl.Card.create(new { card_number = "4242 4242 4242 4242" });
+            this.bank_payment_method = pl.BankAccount.create(new
             {
-                amount = 100.0,
-                description = rand_description,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
+                account_number = "123456789",
+                routing_number = "036001808",
+                account_type = "checking"
             });
-
-            List<dynamic> payments = pl.Payment.filter_by(
-                pl.attr.amount.gt(99),
-                pl.attr.amount.lt(200),
-                pl.attr.description.contains(rand_description),
-                pl.attr.created_at.gt(new DateTime(2019, 2, 1))
-            ).all();
-
-            Assert.True(payments.Count == 1);
-            Assert.True(payments.ElementAt(0).id == card_payment.id);
-
         }
 
         [Test]
-        public void test_void_card_payment()
+        public void test_create_payment_method_card()
         {
-            this.card_payment.update(new { status = "voided" });
-
-            Assert.AreEqual("voided", this.card_payment.status);
+            Assert.AreEqual(typeof(pl.Card), this.card_payment_method.GetType());
+            Assert.AreEqual("xxxxxxxxxxxx4242", this.card_payment_method.card_number);
         }
 
         [Test]
-        public void test_void_bank_payment()
+        public void test_create_payment_method_bank()
         {
+            Assert.AreEqual(typeof(pl.BankAccount), this.bank_payment_method.GetType());
+            Assert.AreEqual("checking", this.bank_payment_method.account_type);
 
-            this.bank_payment.update(new { status = "voided" });
-            Assert.AreEqual("voided", this.bank_payment.status);
-
-        }
-
-        [Test]
-        public void test_refund_card_payment()
-        {
-            var refund = pl.Refund.create(new
-            {
-                amount = 100.0,
-                ledger = new[] {
-                    new pl.Ledger(new {
-                        assoc_transaction_id=this.card_payment.id
-                    })
-                }
-            });
-
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 100);
-            Assert.True(refund.status_code == "approved");
-        }
-
-        [Test]
-        public void test_partial_refund_card_payment()
-        {
-            var refund = pl.Refund.create(new
-            {
-                amount = 10.0,
-                ledger = new[] {
-                    new pl.Ledger(new {
-                        assoc_transaction_id=this.card_payment.id
-                    })
-                }
-            });
-
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 10);
-            Assert.True(refund.status_code == "approved");
-        }
-
-        [Test]
-        public void test_blind_refund_card_payment()
-        {
-            var refund = pl.Refund.create(new
-            {
-                amount = 10.0,
-                processing_id = this.proccessing_account.id,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
-            });
-
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 10);
-            Assert.True(refund.status_code == "approved");
-
-        }
-
-        [Test]
-        public void test_refund_bank_payment()
-        {
-            var refund = pl.Refund.create(new
-            {
-                amount = 100.0,
-                ledger = new[] {
-                    new pl.Ledger(new {
-                        assoc_transaction_id=this.bank_payment.id
-                    })
-                }
-            });
-
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 100);
-            Assert.True(refund.status_code == "approved");
-        }
-
-        [Test]
-        public void test_partial_refund_bank_payment()
-        {
-            var refund = pl.Refund.create(new
-            {
-                amount = 10.0,
-                ledger = new[] {
-                    new pl.Ledger(new {
-                        assoc_transaction_id=this.bank_payment.id
-                    })
-                }
-            });
-
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 10);
-            Assert.True(refund.status_code == "approved");
-        }
-
-
-        [Test]
-        public void test_convenience_fee()
-        {
-            var payment = pl.Payment.select("*", "conv_fee").create(new
-            {
-                amount = 100,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
-            });
-
-            Assert.NotNull(payment.fee);
-            Assert.NotNull(payment.conv_fee);
         }
 
         [Test]
@@ -195,8 +50,20 @@ namespace Payload.Tests
         }
 
 
+        [Test]
+        public void test_card_payment_method_one()
+        {
+            Assert.NotNull(pl.PaymentMethod.filter_by(new { type = this.card_payment_method.type }).one());
+            Assert.AreEqual(typeof(pl.Card), pl.PaymentMethod.filter_by(new { type = this.card_payment_method.type }).one().GetType());
+
+        }
+
+        [Test]
+        public void test_bank_payment_method_one()
+        {
+            Assert.NotNull(pl.PaymentMethod.filter_by(new { type = this.bank_payment_method.type }).one());
+            Assert.AreEqual(typeof(pl.BankAccount), pl.PaymentMethod.filter_by(new { type = this.bank_payment_method.type }).one().GetType());
+
+        }
     }
 }
-
-
-

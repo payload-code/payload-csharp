@@ -85,14 +85,13 @@ namespace Payload.Tests
                 Assert.AreEqual("paid", invoice_get.status);
 
             }
+        }
 
-
-
-
-
-
-
-            // Assert.Pass();
+        [Test]
+        public void test_invoice_one()
+        {
+            Assert.NotNull(pl.Invoice.filter_by(new { type = this.invoice.type }).one());
+            Assert.AreEqual(typeof(pl.Invoice), pl.Invoice.filter_by(new{ type = this.invoice.type }).one().GetType());
         }
     }
 }
