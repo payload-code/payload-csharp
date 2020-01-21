@@ -138,6 +138,36 @@ namespace Payload {
 						.Properties["card_number"] = value;
 				}
 			}
+
+			public string card_code {
+				get {
+					return (string)((Dynamo)this["card"])
+						.Properties["card_code"];
+				}
+				set {
+					if (!this.Properties.ContainsKey("card"))
+						this["card"] = new Dynamo();
+
+					((Dynamo)this["card"])
+						.Properties["card_code"] = value;
+				}
+			}
+
+			public string expiry {
+				get {
+					return (string)((Dynamo)this["card"])
+						.Properties["expiry"];
+				}
+				set {
+					if (!this.Properties.ContainsKey("card"))
+						this["card"] = new Dynamo();
+
+					((Dynamo)this["card"])
+						.Properties["expiry"] = value;
+				}
+			}
+
+
 		}
 
 		public class BankAccount : ARMObject<BankAccount>, IARMObject {

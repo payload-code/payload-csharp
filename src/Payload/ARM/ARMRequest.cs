@@ -235,7 +235,11 @@ namespace Payload.ARM {
 		}
 
 		public dynamic one() {
-			return this.request("GET", parameters: new {limit=1}) != null ? this.request("GET", parameters: new {limit=1})[0] : null ;
+			var data =  this.request("GET", parameters: new {limit=1});
+			if (data.Count == 1){
+				return data[0];
+			}
+			else return null;
 		}
 
 		private void _check_type( dynamic obj ) {

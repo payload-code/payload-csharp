@@ -18,7 +18,13 @@ namespace Payload.Tests
         [SetUp]
         public void Setup()
         {
-            this.card_payment_method = pl.Card.create(new { card_number = "4242 4242 4242 4242" });
+            this.card_payment_method = pl.Card.create(new {
+                account_holder="John Smith",
+                card_number="4242 4242 4242 4242",
+                expiry="05/22",
+                card_code="123"
+            });
+
             this.bank_payment_method = pl.BankAccount.create(new
             {
                 account_number = "123456789",
