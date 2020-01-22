@@ -90,13 +90,21 @@ Use the `pl.attr` attribute helper
 interface to write powerful queries with a little extra syntax sugar.
 
 ```csharp
-var payments = pl.Payments.filter_by(
+var payments = pl.Payment.filter_by(
     pl.attr.amount.gt(100),
     pl.attr.amount.lt(200),
     pl.attr.description.contains("Test"),
     pl.attr.created_at.gt(new DateTime(2019,2,1))
 ).all();
 ```
+
+### Testing the Payload C# Library
+
+Tests are contained within the PayloadTests/ directory. To run tests enter the command in terminal 
+
+```bash
+ dotnet test 
+ ```
 
 ## Documentation
 

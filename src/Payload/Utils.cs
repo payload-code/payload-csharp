@@ -131,9 +131,9 @@ namespace Payload {
 			obj[key] = val;
 		}
 
-		public static string ToQueryString(Dictionary<string, string> parameters) {
+		public static string ToQueryString(Dictionary<string, dynamic> parameters) {
 			var properties = from key in parameters.Keys
-			                 select key + "=" + WebUtility.UrlEncode(parameters[key]);
+			                 select key + "=" + WebUtility.UrlEncode(string.Empty + parameters[key]);
 			return String.Join("&", properties.ToArray());
 		}
 
