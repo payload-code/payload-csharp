@@ -284,6 +284,14 @@ namespace Payload {
 			public PaymentLink(){Populate(new{});}
 		}
 
+		public class OAuthToken : ARMObject<OAuthToken>, IARMObject {
+			public override dynamic GetSpec() {
+				return new { sobject="oauth_token", endpoint = "/oauth/token" };
+			}
+			public OAuthToken(dynamic obj){Populate(obj);}
+			public OAuthToken(){Populate(new{});}
+		}
+
 		public class UnknownResponse : PayloadError {
 			public UnknownResponse(){}
 			public UnknownResponse(string message, ARMObject<object> response) : base(message, response) {}

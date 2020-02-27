@@ -18,11 +18,17 @@ namespace Payload.ARM {
 
 		public static dynamic GetOrCreate( dynamic obj ) {
 			dynamic result;
-			if (!ARMObjectCache._cache.TryGetValue((string)obj["id"], out result)) {
-				var type = Payload.Utils.GetObjectClass(obj);
-				if ( type == null )
-					return obj;
-				result = (IARMObject)Activator.CreateInstance(type);
+			try {
+				var id = obj["id"];
+
+				if (!ARMObjectCache._cache.TryGetValue((string)id, out result)) {
+					var type = Payload.Utils.GetObjectClass(obj);
+					if ( type == null )
+						return obj;
+					result = (IARMObject)Activator.CreateInstance(type);
+				}
+			} catch ( KeyNotFoundException exc ) {
+				return obj;
 			}
 
 			result.Populate( obj );

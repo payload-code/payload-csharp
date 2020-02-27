@@ -37,7 +37,7 @@ namespace Payload.ARM {
 				object parameters=null, object json=null ) {
 			var spec = this.Object.GetSpec();
 
-			var endpoint = spec.GetType().GetProperty("endpoint") ?? "/" + spec.sobject + "s";
+			var endpoint = spec.GetType().GetProperty("endpoint") != null ? spec.endpoint : "/" + spec.sobject + "s";
 			if (!string.IsNullOrEmpty(id))
 				endpoint += "/" + id;
 
