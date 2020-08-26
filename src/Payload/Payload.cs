@@ -32,7 +32,7 @@ namespace Payload {
 
 		public class Customer : ARMObject<Customer>, IARMObject {
 			public override dynamic GetSpec() {
-				return new { sobject="account", polymorphic=new { type="customer" } };
+				return new { sobject="customer" };
 			}
 			public Customer(dynamic obj){Populate(obj);}
 			public Customer(){Populate(new{});}
@@ -47,7 +47,7 @@ namespace Payload {
 
 		public class ProcessingAccount : ARMObject<ProcessingAccount>, IARMObject {
 			public override dynamic GetSpec() {
-				return new { sobject="account", polymorphic=new { type="processing" } };
+				return new { sobject="processing_account" };
 			}
 			public ProcessingAccount(dynamic obj){Populate(obj);}
 			public ProcessingAccount(){Populate(new{});}
