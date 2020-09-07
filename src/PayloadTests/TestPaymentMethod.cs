@@ -9,15 +9,11 @@ namespace Payload.Tests
         dynamic bank_payment_method;
         dynamic card_payment_method;
 
-        [OneTimeSetUp]
-        public void ClassInit()
-        {
-            pl.api_key = "your_secret_key_3bfn0Ilzojfd5M76hFOxT";
-        }
 
         [SetUp]
         public void Setup()
         {
+            PayloadTestSetup.initAPI();
             this.card_payment_method = pl.Card.create(new {
                 account_holder="John Smith",
                 card_number="4242 4242 4242 4242",

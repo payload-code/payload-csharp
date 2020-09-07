@@ -102,6 +102,22 @@ namespace Payload {
 			public Refund(){Populate(new{});}
 		}
 
+		public class Credit : ARMObject<Credit>, IARMObject {
+			public override dynamic GetSpec() {
+				return new { sobject="transaction", polymorphic=new { type="credit" } };
+			}
+			public Credit(dynamic obj){Populate(obj);}
+			public Credit(){Populate(new{});}
+		}
+
+		public class Deposit : ARMObject<Deposit>, IARMObject {
+			public override dynamic GetSpec() {
+				return new { sobject="transaction", polymorphic=new { type="deposit" } };
+			}
+			public Deposit(dynamic obj){Populate(obj);}
+			public Deposit(){Populate(new{});}
+		}
+
 		public class Ledger : ARMObject<Ledger>, IARMObject {
 			public override dynamic GetSpec() {
 				return new { sobject="transaction_ledger" };
@@ -307,6 +323,12 @@ namespace Payload {
 			public override int GetCode() { return 400; }
 			public InvalidAttributes(){}
 			public InvalidAttributes(string message, ARMObject<object> response) : base(message, response) {}
+		}
+
+		public class TransactionDeclined : PayloadError {
+			public override int GetCode() { return 400; }
+			public TransactionDeclined(){}
+			public TransactionDeclined(string message, ARMObject<object> response) : base(message, response) {}
 		}
 
 		public class Unauthorized : PayloadError {

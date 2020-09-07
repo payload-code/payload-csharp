@@ -12,16 +12,10 @@ namespace Payload.Tests
         dynamic bank_payment;
         dynamic processing_account;
 
-        [OneTimeSetUp]
-
-        public void ClassInit()
-        {
-            pl.api_key = "your_secret_key_3bfn0Ilzojfd5M76hFOxT";
-        }
-
         [SetUp]
         public void Setup()
         {
+            PayloadTestSetup.initAPI();
             this.processing_account = Fixtures.processing_account();
             this.card_payment = Fixtures.card_payment();
             this.bank_payment = Fixtures.bank_payment();
