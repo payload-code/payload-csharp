@@ -15,7 +15,9 @@ Include the **Payload** folder in your Visual Studio project.
 
 ### NuGet
 
+```bash
 nuget install payload-api
+```
 
 ## Get Started
 
@@ -100,11 +102,11 @@ var payments = pl.Payment.filter_by(
 
 ### Testing the Payload C# Library
 
-Tests are contained within the PayloadTests/ directory. To run tests enter the command in terminal 
+Tests are contained within the PayloadTests/ directory. To run tests enter the command in terminal
 
 ```bash
- dotnet test 
- ```
+ dotnet test
+```
 
 ## Documentation
 
