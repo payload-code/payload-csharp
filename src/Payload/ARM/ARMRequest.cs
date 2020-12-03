@@ -80,8 +80,8 @@ namespace Payload.ARM {
 
 				var writer = req.GetRequestStream();
 				writer.Write(bytes, 0, bytes.Length);
-			} else
-				req.ContentLength = 0;
+			}// else
+			//	req.ContentLength = 0;
 
 			HttpWebResponse response = null;
 			try {
@@ -91,8 +91,15 @@ namespace Payload.ARM {
 				if (response == null)
 					throw;
 			}
-			var reader = new StreamReader(response.GetResponseStream());
-			var response_value = reader.ReadToEnd();
+
+			string response_value = "";
+			using (Stream dataStream = response.GetResponseStream())
+			{
+				StreamReader reader = new StreamReader(dataStream);
+				response_value = reader.ReadToEnd();
+			}
+
+			response.Close();
 
 			if ( DEBUG ) {
 				Console.WriteLine("-------------------RESP------------------");

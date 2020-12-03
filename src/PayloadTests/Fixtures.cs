@@ -77,7 +77,7 @@ namespace Payload.Tests
             dynamic card_payment = pl.Payment.create(new
             {
                 amount = 100.0,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
             return card_payment;

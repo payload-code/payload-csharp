@@ -36,7 +36,7 @@ namespace Payload.Tests
             {
                 amount = 10,
                 processing_id = this.processing_account.id,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             }
 
                        );
@@ -96,7 +96,7 @@ namespace Payload.Tests
             {
                 amount = 100.0,
                 description = rand_description,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
             List<dynamic> payments = pl.Payment.filter_by(
@@ -171,7 +171,7 @@ namespace Payload.Tests
             {
                 amount = 10.0,
                 processing_id = this.processing_account.id,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
             Assert.True(refund.type == "refund");
@@ -223,7 +223,7 @@ namespace Payload.Tests
             var payment = pl.Payment.select("*", "conv_fee").create(new
             {
                 amount = 100,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
             Assert.NotNull(payment.fee);

@@ -42,8 +42,8 @@ namespace Payload.Tests
         [Test]
         public void test_processing_account_one()
         {
-            Assert.NotNull(pl.Account.filter_by(new { email = processing_account.email }).one());
-            Assert.AreEqual(typeof(pl.ProcessingAccount), pl.Account.filter_by(new { email = processing_account.email }).one().GetType());
+            Assert.NotNull(pl.Account.filter_by(new { name = processing_account.name }).one());
+            Assert.AreEqual(typeof(pl.ProcessingAccount), pl.Account.filter_by(new { name = processing_account.name }).one().GetType());
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace Payload.Tests
         {
             Assert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
             Assert.NotNull(pl.ProcessingAccount.get(this.processing_account.id));
-            Assert.AreEqual("pending", this.processing_account.processing.status);
+            Assert.AreEqual("pending", this.processing_account.status);
         }
 
 

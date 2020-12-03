@@ -115,7 +115,7 @@ namespace Payload {
 
 			if (val is IList<dynamic>) {
 				new_val = new List<dynamic>();
-				for( int i = 0; i < val.Length; i++ ) {
+				for( int i = 0; i < ((IList<dynamic>)val).Count; i++ ) {
 					if (val[i] == null) {
 						new_val.Add(val[i]);
 					} else if (val[i] is Dynamo) {

@@ -69,14 +69,16 @@ namespace Payload.ARM {
 					val = ARMObjectCache.GetOrCreate(val);
 
 			if (val is IList<dynamic>) {
-				var lst = ((IList<dynamic>)val);
-				for( int i = 0; i < lst.Count; i++ ) {
-					lst[i] = this.Convert("", lst[i]);
+				var lst = new List<dynamic>();
+				for( int i = 0; i < ((IList<dynamic>)val).Count; i++ ) {
+					lst.Add(this.Convert("", ((IList<dynamic>)val)[i]));
 					/*if (lst[i] == null) continue;
 
 					if (lst[i].GetType().GetProperty("object") != null)
 						lst[i] = ARMObjectCache.GetOrCreate(lst[i]);*/
 				}
+
+				val = lst;
 			}
 
 			return val;
@@ -155,7 +157,7 @@ namespace Payload.ARM {
 
 			if (objects is IList<dynamic>) {
 				var lst = new List<dynamic>();
-				for ( int i = 0; i < objects.Length; i++ )
+				for ( int i = 0; i < ((IList<dynamic>)objects).Count; i++ )
 					lst.Add((T)((IARMObject)Activator.CreateInstance(typeof(T))).Populate(objects[i]));
 				objects = lst;
 			} else
