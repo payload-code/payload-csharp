@@ -1,5 +1,7 @@
 using NUnit.Framework;
 using System;
+using System.IO;
+using System.Text;
 
 namespace Payload.Tests
 {
@@ -37,6 +39,37 @@ namespace Payload.Tests
             Assert.AreEqual(typeof(pl.PaymentLink), lnk.GetType());
         }
 
+
+        [Test]
+        public void test_create_payment_link_with_attachement()
+        {
+
+            string path = Path.GetTempPath() + Guid.NewGuid().ToString() + ".pdf";
+            using (FileStream fs = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+            {
+                Byte[] info = new UTF8Encoding(true)
+                    .GetBytes("This is some text in the file.");
+                // Add some information to the file.
+                fs.Write(info, 0, info.Length);
+            }
+
+            using (FileStream fs = File.Open(path, FileMode.Open))
+            {
+                var lnk = pl.PaymentLink.create(new {
+                    type = "one_time",
+                    description = "Payment Request",
+                    amount = 10.00,
+                    processing_id = this.processing_account.id,
+                    attachments = new []{new {file=fs}}
+                });
+                Console.WriteLine("AFTER CREATE");
+                Console.WriteLine(lnk.id);
+                Console.WriteLine(lnk.processing_id);
+                Console.WriteLine(lnk.attachments.Count);
+                Console.WriteLine(this.processing_account.id);
+                Assert.True(lnk.processing_id == this.processing_account.id);
+            }
+        }
 
     }
 }

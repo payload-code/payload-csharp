@@ -66,20 +66,77 @@ namespace Payload.ARM {
 			req.Accept = "application/json";
 
 			if (json != null) {
-				string post_data = JsonConvert.SerializeObject(
-					json, Formatting.None, jsonsettings);
-				var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(post_data);
 
-				if ( DEBUG ) {
-					Console.WriteLine("-------------------REQ-------------------");
-					Console.WriteLine(post_data);
+				var use_multipart = false;
+				var data = Utils.JSONFlatten(json);
+				foreach(var item in data) {
+					if ( item.Value is FileStream ) {
+						use_multipart = true;
+						break;
+					}
 				}
 
-				req.ContentType = "application/json";
-				req.ContentLength = bytes.Length;
 
-				var writer = req.GetRequestStream();
-				writer.Write(bytes, 0, bytes.Length);
+				if ( use_multipart ) {
+					string boundary = "----------" + DateTime.Now.Ticks.ToString("x");
+					req.ContentType = "multipart/form-data; boundary=" + boundary;
+
+					var writer = req.GetRequestStream();
+
+					/// The first boundary
+					byte[] boundarybytes = Encoding.UTF8.GetBytes("--" + boundary + "\r\n");
+					/// the last boundary.
+					byte[] trailer = Encoding.UTF8.GetBytes("\r\n--" + boundary + "--\r\n");
+					/// the form data, properly formatted
+					string formdataTemplate = "Content-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}";
+					/// the form-data file upload, properly formatted
+					string fileheaderTemplate = "Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\";\r\nContent-Type: {2}\r\n\r\n";
+
+					/// Added to track if we need a CRLF or not.
+					bool bNeedsCRLF = false;
+
+					foreach (string key in data.Keys)
+					{
+						if (bNeedsCRLF)
+							WriteToStream(writer, "\r\n");
+
+						/// Write the boundary.
+						WriteToStream(writer, boundarybytes);
+
+						/// Write the key.
+						if ( data[key] is FileStream ) {
+
+							string contentType = MimeTypeMap.GetMimeType(Path.GetExtension(((FileStream)data[key]).Name));
+							WriteToStream(writer, string.Format(fileheaderTemplate, key, ((FileStream)data[key]).Name, contentType));
+							WriteToStream(writer, data[key].ToString());
+						} else {
+							WriteToStream(writer, string.Format(formdataTemplate, key, data[key]));
+						}
+
+						bNeedsCRLF = true;
+					}
+
+					WriteToStream(writer, trailer);
+
+
+				} else {
+
+					string post_data = JsonConvert.SerializeObject(
+						json, Formatting.None, jsonsettings);
+
+					var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(post_data);
+
+					if ( DEBUG ) {
+						Console.WriteLine("-------------------REQ-------------------");
+						Console.WriteLine(post_data);
+					}
+
+					req.ContentType = "application/json";
+					req.ContentLength = bytes.Length;
+
+					var writer = req.GetRequestStream();
+					writer.Write(bytes, 0, bytes.Length);
+				}
 			}// else
 			//	req.ContentLength = 0;
 
@@ -134,6 +191,15 @@ namespace Payload.ARM {
 					throw (PayloadError)Activator.CreateInstance(type, (string)obj["error_description"], obj);
 				throw new pl.UnknownResponse((string)obj["error_description"], obj);
 			}
+		}
+
+
+		private void WriteToStream(Stream s, string txt) {
+			WriteToStream(s, Encoding.UTF8.GetBytes(txt));
+		}
+
+		private void WriteToStream(Stream s, byte[] bytes) {
+			s.Write(bytes, 0, bytes.Length);
 		}
 
 		public dynamic get( string id ) {

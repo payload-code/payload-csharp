@@ -220,7 +220,7 @@ namespace Payload.Tests
         [Test]
         public void test_convenience_fee()
         {
-            var payment = pl.Payment.select("*", "conv_fee").create(new
+            var payment = pl.Payment.select("*", "fee", "conv_fee").create(new
             {
                 amount = 100,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
