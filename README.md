@@ -105,7 +105,7 @@ var payments = pl.Payment.filter_by(
 Tests are contained within the PayloadTests/ directory. To run tests enter the command in terminal
 
 ```bash
- dotnet test
+API_KEY=your_test_secret_key dotnet test
 ```
 
 ## Documentation

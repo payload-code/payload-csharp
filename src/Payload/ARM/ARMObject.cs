@@ -113,8 +113,12 @@ namespace Payload.ARM {
 		}
 
 		public string json() {
+
+			dynamic obj = new ExpandoObject();
+			Utils.PopulateExpando( obj, this );
+
 			return JsonConvert.SerializeObject(
-					this.Properties, Formatting.Indented);
+					obj, Formatting.Indented);
 		}
 
 		public void update( dynamic update ) {

@@ -33,7 +33,7 @@ namespace Payload.Tests
         public void test_create_invoice()
         {
             Assert.AreEqual(typeof(pl.Invoice), this.invoice.GetType());
-            Assert.True(this.invoice.due_date == "Wed, 01 May 2019 00:00:00 GMT");
+            Assert.True(this.invoice.due_date == "2019-05-01");
             Assert.True(this.invoice.status == "unpaid");
         }
 
