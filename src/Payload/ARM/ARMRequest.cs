@@ -76,44 +76,70 @@ namespace Payload.ARM {
 					}
 				}
 
-
 				if ( use_multipart ) {
 					string boundary = "----------" + DateTime.Now.Ticks.ToString("x");
 					req.ContentType = "multipart/form-data; boundary=" + boundary;
-
-					var writer = req.GetRequestStream();
-
 					/// The first boundary
 					byte[] boundarybytes = Encoding.UTF8.GetBytes("--" + boundary + "\r\n");
 					/// the last boundary.
-					byte[] trailer = Encoding.UTF8.GetBytes("\r\n--" + boundary + "--\r\n");
+					byte[] trailer = Encoding.UTF8.GetBytes("--" + boundary + "--\r\n");
 					/// the form data, properly formatted
 					string formdataTemplate = "Content-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}";
 					/// the form-data file upload, properly formatted
 					string fileheaderTemplate = "Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\";\r\nContent-Type: {2}\r\n\r\n";
 
-					/// Added to track if we need a CRLF or not.
-					bool bNeedsCRLF = false;
+
+					int content_len = trailer.Length;
+					foreach (string key in data.Keys)
+					{
+						content_len+=boundarybytes.Length+2;
+						if ( data[key] is FileStream ) {
+							var file = (FileStream)data[key];
+
+							string contentType = MimeTypeMap.GetMimeType(Path.GetExtension(file.Name));
+							content_len += string.Format(fileheaderTemplate, key, file.Name, contentType).Length;
+							content_len += (int)file.Length;
+						} else {
+							content_len += string.Format(formdataTemplate, key, data[key]).Length;
+						}
+					}
+
+					req.ContentLength = content_len;
+
+					var writer = req.GetRequestStream();
 
 					foreach (string key in data.Keys)
 					{
-						if (bNeedsCRLF)
-							WriteToStream(writer, "\r\n");
-
-						/// Write the boundary.
 						WriteToStream(writer, boundarybytes);
 
-						/// Write the key.
 						if ( data[key] is FileStream ) {
 
-							string contentType = MimeTypeMap.GetMimeType(Path.GetExtension(((FileStream)data[key]).Name));
-							WriteToStream(writer, string.Format(fileheaderTemplate, key, ((FileStream)data[key]).Name, contentType));
-							WriteToStream(writer, data[key].ToString());
+							var file = (FileStream)data[key];
+
+							string contentType = MimeTypeMap.GetMimeType(Path.GetExtension(file.Name));
+							WriteToStream(writer, string.Format(fileheaderTemplate, key, file.Name, contentType));
+
+							int CHUNK = 1024;
+							int numBytesToRead = (int)file.Length;
+							while (numBytesToRead > 0)
+							{
+								byte[] bytes = new byte[Math.Min(CHUNK, numBytesToRead)];
+								int n = file.Read(bytes, 0, bytes.Length);
+
+								if (n == 0)
+									break;
+
+								numBytesToRead -= n;
+								WriteToStream(writer, bytes);
+							}
+
+						} else if ( data[key] is bool ) {
+							WriteToStream(writer, string.Format(formdataTemplate, key,  ((bool)data[key])?"true":"false"));
 						} else {
 							WriteToStream(writer, string.Format(formdataTemplate, key, data[key]));
 						}
 
-						bNeedsCRLF = true;
+						WriteToStream(writer, "\r\n");
 					}
 
 					WriteToStream(writer, trailer);
@@ -194,12 +220,13 @@ namespace Payload.ARM {
 		}
 
 
-		private void WriteToStream(Stream s, string txt) {
-			WriteToStream(s, Encoding.UTF8.GetBytes(txt));
+		private int WriteToStream(Stream s, string txt) {
+			return WriteToStream(s, Encoding.UTF8.GetBytes(txt));
 		}
 
-		private void WriteToStream(Stream s, byte[] bytes) {
+		private int WriteToStream(Stream s, byte[] bytes) {
 			s.Write(bytes, 0, bytes.Length);
+			return bytes.Length;
 		}
 
 		public dynamic get( string id ) {

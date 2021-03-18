@@ -187,7 +187,15 @@ namespace Payload {
 						child_key = parent_key+child_key;
 					JSONFlatten(obj, child_key, val[i]);
 				}
-			} else if ( parent_key != null ){
+			} else if(Utils.CheckIfAnonymousType(val.GetType())) {
+				var properties = val.GetType().GetProperties();
+
+				foreach (var pi in properties) {
+					var child_key = parent_key == null ? pi.Name : parent_key +"["+pi.Name+"]";
+					JSONFlatten(obj, child_key, pi.GetValue(val, null));
+				}
+			}
+			else if ( parent_key != null ){
 				obj[parent_key] = val;
 			}
 

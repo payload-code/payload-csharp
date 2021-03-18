@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System;
 using System.IO;
 using System.Text;
+using System.Net;
 
 namespace Payload.Tests
 {
@@ -60,14 +61,36 @@ namespace Payload.Tests
                     description = "Payment Request",
                     amount = 10.00,
                     processing_id = this.processing_account.id,
+                    additional_datafields = new []{
+                        new {
+                            section = "Test",
+                            fields = new []{
+                                new {
+                                    title="Test"
+                                }
+                            }
+                        }
+                    },
+                    checkout_options = new {
+                        billing_address = false
+                    },
                     attachments = new []{new {file=fs}}
                 });
-                Console.WriteLine("AFTER CREATE");
-                Console.WriteLine(lnk.id);
-                Console.WriteLine(lnk.processing_id);
-                Console.WriteLine(lnk.attachments.Count);
-                Console.WriteLine(this.processing_account.id);
                 Assert.True(lnk.processing_id == this.processing_account.id);
+                Assert.True(lnk.attachments.Count == 1);
+                Assert.False(lnk.checkout_options.billing_address);
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(lnk.attachments[0].url);
+
+                string content = string.Empty;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    content = reader.ReadToEnd();
+                }
+
+                Assert.True(content.Equals("This is some text in the file."));
             }
         }
 
