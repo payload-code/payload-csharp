@@ -308,6 +308,14 @@ namespace Payload {
 			public OAuthToken(){Populate(new{});}
 		}
 
+		public class PaymentActivation : ARMObject<PaymentActivation>, IARMObject {
+			public override dynamic GetSpec() {
+				return new { sobject="payment_activation" };
+			}
+			public PaymentActivation(dynamic obj){Populate(obj);}
+			public PaymentActivation(){Populate(new{});}
+		}
+
 		public class UnknownResponse : PayloadError {
 			public UnknownResponse(){}
 			public UnknownResponse(string message, ARMObject<object> response) : base(message, response) {}
