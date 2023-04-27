@@ -4,8 +4,8 @@
     <RootNamespace>Payload</RootNamespace>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyTitle>Payload</AssemblyTitle>
-    <VersionPrefix>0.2.5</VersionPrefix>
-    <Version>0.2.5</Version>
+    <VersionPrefix>0.3.0</VersionPrefix>
+    <Version>0.3.0</Version>
     <Authors>Payload, Ian Halpern</Authors>
     <AssemblyName>Payload</AssemblyName>
     <PackageId>payload-api</PackageId>
