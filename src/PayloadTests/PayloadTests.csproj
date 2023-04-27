@@ -5,19 +5,10 @@
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'== 'net461' AND '$(OS)' == 'Unix' ">
-      <FrameworkPathOverride>$(NuGetPackageRoot)microsoft.targetingpack.netframework.v4.6.1/1.0.1/lib/net461/</FrameworkPathOverride>
-  </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' AND '$(OS)' == 'Unix' ">
-    <PackageReference Include="Microsoft.TargetingPack.NETFramework.v4.6.1"
-                        Version="1.0.1" ExcludeAssets="All" PrivateAssets="All" />
-  </ItemGroup>
-   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' AND '$(OS)' == 'Unix' ">
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 
     <Reference Include="Payload">
         <HintPath>..\Payload\bin\Debug\net461\Payload.dll</HintPath>

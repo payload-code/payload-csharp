@@ -48,7 +48,12 @@ namespace Payload.Tests
                 account_id = cust.id,
                 card_number = "4242 4242 4242 4242",
                 default_payment_method = true,
-                expiry = "12/25"
+                expiry = "12/25",
+                card_code = "123",
+                billing_address = new
+                {
+                    postal_code = "12345"
+                }
             });
 
             var invoice = pl.Invoice.create(new
@@ -87,7 +92,7 @@ namespace Payload.Tests
         public void test_invoice_one()
         {
             Assert.NotNull(pl.Invoice.filter_by(new { type = this.invoice.type }).one());
-            Assert.AreEqual(typeof(pl.Invoice), pl.Invoice.filter_by(new{ type = this.invoice.type }).one().GetType());
+            Assert.AreEqual(typeof(pl.Invoice), pl.Invoice.filter_by(new { type = this.invoice.type }).one().GetType());
         }
     }
 }
