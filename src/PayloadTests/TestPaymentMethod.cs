@@ -14,12 +14,14 @@ namespace Payload.Tests
         public void Setup()
         {
             PayloadTestSetup.initAPI();
-            this.card_payment_method = pl.Card.create(new {
-                account_holder="John Smith",
-                card_number="4242 4242 4242 4242",
-                expiry="05/23",
-                card_code="123",
-                billing_address = new {
+            this.card_payment_method = pl.Card.create(new
+            {
+                account_holder = "John Smith",
+                card_number = "4242 4242 4242 4242",
+                expiry = "05/23",
+                card_code = "123",
+                billing_address = new
+                {
                     postal_code = "12345"
                 }
             });

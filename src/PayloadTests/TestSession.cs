@@ -19,7 +19,7 @@ namespace Payload.Tests
 
             this.session = new pl.Session(Environment.GetEnvironmentVariable("API_KEY"));
             string url = Environment.GetEnvironmentVariable("API_URL");
-            if ( url != null )
+            if (url != null)
                 this.session.api_url = url;
         }
 
@@ -29,7 +29,7 @@ namespace Payload.Tests
             var rand_email = Fixtures.RandomString(10) + "@example.com";
 
             var account = this.session.create(
-               new pl.Customer(new{email=rand_email, name="Matt Perez"})
+               new pl.Customer(new { email = rand_email, name = "Matt Perez" })
             );
 
             var get_account = this.session.query<pl.Customer>().filter_by(new { email = rand_email }).one();
@@ -63,7 +63,7 @@ namespace Payload.Tests
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
             var account = this.session.create(
-               new pl.Customer(new{email=rand_email1, name="Matt Perez"})
+               new pl.Customer(new { email = rand_email1, name = "Matt Perez" })
             );
 
             var get_account = this.session.query<pl.Customer>().get(account.id);
@@ -78,7 +78,7 @@ namespace Payload.Tests
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
             var account = this.session.create(
-               new pl.Customer(new{email=rand_email1, name="Matt Perez"})
+               new pl.Customer(new { email = rand_email1, name = "Matt Perez" })
             );
 
             var get_account1 = this.session.query<pl.Customer>().filter_by(new { email = rand_email1 }).one();
@@ -86,7 +86,8 @@ namespace Payload.Tests
             Assert.NotNull(get_account1);
             Assert.Null(get_account2);
 
-            account.update(new {
+            account.update(new
+            {
                 email = rand_email2
             });
 
@@ -103,7 +104,7 @@ namespace Payload.Tests
             var rand_email = Fixtures.RandomString(10) + "@example.com";
 
             var account = this.session.create(
-               new pl.Customer(new{email=rand_email, name="Matt Perez"})
+               new pl.Customer(new { email = rand_email, name = "Matt Perez" })
             );
 
             var get_account = this.session.query<pl.Customer>().filter_by(new { email = rand_email }).one();

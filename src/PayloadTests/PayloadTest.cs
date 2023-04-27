@@ -5,10 +5,11 @@ namespace Payload.Tests
 {
     public class PayloadTestSetup
     {
-        public static void initAPI() {
+        public static void initAPI()
+        {
             pl.api_key = Environment.GetEnvironmentVariable("API_KEY");
             string url = Environment.GetEnvironmentVariable("API_URL");
-            if ( url != null )
+            if (url != null)
                 pl.api_url = url;
         }
     }
