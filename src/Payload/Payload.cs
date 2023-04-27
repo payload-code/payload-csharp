@@ -6,22 +6,49 @@ using Payload.ARM;
 namespace Payload {
 
 	public static class pl {
-		public const string URL = "https://api.payload.co";
-		private static string _url = URL;
-		public static string api_key { get; set; }
-		public static string api_url { get { return _url; } set { _url = value; } }
+
+		public class Session {
+			public const string URL = "https://api.payload.co";
+			private string _url = URL;
+			public string api_key { get; set; }
+			public string api_url { get { return _url; } set { _url = value; } }
+
+			public Session(string api_key) {
+				this.api_key = api_key;
+			}
+
+			public dynamic create(dynamic objects) {
+				return new ARMRequest(this).create(objects);
+			}
+
+			public ARMRequest query<T>() {
+				return new ARMRequest(this, typeof(T));
+			}
+
+			public dynamic update(dynamic objects) {
+				return new ARMRequest(this).update(objects);
+			}
+
+			public dynamic delete(dynamic objects) {
+				return new ARMRequest(this).delete(objects);
+			}
+		}
+
+		public static string api_key { get { return session.api_key; } set { session.api_key = value; } }
+		public static string api_url { get { return session.api_url; } set { session.api_url = value; } }
 		public static dynamic attr = new Attr(null);
+		public static Session session = new Session(null);
 
 		public static dynamic create(dynamic objects) {
-			return new ARMRequest().create(objects);
+			return new ARMRequest(pl.session).create(objects);
 		}
 
 		public static dynamic update( dynamic objects ) {
-			return new ARMRequest().update(objects);
+			return new ARMRequest(pl.session).update(objects);
 		}
 
 		public static dynamic delete( dynamic objects ) {
-			return new ARMRequest().delete(objects);
+			return new ARMRequest(pl.session).delete(objects);
 		}
 
 		public class Account : ARMObject<Account>, IARMObject {

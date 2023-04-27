@@ -34,7 +34,7 @@ namespace Payload.Tests
                     state_incorporated= "NY",
                     postal_code= "11238",
                     phone_number= "(111) 222-3333",
-                    website= "www.payload.co",
+                    website= "https://payload.co",
                     start_date= "05/01/2015",
                     contact_name= "Test Person",
                     contact_email= "test.person@example.com",
@@ -74,9 +74,11 @@ namespace Payload.Tests
 
         public static dynamic card_payment()
         {
+            Random random = new Random();
+            int randomNumber = random.Next(1, 100);
             dynamic card_payment = pl.Payment.create(new
             {
-                amount = 100.0,
+                amount = randomNumber,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
@@ -87,9 +89,11 @@ namespace Payload.Tests
 
         public static dynamic bank_payment()
         {
+            Random random = new Random();
+            int randomNumber = random.Next(1, 100);
             dynamic bank_payment = pl.Payment.create(new
             {
-                amount = 100,
+                amount = randomNumber,
                 payment_method = new pl.BankAccount(new
                 {
                     account_number = "123456789",

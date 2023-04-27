@@ -1,12 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <Description>Payload is C# library for the Payload API (https://payload.co).</Description>
     <RootNamespace>Payload</RootNamespace>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <RestoreAdditionalProjectSources Condition=" '$(OS)' == 'Unix' ">
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
-    </RestoreAdditionalProjectSources>
     <AssemblyTitle>Payload</AssemblyTitle>
     <VersionPrefix>0.2.5</VersionPrefix>
     <Version>0.2.5</Version>
@@ -21,17 +17,13 @@
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'== 'net461' AND '$(OS)' == 'Unix' ">
-      <FrameworkPathOverride>$(NuGetPackageRoot)microsoft.targetingpack.netframework.v4.6.1/1.0.1/lib/net461/</FrameworkPathOverride>
-  </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' AND '$(OS)' == 'Unix' ">
-    <PackageReference Include="Microsoft.TargetingPack.NETFramework.v4.6.1"
-                        Version="1.0.1" ExcludeAssets="All" PrivateAssets="All" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
+<ItemGroup>
+  <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+</ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' AND '$(OS)' == 'Unix' ">
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>

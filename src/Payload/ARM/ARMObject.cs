@@ -16,7 +16,7 @@ namespace Payload.ARM {
 	public static class ARMObjectCache {
 		public static Dictionary<string, dynamic> _cache = new Dictionary<string, dynamic>();
 
-		public static dynamic GetOrCreate( dynamic obj ) {
+		public static dynamic GetOrCreate( dynamic obj, pl.Session session ) {
 			dynamic result;
 			try {
 				var id = obj["id"];
@@ -30,13 +30,14 @@ namespace Payload.ARM {
 			} catch ( KeyNotFoundException exc ) {
 				return obj;
 			}
-
+			result.session = session;
 			result.Populate( obj );
 			return result;
 		}
 	}
 
 	public class ARMObject<T>: Payload.Dynamo, IARMObject {
+		public pl.Session session = null;
 
 		public virtual dynamic GetSpec() {
 			return new { sobject="" };
@@ -66,7 +67,7 @@ namespace Payload.ARM {
 
 			if ( val is Dynamo )
 				if (((Dynamo)val).Properties.Keys.Contains("object"))
-					val = ARMObjectCache.GetOrCreate(val);
+					val = ARMObjectCache.GetOrCreate(val, this.session);
 
 			if (val is IList<dynamic>) {
 				var lst = new List<dynamic>();
@@ -122,22 +123,25 @@ namespace Payload.ARM {
 		}
 
 		public void update( dynamic update ) {
-			new ARMRequest(typeof(T)).request("PUT", id: (string)this["id"], json: update);
+			new ARMRequest(this.session, typeof(T)).request("PUT", id: (string)this["id"], json: update);
 		}
 
 		public void delete() {
-			new ARMRequest(typeof(T)).request("DELETE", id: (string)this["id"]);
+			new ARMRequest(this.session, typeof(T)).request("DELETE", id: (string)this["id"]);
 		}
 
-		public static dynamic get( string id ) {
-			return new ARMRequest(typeof(T)).get(id);
+		public static dynamic get( string id, pl.Session session=null ) {
+			return new ARMRequest(session, typeof(T)).get(id);
 		}
 
 		public static dynamic filter_by(params dynamic[] list) {
-			var req = new ARMRequest(typeof(T));
+			pl.Session session = list.Where(item => item is pl.Session).FirstOrDefault();
+			List<dynamic> filters = list.Where(item => !(item is pl.Session)).ToList();
 
-			foreach ( var filters in list)
-				req = req.filter_by(filters);
+			var req = new ARMRequest(session, typeof(T));
+
+			foreach (var filter in filters)
+				req = req.filter_by(filter);
 
 			if ( req.Object.GetSpec().GetType().GetProperty("polymorphic") != null )
 				req = req.filter_by(req.Object.GetSpec().polymorphic);
@@ -146,9 +150,12 @@ namespace Payload.ARM {
 		}
 
 		public static dynamic select(params dynamic[] list) {
-			var req = new ARMRequest(typeof(T));
+			pl.Session session = list.Where(item => item is pl.Session).FirstOrDefault();
+			List<dynamic> attrs = list.Where(item => !(item is pl.Session)).ToList();
 
-			foreach ( var attr in list)
+			var req = new ARMRequest(session, typeof(T));
+
+			foreach ( var attr in attrs)
 				req = req.select(attr);
 
 			if ( req.Object.GetSpec().GetType().GetProperty("polymorphic") != null )
@@ -157,8 +164,7 @@ namespace Payload.ARM {
 			return req;
 		}
 
-		public static dynamic create(dynamic objects) {
-
+		public static dynamic create(dynamic objects, pl.Session session=null) {
 			if (objects is IList<dynamic>) {
 				var lst = new List<dynamic>();
 				for ( int i = 0; i < ((IList<dynamic>)objects).Count; i++ )
@@ -167,15 +173,15 @@ namespace Payload.ARM {
 			} else
 				objects = (T)((IARMObject)Activator.CreateInstance(typeof(T))).Populate(objects);
 
-			return new ARMRequest(typeof(T)).create(objects);
+			return new ARMRequest(session, typeof(T)).create(objects);
 		}
 
-		public static dynamic update_all( dynamic objects ) {
-			return new ARMRequest(typeof(T)).update(objects);
+		public static dynamic update_all( dynamic objects, pl.Session session=null ) {
+			return new ARMRequest(session, typeof(T)).update(objects);
 		}
 
-		public static dynamic delete_all( dynamic objects ) {
-			return new ARMRequest(typeof(T)).delete(objects);
+		public static dynamic delete_all( dynamic objects, pl.Session session=null ) {
+			return new ARMRequest(session, typeof(T)).delete(objects);
 		}
 	}
 }

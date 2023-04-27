@@ -6,7 +6,7 @@ using System.Net;
 
 namespace Payload.Tests
 {
-    public class PaymentLink
+    public class TestPaymentLink
     {
         dynamic processing_account;
         dynamic payment_link;

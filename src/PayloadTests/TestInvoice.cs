@@ -48,7 +48,11 @@ namespace Payload.Tests
                 account_id = cust.id,
                 card_number = "4242 4242 4242 4242",
                 default_payment_method = true,
-                expiry = "12/25"
+                expiry = "12/25",
+                card_code = "123",
+                billing_address = new {
+                    postal_code = "12345"
+                }
             });
 
             var invoice = pl.Invoice.create(new

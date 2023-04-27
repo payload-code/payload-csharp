@@ -17,13 +17,13 @@ namespace Payload.Tests
         {
             PayloadTestSetup.initAPI();
             this.processing_account = Fixtures.processing_account();
-            this.card_payment = Fixtures.card_payment();
-            this.bank_payment = Fixtures.bank_payment();
         }
 
         [Test]
         public void test_transaction_ledger_empty()
         {
+            this.card_payment = Fixtures.card_payment();
+
             var transaction = pl.Transaction.select("*", "ledger").get(this.card_payment.id);
 
             Assert.IsEmpty(transaction.ledger);
@@ -37,9 +37,7 @@ namespace Payload.Tests
                 amount = 10,
                 processing_id = this.processing_account.id,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
-            }
-
-                       );
+            });
 
             var transactions = pl.Transaction.select("*", "ledger")
                 .filter_by(new { type = "refund", processing_id = this.processing_account.id })
@@ -53,6 +51,8 @@ namespace Payload.Tests
         [Test]
         public void test_get_transaction()
         {
+            this.card_payment = Fixtures.card_payment();
+
             var transaction = pl.Transaction.get(card_payment.id);
 
             Assert.True(transaction.id == card_payment.id);
@@ -61,6 +61,8 @@ namespace Payload.Tests
         [Test]
         public void test_transactions_one()
         {
+            this.card_payment = Fixtures.card_payment();
+
             Assert.NotNull(pl.Transaction.filter_by(new { type = this.card_payment.type }).one());
             Assert.AreEqual(typeof(pl.Payment), pl.Payment.filter_by(new { amount = this.card_payment.amount }).one().GetType());
         }
@@ -68,12 +70,16 @@ namespace Payload.Tests
         [Test]
         public void test_risk_flag()
         {
+            this.card_payment = Fixtures.card_payment();
+
             Assert.True(this.card_payment.risk_flag == "allowed");
         }
 
         [Test]
         public void test_update_processed()
         {
+            this.card_payment = Fixtures.card_payment();
+
             this.card_payment.update(new { status = "voided" });
             Assert.True(card_payment.status == "voided");
 
@@ -91,16 +97,18 @@ namespace Payload.Tests
         public void test_payment_filters_1()
         {
             String rand_description = Fixtures.RandomString(10);
+            Random random = new Random();
+            int randomNumber = random.Next(1, 100);
 
             var card_payment = pl.Payment.create(new
             {
-                amount = 100.0,
+                amount = randomNumber,
                 description = rand_description,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
             List<dynamic> payments = pl.Payment.filter_by(
-                pl.attr.amount.gt(99),
+                pl.attr.amount.gt(0),
                 pl.attr.amount.lt(200),
                 pl.attr.description.contains(rand_description),
                 pl.attr.created_at.gt(new DateTime(2019, 2, 1))
@@ -114,6 +122,8 @@ namespace Payload.Tests
         [Test]
         public void test_void_card_payment()
         {
+            this.card_payment = Fixtures.card_payment();
+
             this.card_payment.update(new { status = "voided" });
 
             Assert.AreEqual("voided", this.card_payment.status);
@@ -122,6 +132,7 @@ namespace Payload.Tests
         [Test]
         public void test_void_bank_payment()
         {
+            this.bank_payment = Fixtures.bank_payment();
 
             this.bank_payment.update(new { status = "voided" });
             Assert.AreEqual("voided", this.bank_payment.status);
@@ -131,9 +142,11 @@ namespace Payload.Tests
         [Test]
         public void test_refund_card_payment()
         {
+            this.card_payment = Fixtures.card_payment();
+
             var refund = pl.Refund.create(new
             {
-                amount = 100.0,
+                amount = this.card_payment.amount,
                 ledger = new[] {
                     new pl.Ledger(new {
                         assoc_transaction_id=this.card_payment.id
@@ -142,13 +155,15 @@ namespace Payload.Tests
             });
 
             Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 100);
+            Assert.True(refund.amount == this.card_payment.amount);
             Assert.True(refund.status_code == "approved");
         }
 
         [Test]
         public void test_partial_refund_card_payment()
         {
+            this.card_payment = Fixtures.card_payment();
+
             var refund = pl.Refund.create(new
             {
                 amount = 10.0,
@@ -183,9 +198,11 @@ namespace Payload.Tests
         [Test]
         public void test_refund_bank_payment()
         {
+            this.bank_payment = Fixtures.bank_payment();
+
             var refund = pl.Refund.create(new
             {
-                amount = 100.0,
+                amount = this.bank_payment.amount,
                 ledger = new[] {
                     new pl.Ledger(new {
                         assoc_transaction_id=this.bank_payment.id
@@ -194,13 +211,15 @@ namespace Payload.Tests
             });
 
             Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 100);
+            Assert.True(refund.amount == this.bank_payment.amount);
             Assert.True(refund.status_code == "approved");
         }
 
         [Test]
         public void test_partial_refund_bank_payment()
         {
+            this.bank_payment = Fixtures.bank_payment();
+
             var refund = pl.Refund.create(new
             {
                 amount = 10.0,

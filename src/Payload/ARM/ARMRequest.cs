@@ -20,17 +20,19 @@ namespace Payload.ARM {
 		public Dictionary<string, dynamic> _filters;
 		public List<object> _attrs;
 		public List<object> _group_by;
+		private pl.Session session;
 
 		private static JsonSerializerSettings jsonsettings = new JsonSerializerSettings{
 			NullValueHandling = NullValueHandling.Ignore
 		};
 
-		public ARMRequest( Type type=null ) {
+		public ARMRequest(pl.Session session=null, Type type=null) {
 			if ( type != null )
 				this.Object = (IARMObject)Activator.CreateInstance(type);
 			this._filters  = new Dictionary<string, dynamic>();
 			this._attrs    = new List<object>();
 			this._group_by = new List<object>();
+			this.session = session != null ? session : pl.session;
 		}
 
 		public dynamic request(string method, string id=null,
@@ -56,10 +58,10 @@ namespace Payload.ARM {
 			if ( parameters != null )
 				endpoint += Utils.ToQueryString(parameters);
 
-			HttpWebRequest req = (HttpWebRequest)WebRequest.Create(pl.api_url + endpoint);
+			HttpWebRequest req = (HttpWebRequest)WebRequest.Create(this.session.api_url + endpoint);
 			req.Method = method;
 
-			string _auth = string.Concat(pl.api_key, ":");
+			string _auth = string.Concat(this.session.api_key, ":");
 			string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
 			string _cred = string.Concat("Basic ", _enc);
 			req.Headers.Add("Authorization", _cred);
@@ -195,7 +197,7 @@ namespace Payload.ARM {
 
 				if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list") ) ) {
 
-					dynamic result = ARMObjectCache.GetOrCreate(obj);
+					dynamic result = ARMObjectCache.GetOrCreate(obj, this.session);
 
 					return result;
 				} else {
@@ -204,7 +206,7 @@ namespace Payload.ARM {
 					foreach( var i in (Newtonsoft.Json.Linq.JArray)obj["values"] ) {
 						var item = i.ToObject<ARMObject<object>>();
 
-						dynamic result = ARMObjectCache.GetOrCreate(item);
+						dynamic result = ARMObjectCache.GetOrCreate(item, this.session);
 
 						return_list.Add(result);
 					}
@@ -263,8 +265,10 @@ namespace Payload.ARM {
 				obj.values = list;
 
 			} else {
-
 				Utils.PopulateExpando( obj, data );
+
+				_check_type( data );
+
 				if ( this.Object.GetSpec().GetType().GetProperty("polymorphic") != null )
 					Utils.PopulateExpando( obj, this.Object.GetSpec().polymorphic );
 
@@ -296,17 +300,24 @@ namespace Payload.ARM {
 			return this.request("PUT", parameters: new {mode="query"}, json: updates );
 		}
 
-		public dynamic delete( dynamic objects ) {
+		public dynamic delete( dynamic data=null ) {
 
-			if (objects is IList<dynamic>) {
+			if (data is IList<dynamic>) {
 
-				for ( int i = 0; i < objects.Count; i++ )
-					_check_type( objects[i] );
+				for ( int i = 0; i < data.Count; i++ )
+					_check_type( data[i] );
 
 				string id_query = String.Join("|",
-					(from o in (List<dynamic>)objects select o.id).ToArray());
+					(from o in (List<dynamic>)data select o.id).ToArray());
 
 				return this.request("DELETE", parameters: new {mode="query", id=id_query} );
+			} else if (data != null) {
+				if ( string.IsNullOrEmpty(data.id) )
+					throw new ArgumentNullException("id cannot be empty");
+
+				_check_type( data );
+
+				return this.request("DELETE", id: data.id);
 			}
 
 			if ( this._filters.Count > 0 )
