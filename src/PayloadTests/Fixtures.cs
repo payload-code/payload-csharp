@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Payload.Tests
 {
@@ -110,10 +111,21 @@ namespace Payload.Tests
         public static string RandomString(int length)
         {
             const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
-            Random random = new Random(DateTime.Now.Millisecond);
-            var chars = Enumerable.Range(0, length)
-                .Select(x => pool[random.Next(0, pool.Length)]);
-            return new string(chars.ToArray());
+            var chars = new char[length];
+
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                byte[] buffer = new byte[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    int num = buffer[i] % pool.Length;
+                    chars[i] = pool[num];
+                }
+            }
+
+            return new string(chars);
         }
     }
 
