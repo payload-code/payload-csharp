@@ -245,6 +245,8 @@ namespace Payload.ARM
 
             return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "PUT", Body = body }, (string)this["id"]);
         }
+        [Obsolete]
+        public string json() => Json();
 
         public T Update(object update) => UpdateAsync(update).GetAwaiter().GetResult();
 
@@ -252,6 +254,8 @@ namespace Payload.ARM
         {
             return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "DELETE" }, (string)this["id"]);
         }
+        [Obsolete]
+        public dynamic update(dynamic update) => Update(update).GetAwaiter().GetResult();
 
         public T Delete() => DeleteAsync().GetAwaiter().GetResult();
 
@@ -259,6 +263,8 @@ namespace Payload.ARM
         {
             return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "GET" }, id);
         }
+        [Obsolete]
+        public dynamic delete() => Delete().GetAwaiter().GetResult();
 
         public static T Get(string id, pl.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
 
@@ -277,6 +283,8 @@ namespace Payload.ARM
 
             return req;
         }
+        [Obsolete]
+        public static dynamic filter_by(params dynamic[] list) => FilterBy(list);
 
         public static ARMRequest<T> Select(params object[] list)
         {
@@ -293,6 +301,8 @@ namespace Payload.ARM
 
             return req;
         }
+        [Obsolete]
+        public static dynamic select(params dynamic[] list) => Select(list);
 
         public static async Task<List<T>> CreateAllAsync(IEnumerable<dynamic> objects, pl.Session session = null)
         {
@@ -306,6 +316,8 @@ namespace Payload.ARM
 
             return await new ARMRequest<T>(session).CreateAllAsync(lst);
         }
+        [Obsolete]
+        public static dynamic create(dynamic objects, pl.Session session = null) => Create(objects, session).GetAwaiter().GetResult();
 
         public static List<T> CreateAll(IEnumerable<dynamic> objects, pl.Session session = null) => CreateAllAsync(objects.ToArray(), session).GetAwaiter().GetResult();
 
@@ -315,6 +327,8 @@ namespace Payload.ARM
 
             return await new ARMRequest<T>(session).CreateAsync(obj);
         }
+        [Obsolete]
+        public static dynamic update_all(dynamic objects, pl.Session session = null) => UpdateAll(objects, session).GetAwaiter().GetResult();
 
         public static T Create(dynamic obj = null, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
 
