@@ -6,6 +6,7 @@ using System.Linq;
 using System.Dynamic;
 using System.Reflection;
 using Payload;
+using System.Threading.Tasks;
 
 namespace Payload.ARM
 {
@@ -34,7 +35,7 @@ namespace Payload.ARM
                     result = (IARMObject)Activator.CreateInstance(type);
                 }
             }
-            catch (KeyNotFoundException exc)
+            catch (KeyNotFoundException)
             {
                 return obj;
             }
@@ -135,7 +136,7 @@ namespace Payload.ARM
             return this;
         }
 
-        public string json()
+        public string Json()
         {
 
             dynamic obj = new ExpandoObject();
@@ -144,23 +145,31 @@ namespace Payload.ARM
             return JsonConvert.SerializeObject(
                     obj, Formatting.Indented);
         }
+        [Obsolete]
+        public string json() => Json();
 
-        public void update(dynamic update)
+        public async Task<dynamic> Update(dynamic update)
         {
-            new ARMRequest(this.session, typeof(T)).request("PUT", id: (string)this["id"], json: update);
+            return await new ARMRequest(session, typeof(T)).Request("PUT", id: (string)this["id"], json: update);
         }
+        [Obsolete]
+        public dynamic update(dynamic update) => Update(update).GetAwaiter().GetResult();
 
-        public void delete()
+        public async Task<dynamic> Delete()
         {
-            new ARMRequest(this.session, typeof(T)).request("DELETE", id: (string)this["id"]);
+            return await new ARMRequest(session, typeof(T)).Request("DELETE", id: (string)this["id"]);
         }
+        [Obsolete]
+        public dynamic delete() => Delete().GetAwaiter().GetResult();
 
-        public static dynamic get(string id, pl.Session session = null)
+        public static async Task<dynamic> Get(string id, pl.Session session = null)
         {
-            return new ARMRequest(session, typeof(T)).get(id);
+            return await new ARMRequest(session, typeof(T)).Request("GET", id: id);
         }
+        [Obsolete]
+        public static dynamic get(string id, pl.Session session = null) => Get(id, session).GetAwaiter().GetResult();
 
-        public static dynamic filter_by(params dynamic[] list)
+        public static dynamic FilterBy(params dynamic[] list)
         {
             pl.Session session = list.Where(item => item is pl.Session).FirstOrDefault();
             List<dynamic> filters = list.Where(item => !(item is pl.Session)).ToList();
@@ -175,8 +184,10 @@ namespace Payload.ARM
 
             return req;
         }
+        [Obsolete]
+        public static dynamic filter_by(params dynamic[] list) => FilterBy(list);
 
-        public static dynamic select(params dynamic[] list)
+        public static dynamic Select(params dynamic[] list)
         {
             pl.Session session = list.Where(item => item is pl.Session).FirstOrDefault();
             List<dynamic> attrs = list.Where(item => !(item is pl.Session)).ToList();
@@ -191,8 +202,10 @@ namespace Payload.ARM
 
             return req;
         }
+        [Obsolete]
+        public static dynamic select(params dynamic[] list) => Select(list);
 
-        public static dynamic create(dynamic objects, pl.Session session = null)
+        public static async Task<dynamic> Create(dynamic objects, pl.Session session = null)
         {
             if (objects is IList<dynamic>)
             {
@@ -204,17 +217,23 @@ namespace Payload.ARM
             else
                 objects = (T)((IARMObject)Activator.CreateInstance(typeof(T))).Populate(objects);
 
-            return new ARMRequest(session, typeof(T)).create(objects);
+            return await new ARMRequest(session, typeof(T)).Create(objects);
         }
+        [Obsolete]
+        public static dynamic create(dynamic objects, pl.Session session = null) => Create(objects, session).GetAwaiter().GetResult();
 
-        public static dynamic update_all(dynamic objects, pl.Session session = null)
+        public static async Task<dynamic> UpdateAll(dynamic objects, pl.Session session = null)
         {
-            return new ARMRequest(session, typeof(T)).update(objects);
+            return await new ARMRequest(session, typeof(T)).Update(objects);
         }
+        [Obsolete]
+        public static dynamic update_all(dynamic objects, pl.Session session = null) => UpdateAll(objects, session).GetAwaiter().GetResult();
 
-        public static dynamic delete_all(dynamic objects, pl.Session session = null)
+        public static async Task<dynamic> DeleteAll(dynamic objects, pl.Session session = null)
         {
-            return new ARMRequest(session, typeof(T)).delete(objects);
+            return await new ARMRequest(session, typeof(T)).Delete(objects);
         }
+        [Obsolete]
+        public static dynamic delete_all(dynamic objects, pl.Session session = null) => DeleteAll(objects, session).GetAwaiter().GetResult();
     }
 }

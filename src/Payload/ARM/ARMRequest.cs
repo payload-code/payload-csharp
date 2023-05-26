@@ -9,6 +9,9 @@ using System.Reflection;
 using System.Dynamic;
 using System.Linq;
 using Payload;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Payload.ARM
 {
@@ -32,14 +35,14 @@ namespace Payload.ARM
         public ARMRequest(pl.Session session = null, Type type = null)
         {
             if (type != null)
-                this.Object = (IARMObject)Activator.CreateInstance(type);
-            this._filters = new Dictionary<string, dynamic>();
-            this._attrs = new List<object>();
-            this._group_by = new List<object>();
+                Object = (IARMObject)Activator.CreateInstance(type);
+            _filters = new Dictionary<string, dynamic>();
+            _attrs = new List<object>();
+            _group_by = new List<object>();
             this.session = session != null ? session : pl.session;
         }
 
-        public dynamic request(string method, string id = null,
+        public async Task<dynamic> Request(string method, string id = null,
                 object parameters = null, object json = null)
         {
             var spec = this.Object.GetSpec();
@@ -64,195 +67,136 @@ namespace Payload.ARM
             if (parameters != null)
                 endpoint += Utils.ToQueryString(parameters);
 
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(this.session.api_url + endpoint);
-            req.Method = method;
-
-            string _auth = string.Concat(this.session.api_key, ":");
-            string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
-            string _cred = string.Concat("Basic ", _enc);
-            req.Headers.Add("Authorization", _cred);
-            req.Accept = "application/json";
-
-            if (json != null)
+            using (var http = new HttpClient())
             {
+                string _auth = string.Concat(this.session.api_key, ":");
+                string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
+                string _cred = string.Concat("Basic ", _enc);
+                http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Basic", _enc);
+                http.DefaultRequestHeaders.Accept.Add(
+                   new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var use_multipart = false;
-                var data = Utils.JSONFlatten(json);
-                foreach (var item in data)
+                HttpContent content;
+                if (json != null)
                 {
-                    if (item.Value is FileStream)
+                    var use_multipart = false;
+                    var data = Utils.JSONFlatten(json);
+                    foreach (var item in data)
                     {
-                        use_multipart = true;
-                        break;
-                    }
-                }
-
-                if (use_multipart)
-                {
-                    string boundary = "----------" + DateTime.Now.Ticks.ToString("x");
-                    req.ContentType = "multipart/form-data; boundary=" + boundary;
-                    /// The first boundary
-                    byte[] boundarybytes = Encoding.UTF8.GetBytes("--" + boundary + "\r\n");
-                    /// the last boundary.
-                    byte[] trailer = Encoding.UTF8.GetBytes("--" + boundary + "--\r\n");
-                    /// the form data, properly formatted
-                    string formdataTemplate = "Content-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}";
-                    /// the form-data file upload, properly formatted
-                    string fileheaderTemplate = "Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\";\r\nContent-Type: {2}\r\n\r\n";
-
-
-                    int content_len = trailer.Length;
-                    foreach (string key in data.Keys)
-                    {
-                        content_len += boundarybytes.Length + 2;
-                        if (data[key] is FileStream)
+                        if (item.Value is FileStream)
                         {
-                            var file = (FileStream)data[key];
-
-                            string contentType = MimeTypeMap.GetMimeType(Path.GetExtension(file.Name));
-                            content_len += string.Format(fileheaderTemplate, key, file.Name, contentType).Length;
-                            content_len += (int)file.Length;
-                        }
-                        else
-                        {
-                            content_len += string.Format(formdataTemplate, key, data[key]).Length;
+                            use_multipart = true;
+                            break;
                         }
                     }
 
-                    req.ContentLength = content_len;
-
-                    var writer = req.GetRequestStream();
-
-                    foreach (string key in data.Keys)
+                    if (use_multipart)
                     {
-                        WriteToStream(writer, boundarybytes);
-
-                        if (data[key] is FileStream)
+                        var multipart = new MultipartFormDataContent();
+                        foreach (string key in data.Keys)
                         {
-
-                            var file = (FileStream)data[key];
-
-                            string contentType = MimeTypeMap.GetMimeType(Path.GetExtension(file.Name));
-                            WriteToStream(writer, string.Format(fileheaderTemplate, key, file.Name, contentType));
-
-                            int CHUNK = 1024;
-                            int numBytesToRead = (int)file.Length;
-                            while (numBytesToRead > 0)
+                            if (data[key] is FileStream)
                             {
-                                byte[] bytes = new byte[Math.Min(CHUNK, numBytesToRead)];
-                                int n = file.Read(bytes, 0, bytes.Length);
-
-                                if (n == 0)
-                                    break;
-
-                                numBytesToRead -= n;
-                                WriteToStream(writer, bytes);
+                                var file = (FileStream)data[key];
+                                var streamContent = new StreamContent(file);
+                                streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                                {
+                                    Name = key,
+                                    FileName = file.Name
+                                };
+                                multipart.Add(streamContent, key, file.Name);
                             }
-
+                            else if (data[key] is bool)
+                            {
+                                multipart.Add(new StringContent(((bool)data[key]) ? "true" : "false"), key);
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    multipart.Add(new StringContent((string)data[key]), key);
+                                }
+                                catch (InvalidCastException)
+                                {
+                                    multipart.Add(new StringContent(data[key].ToString()), key);
+                                }
+                            }
                         }
-                        else if (data[key] is bool)
-                        {
-                            WriteToStream(writer, string.Format(formdataTemplate, key, ((bool)data[key]) ? "true" : "false"));
-                        }
-                        else
-                        {
-                            WriteToStream(writer, string.Format(formdataTemplate, key, data[key]));
-                        }
-
-                        WriteToStream(writer, "\r\n");
+                        content = multipart;
                     }
+                    else
+                    {
+                        string post_data = JsonConvert.SerializeObject(
+                            json, Formatting.None, jsonsettings);
 
-                    WriteToStream(writer, trailer);
+                        var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(post_data);
 
+                        if (DEBUG)
+                        {
+                            Console.WriteLine("-------------------REQ-------------------");
+                            Console.WriteLine(post_data);
+                        }
 
+                        content = new ByteArrayContent(bytes);
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    }
                 }
                 else
                 {
-
-                    string post_data = JsonConvert.SerializeObject(
-                        json, Formatting.None, jsonsettings);
-
-                    var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(post_data);
-
-                    if (DEBUG)
-                    {
-                        Console.WriteLine("-------------------REQ-------------------");
-                        Console.WriteLine(post_data);
-                    }
-
-                    req.ContentType = "application/json";
-                    req.ContentLength = bytes.Length;
-
-                    var writer = req.GetRequestStream();
-                    writer.Write(bytes, 0, bytes.Length);
+                    content = null;
                 }
-            }// else
-             //	req.ContentLength = 0;
 
-            HttpWebResponse response = null;
-            try
-            {
-                response = (HttpWebResponse)req.GetResponse();
-            }
-            catch (WebException we)
-            {
-                response = we.Response as HttpWebResponse;
-                if (response == null)
-                    throw;
-            }
+                var response = await http.SendAsync(new HttpRequestMessage(new HttpMethod(method), this.session.api_url + endpoint) { Content = content });
 
-            string response_value = "";
-            using (Stream dataStream = response.GetResponseStream())
-            {
-                StreamReader reader = new StreamReader(dataStream);
-                response_value = reader.ReadToEnd();
-            }
+                string response_value = await response.Content.ReadAsStringAsync();
 
-            response.Close();
+                if (DEBUG)
+                {
+                    Console.WriteLine("-------------------RESP------------------");
+                    Console.WriteLine(response_value);
+                }
 
-            if (DEBUG)
-            {
-                Console.WriteLine("-------------------RESP------------------");
-                Console.WriteLine(response_value);
-            }
+                var obj = JsonConvert.DeserializeObject<ARMObject<object>>(response_value);
 
-            var obj = JsonConvert.DeserializeObject<ARMObject<object>>(response_value);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-
-                if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list")))
+                if (response.StatusCode == HttpStatusCode.OK)
                 {
 
-                    dynamic result = ARMObjectCache.GetOrCreate(obj, this.session);
+                    if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list")))
+                    {
 
-                    return result;
+                        dynamic result = ARMObjectCache.GetOrCreate(obj, this.session);
+
+                        return result;
+                    }
+                    else
+                    {
+                        var return_list = new List<dynamic>();
+
+                        foreach (var i in (Newtonsoft.Json.Linq.JArray)obj["values"])
+                        {
+                            var item = i.ToObject<ARMObject<object>>();
+
+                            dynamic result = ARMObjectCache.GetOrCreate(item, this.session);
+
+                            return_list.Add(result);
+                        }
+
+                        return return_list;
+                    }
                 }
                 else
                 {
-                    var return_list = new List<dynamic>();
-
-                    foreach (var i in (Newtonsoft.Json.Linq.JArray)obj["values"])
-                    {
-                        var item = i.ToObject<ARMObject<object>>();
-
-                        dynamic result = ARMObjectCache.GetOrCreate(item, this.session);
-
-                        return_list.Add(result);
-                    }
-
-                    return return_list;
+                    Type type = Utils.GetErrorClass(obj, (int)response.StatusCode);
+                    if (type != null)
+                        throw (PayloadError)Activator.CreateInstance(type, (string)obj["error_description"], obj);
+                    throw new pl.UnknownResponse((string)obj["error_description"], obj);
                 }
-            }
-            else
-            {
-                Type type = Utils.GetErrorClass(obj, (int)response.StatusCode);
-                if (type != null)
-                    throw (PayloadError)Activator.CreateInstance(type, (string)obj["error_description"], obj);
-                throw new pl.UnknownResponse((string)obj["error_description"], obj);
             }
         }
-
+        [Obsolete]
+        public dynamic request(string method, string id = null, object parameters = null, object json = null) =>
+            Request(method, id, parameters, json).GetAwaiter().GetResult();
 
         private int WriteToStream(Stream s, string txt)
         {
@@ -265,21 +209,26 @@ namespace Payload.ARM
             return bytes.Length;
         }
 
-        public dynamic get(string id)
+        public async Task<dynamic> Get(string id)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException("id cannot be empty");
-            return this.request("GET", id: id);
+            return await Request("GET", id: id);
         }
+        [Obsolete]
+        public dynamic get(string id) => Get(id).GetAwaiter().GetResult();
 
-        public dynamic select(params dynamic[] attrs)
+        public dynamic Select(params dynamic[] attrs)
         {
             foreach (var attr in attrs)
-                this._attrs.Add(attr.ToString());
+                _attrs.Add(attr.ToString());
             return this;
         }
 
-        public dynamic create(dynamic data)
+        [Obsolete]
+        public dynamic select(params dynamic[] attrs) => Select(attrs);
+
+        public async Task<dynamic> Create(dynamic data)
         {
 
             dynamic obj = new ExpandoObject();
@@ -315,10 +264,12 @@ namespace Payload.ARM
 
             }
 
-            return this.request("POST", json: obj);
+            return await Request("POST", json: obj);
         }
+        [Obsolete]
+        public dynamic create(dynamic data) => Create(data).GetAwaiter().GetResult();
 
-        public dynamic update(dynamic updates)
+        public async Task<dynamic> Update(dynamic updates)
         {
 
             if (updates is IList<dynamic>)
@@ -338,13 +289,15 @@ namespace Payload.ARM
                 ((IDictionary<string, object>)data).Add("object", "list");
                 data.values = updates;
 
-                return this.request("PUT", json: data);
+                return await Request("PUT", json: data);
             }
 
-            return this.request("PUT", parameters: new { mode = "query" }, json: updates);
+            return await Request("PUT", parameters: new { mode = "query" }, json: updates);
         }
+        [Obsolete]
+        public dynamic update(dynamic updates) => Update(updates).GetAwaiter().GetResult();
 
-        public dynamic delete(dynamic data = null)
+        public async Task<dynamic> Delete(dynamic data = null)
         {
 
             if (data is IList<dynamic>)
@@ -356,7 +309,7 @@ namespace Payload.ARM
                 string id_query = String.Join("|",
                     (from o in (List<dynamic>)data select o.id).ToArray());
 
-                return this.request("DELETE", parameters: new { mode = "query", id = id_query });
+                return await Request("DELETE", parameters: new { mode = "query", id = id_query });
             }
             else if (data != null)
             {
@@ -365,16 +318,18 @@ namespace Payload.ARM
 
                 _check_type(data);
 
-                return this.request("DELETE", id: data.id);
+                return await Request("DELETE", id: data.id);
             }
 
-            if (this._filters.Count > 0)
-                return this.request("DELETE", parameters: new { mode = "query" });
+            if (_filters.Count > 0)
+                return await Request("DELETE", parameters: new { mode = "query" });
             else
                 throw new Exception("Invalid delete request");
         }
+        [Obsolete]
+        public dynamic delete(dynamic data = null) => Delete(data).GetAwaiter().GetResult();
 
-        public ARMRequest filter_by(params dynamic[] filters)
+        public ARMRequest FilterBy(params dynamic[] filters)
         {
             foreach (var filter in filters)
             {
@@ -393,21 +348,24 @@ namespace Payload.ARM
 
             return this;
         }
+        [Obsolete]
+        public ARMRequest filter_by(params dynamic[] filters) => FilterBy(filters);
 
-        public dynamic all()
-        {
-            return this.request("GET");
-        }
+        public async Task<dynamic> All() => await Request("GET");
+        [Obsolete]
+        public dynamic all() => All().GetAwaiter().GetResult();
 
-        public dynamic one()
+        public async Task<dynamic> One()
         {
-            var data = this.request("GET", parameters: new { limit = 1 });
+            var data = await Request("GET", parameters: new { limit = 1 });
             if (data.Count == 1)
             {
                 return data[0];
             }
             else return null;
         }
+        [Obsolete]
+        public dynamic one() => One().GetAwaiter().GetResult();
 
         private void _check_type(dynamic obj)
         {

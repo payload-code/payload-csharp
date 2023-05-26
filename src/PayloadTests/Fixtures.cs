@@ -110,7 +110,7 @@ namespace Payload.Tests
         public static string RandomString(int length)
         {
             const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
-            Random random = new Random();
+            Random random = new Random(DateTime.Now.Millisecond);
             var chars = Enumerable.Range(0, length)
                 .Select(x => pool[random.Next(0, pool.Length)]);
             return new string(chars.ToArray());

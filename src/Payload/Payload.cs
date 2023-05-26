@@ -1,6 +1,7 @@
 using System;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Payload.ARM;
 
 namespace Payload
@@ -21,24 +22,44 @@ namespace Payload
                 this.api_key = api_key;
             }
 
+            public async Task<dynamic> Create(dynamic objects)
+            {
+                return await new ARMRequest(this).Create(objects);
+            }
+            [Obsolete]
             public dynamic create(dynamic objects)
             {
-                return new ARMRequest(this).create(objects);
+                return Create(objects).GetAwaiter().GetResult();
             }
 
-            public ARMRequest query<T>()
+            public ARMRequest Query<T>()
             {
                 return new ARMRequest(this, typeof(T));
             }
-
-            public dynamic update(dynamic objects)
+            [Obsolete]
+            public ARMRequest query<T>()
             {
-                return new ARMRequest(this).update(objects);
+                return Query<T>();
             }
 
+            public async Task<dynamic> Update(dynamic objects)
+            {
+                return await new ARMRequest(this).Update(objects);
+            }
+            [Obsolete]
+            public dynamic update(dynamic objects)
+            {
+                return Update(objects).GetAwaiter().GetResult();
+            }
+
+            public async Task<dynamic> Delete(dynamic objects)
+            {
+                return await new ARMRequest(this).Delete(objects);
+            }
+            [Obsolete]
             public dynamic delete(dynamic objects)
             {
-                return new ARMRequest(this).delete(objects);
+                return Delete(objects).GetAwaiter().GetResult();
             }
         }
 
@@ -47,19 +68,34 @@ namespace Payload
         public static dynamic attr = new Attr(null);
         public static Session session = new Session(null);
 
+        public static async Task<dynamic> Create(dynamic objects)
+        {
+            return await new ARMRequest(pl.session).Create(objects);
+        }
+        [Obsolete]
         public static dynamic create(dynamic objects)
         {
-            return new ARMRequest(pl.session).create(objects);
+            return Create(objects).GetAwaiter().GetResult();
         }
 
+        public static async Task<dynamic> Update(dynamic objects)
+        {
+            return await new ARMRequest(pl.session).update(objects);
+        }
+        [Obsolete]
         public static dynamic update(dynamic objects)
         {
-            return new ARMRequest(pl.session).update(objects);
+            return Update(objects).GetAwaiter().GetResult();
         }
 
+        public static async Task<dynamic> Delete(dynamic objects)
+        {
+            return await new ARMRequest(pl.session).Delete(objects);
+        }
+        [Obsolete]
         public static dynamic delete(dynamic objects)
         {
-            return new ARMRequest(pl.session).delete(objects);
+            return Delete(objects).GetAwaiter().GetResult();
         }
 
         public class Account : ARMObject<Account>, IARMObject
