@@ -9,7 +9,7 @@ namespace Payload.Tests
 
         public static dynamic customer_account()
         {
-            dynamic customer = pl.Customer.create(new { email = "customer@example.com", name = "Customer Account" });
+            dynamic customer = pl.Customer.Create(new { email = "customer@example.com", name = "Customer Account" });
             return customer;
 
         }
@@ -19,9 +19,9 @@ namespace Payload.Tests
         {
             string id = Environment.GetEnvironmentVariable("PROCESSING_ID");
             if (id != null)
-                return pl.ProcessingAccount.get(id);
+                return pl.ProcessingAccount.Get(id);
 
-            dynamic processing_account = pl.ProcessingAccount.create(new
+            dynamic processing_account = pl.ProcessingAccount.Create(new
             {
                 name = "Processing Account",
                 legal_entity = new
@@ -79,7 +79,7 @@ namespace Payload.Tests
         {
             Random random = new Random();
             int randomNumber = random.Next(1, 100);
-            dynamic card_payment = pl.Payment.create(new
+            dynamic card_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
@@ -94,7 +94,7 @@ namespace Payload.Tests
         {
             Random random = new Random();
             int randomNumber = random.Next(1, 100);
-            dynamic bank_payment = pl.Payment.create(new
+            dynamic bank_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
                 payment_method = new pl.BankAccount(new

@@ -18,7 +18,7 @@ namespace Payload.Tests
             {
                 account_holder = "John Smith",
                 card_number = "4242 4242 4242 4242",
-                expiry = "05/23",
+                expiry = "05/40",
                 card_code = "123",
                 billing_address = new
                 {

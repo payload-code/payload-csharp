@@ -42,7 +42,7 @@ namespace Payload.ARM
             this.session = session != null ? session : pl.session;
         }
 
-        public async Task<dynamic> Request(string method, string id = null,
+        public async Task<dynamic> RequestAsync(string method, string id = null,
                 object parameters = null, object json = null)
         {
             var spec = this.Object.GetSpec();
@@ -194,9 +194,13 @@ namespace Payload.ARM
                 }
             }
         }
+
+        public dynamic Request(string method, string id = null, object parameters = null, object json = null) =>
+            RequestAsync(method, id, parameters, json).GetAwaiter().GetResult();
+        
         [Obsolete]
         public dynamic request(string method, string id = null, object parameters = null, object json = null) =>
-            Request(method, id, parameters, json).GetAwaiter().GetResult();
+            Request(method, id, parameters, json);
 
         private int WriteToStream(Stream s, string txt)
         {
@@ -209,14 +213,17 @@ namespace Payload.ARM
             return bytes.Length;
         }
 
-        public async Task<dynamic> Get(string id)
+        public async Task<dynamic> GetAsync(string id)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException("id cannot be empty");
-            return await Request("GET", id: id);
+            return await RequestAsync("GET", id: id);
         }
+
+        public dynamic Get(string id) => GetAsync(id).GetAwaiter().GetResult();
+
         [Obsolete]
-        public dynamic get(string id) => Get(id).GetAwaiter().GetResult();
+        public dynamic get(string id) => Get(id);
 
         public dynamic Select(params dynamic[] attrs)
         {
@@ -228,7 +235,7 @@ namespace Payload.ARM
         [Obsolete]
         public dynamic select(params dynamic[] attrs) => Select(attrs);
 
-        public async Task<dynamic> Create(dynamic data)
+        public async Task<dynamic> CreateAsync(dynamic data)
         {
 
             dynamic obj = new ExpandoObject();
@@ -238,7 +245,7 @@ namespace Payload.ARM
                 foreach (var item in data)
                 {
 
-                    _check_type(item);
+                    CheckType(item);
 
                     dynamic row = new ExpandoObject();
                     Utils.PopulateExpando(row, item);
@@ -257,19 +264,22 @@ namespace Payload.ARM
             {
                 Utils.PopulateExpando(obj, data);
 
-                _check_type(data);
+                CheckType(data);
 
                 if (this.Object.GetSpec().GetType().GetProperty("polymorphic") != null)
                     Utils.PopulateExpando(obj, this.Object.GetSpec().polymorphic);
 
             }
 
-            return await Request("POST", json: obj);
+            return await RequestAsync("POST", json: obj);
         }
-        [Obsolete]
-        public dynamic create(dynamic data) => Create(data).GetAwaiter().GetResult();
 
-        public async Task<dynamic> Update(dynamic updates)
+        public dynamic Create(dynamic data) => CreateAsync(data).GetAwaiter().GetResult();
+
+        [Obsolete]
+        public dynamic create(dynamic data) => Create(data);
+
+        public async Task<dynamic> UpdateAsync(dynamic updates)
         {
 
             if (updates is IList<dynamic>)
@@ -277,7 +287,7 @@ namespace Payload.ARM
                 for (int i = 0; i < updates.Count; i++)
                 {
 
-                    _check_type(updates[i][0]);
+                    CheckType(updates[i][0]);
 
                     var upd = new ExpandoObject();
                     ((IDictionary<string, object>)upd).Add("id", updates[i][0]["id"]);
@@ -289,45 +299,51 @@ namespace Payload.ARM
                 ((IDictionary<string, object>)data).Add("object", "list");
                 data.values = updates;
 
-                return await Request("PUT", json: data);
+                return await RequestAsync("PUT", json: data);
             }
 
-            return await Request("PUT", parameters: new { mode = "query" }, json: updates);
+            return await RequestAsync("PUT", parameters: new { mode = "query" }, json: updates);
         }
-        [Obsolete]
-        public dynamic update(dynamic updates) => Update(updates).GetAwaiter().GetResult();
 
-        public async Task<dynamic> Delete(dynamic data = null)
+        public dynamic Update(dynamic updates) => UpdateAsync(updates).GetAwaiter().GetResult();
+
+        [Obsolete]
+        public dynamic update(dynamic updates) => Update(updates);
+
+        public async Task<dynamic> DeleteAsync(dynamic data = null)
         {
 
             if (data is IList<dynamic>)
             {
 
                 for (int i = 0; i < data.Count; i++)
-                    _check_type(data[i]);
+                    CheckType(data[i]);
 
                 string id_query = String.Join("|",
                     (from o in (List<dynamic>)data select o.id).ToArray());
 
-                return await Request("DELETE", parameters: new { mode = "query", id = id_query });
+                return await RequestAsync("DELETE", parameters: new { mode = "query", id = id_query });
             }
             else if (data != null)
             {
                 if (string.IsNullOrEmpty(data.id))
                     throw new ArgumentNullException("id cannot be empty");
 
-                _check_type(data);
+                CheckType(data);
 
-                return await Request("DELETE", id: data.id);
+                return await RequestAsync("DELETE", id: data.id);
             }
 
             if (_filters.Count > 0)
-                return await Request("DELETE", parameters: new { mode = "query" });
+                return await RequestAsync("DELETE", parameters: new { mode = "query" });
             else
                 throw new Exception("Invalid delete request");
         }
+
+        public dynamic Delete(dynamic data = null) => DeleteAsync(data).GetAwaiter().GetResult();
+
         [Obsolete]
-        public dynamic delete(dynamic data = null) => Delete(data).GetAwaiter().GetResult();
+        public dynamic delete(dynamic data = null) => Delete(data);
 
         public ARMRequest FilterBy(params dynamic[] filters)
         {
@@ -348,26 +364,33 @@ namespace Payload.ARM
 
             return this;
         }
+
         [Obsolete]
         public ARMRequest filter_by(params dynamic[] filters) => FilterBy(filters);
 
-        public async Task<dynamic> All() => await Request("GET");
-        [Obsolete]
-        public dynamic all() => All().GetAwaiter().GetResult();
+        public async Task<dynamic> AllAsync() => await RequestAsync("GET");
 
-        public async Task<dynamic> One()
+        public dynamic All() => AllAsync().GetAwaiter().GetResult();
+
+        [Obsolete]
+        public dynamic all() => All();
+
+        public async Task<dynamic> OneAsync()
         {
-            var data = await Request("GET", parameters: new { limit = 1 });
+            var data = await RequestAsync("GET", parameters: new { limit = 1 });
             if (data.Count == 1)
             {
                 return data[0];
             }
             else return null;
         }
-        [Obsolete]
-        public dynamic one() => One().GetAwaiter().GetResult();
 
-        private void _check_type(dynamic obj)
+        public dynamic One() => OneAsync().GetAwaiter().GetResult();
+
+        [Obsolete]
+        public dynamic one() => One();
+
+        private void CheckType(dynamic obj)
         {
 
             if (Utils.IsSubclassOfRawGeneric(typeof(ARMObject<>), obj.GetType()))

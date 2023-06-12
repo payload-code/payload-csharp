@@ -145,29 +145,39 @@ namespace Payload.ARM
             return JsonConvert.SerializeObject(
                     obj, Formatting.Indented);
         }
+
         [Obsolete]
         public string json() => Json();
 
-        public async Task<dynamic> Update(dynamic update)
+        public async Task<dynamic> UpdateAsync(dynamic update)
         {
-            return await new ARMRequest(session, typeof(T)).Request("PUT", id: (string)this["id"], json: update);
+            return await new ARMRequest(session, typeof(T)).RequestAsync("PUT", id: (string)this["id"], json: update);
         }
-        [Obsolete]
-        public dynamic update(dynamic update) => Update(update).GetAwaiter().GetResult();
 
-        public async Task<dynamic> Delete()
-        {
-            return await new ARMRequest(session, typeof(T)).Request("DELETE", id: (string)this["id"]);
-        }
-        [Obsolete]
-        public dynamic delete() => Delete().GetAwaiter().GetResult();
+        public dynamic Update(dynamic update) => UpdateAsync(update).GetAwaiter().GetResult();
 
-        public static async Task<dynamic> Get(string id, pl.Session session = null)
-        {
-            return await new ARMRequest(session, typeof(T)).Request("GET", id: id);
-        }
         [Obsolete]
-        public static dynamic get(string id, pl.Session session = null) => Get(id, session).GetAwaiter().GetResult();
+        public dynamic update(dynamic update) => Update(update);
+
+        public async Task<dynamic> DeleteAsync()
+        {
+            return await new ARMRequest(session, typeof(T)).RequestAsync("DELETE", id: (string)this["id"]);
+        }
+
+        public dynamic Delete() => DeleteAsync().GetAwaiter().GetResult();
+
+        [Obsolete]
+        public dynamic delete() => Delete();
+
+        public static async Task<dynamic> GetAsync(string id, pl.Session session = null)
+        {
+            return await new ARMRequest(session, typeof(T)).RequestAsync("GET", id: id);
+        }
+
+        public static dynamic Get(string id, pl.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
+
+        [Obsolete]
+        public static dynamic get(string id, pl.Session session = null) => Get(id, session);
 
         public static dynamic FilterBy(params dynamic[] list)
         {
@@ -177,13 +187,14 @@ namespace Payload.ARM
             var req = new ARMRequest(session, typeof(T));
 
             foreach (var filter in filters)
-                req = req.filter_by(filter);
+                req = req.FilterBy(filter);
 
             if (req.Object.GetSpec().GetType().GetProperty("polymorphic") != null)
-                req = req.filter_by(req.Object.GetSpec().polymorphic);
+                req = req.FilterBy(req.Object.GetSpec().polymorphic);
 
             return req;
         }
+
         [Obsolete]
         public static dynamic filter_by(params dynamic[] list) => FilterBy(list);
 
@@ -195,17 +206,18 @@ namespace Payload.ARM
             var req = new ARMRequest(session, typeof(T));
 
             foreach (var attr in attrs)
-                req = req.select(attr);
+                req = req.Select(attr);
 
             if (req.Object.GetSpec().GetType().GetProperty("polymorphic") != null)
-                req = req.filter_by(req.Object.GetSpec().polymorphic);
+                req = req.FilterBy(req.Object.GetSpec().polymorphic);
 
             return req;
         }
+
         [Obsolete]
         public static dynamic select(params dynamic[] list) => Select(list);
 
-        public static async Task<dynamic> Create(dynamic objects, pl.Session session = null)
+        public static async Task<dynamic> CreateAsync(dynamic objects, pl.Session session = null)
         {
             if (objects is IList<dynamic>)
             {
@@ -217,23 +229,32 @@ namespace Payload.ARM
             else
                 objects = (T)((IARMObject)Activator.CreateInstance(typeof(T))).Populate(objects);
 
-            return await new ARMRequest(session, typeof(T)).Create(objects);
+            return await new ARMRequest(session, typeof(T)).CreateAsync(objects);
         }
-        [Obsolete]
-        public static dynamic create(dynamic objects, pl.Session session = null) => Create(objects, session).GetAwaiter().GetResult();
 
-        public static async Task<dynamic> UpdateAll(dynamic objects, pl.Session session = null)
-        {
-            return await new ARMRequest(session, typeof(T)).Update(objects);
-        }
+        public static dynamic Create(dynamic objects, pl.Session session = null) => CreateAsync(objects, session).GetAwaiter().GetResult();
+        
         [Obsolete]
-        public static dynamic update_all(dynamic objects, pl.Session session = null) => UpdateAll(objects, session).GetAwaiter().GetResult();
+        public static dynamic create(dynamic objects, pl.Session session = null) => Create(objects, session);
 
-        public static async Task<dynamic> DeleteAll(dynamic objects, pl.Session session = null)
+        public static async Task<dynamic> UpdateAllAsync(dynamic objects, pl.Session session = null)
         {
-            return await new ARMRequest(session, typeof(T)).Delete(objects);
+            return await new ARMRequest(session, typeof(T)).UpdateAsync(objects);
         }
+
+        public static dynamic UpdateAll(dynamic objects, pl.Session session = null) => UpdateAllAsync(objects, session).GetAwaiter().GetResult();
+
         [Obsolete]
-        public static dynamic delete_all(dynamic objects, pl.Session session = null) => DeleteAll(objects, session).GetAwaiter().GetResult();
+        public static dynamic update_all(dynamic objects, pl.Session session = null) => UpdateAll(objects, session);
+
+        public static async Task<dynamic> DeleteAllAsync(dynamic objects, pl.Session session = null)
+        {
+            return await new ARMRequest(session, typeof(T)).DeleteAsync(objects);
+        }
+
+        public static dynamic DeleteAll(dynamic objects, pl.Session session = null) => DeleteAllAsync(objects, session).GetAwaiter().GetResult();
+        
+        [Obsolete]
+        public static dynamic delete_all(dynamic objects, pl.Session session = null) => DeleteAll(objects, session);
     }
 }
