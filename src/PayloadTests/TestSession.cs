@@ -146,11 +146,11 @@ namespace Payload.Tests
         {
             var rand_email = Fixtures.RandomString(10) + "@example.com";
 
-            var account = await this.session.Create(
+            var account = await this.session.CreateAsync(
                new pl.Customer(new { email = rand_email, name = "Matt Perez" })
             );
 
-            var get_account = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email }).One();
+            var get_account = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email }).OneAsync();
             Assert.NotNull(get_account);
         }
 
@@ -160,15 +160,15 @@ namespace Payload.Tests
             var rand_email1 = Fixtures.RandomString(10) + "@example.com";
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
-            var accounts = await this.session.Create(
+            var accounts = await this.session.CreateAsync(
                 new[]{
                    new pl.Customer(new{email=rand_email1, name="Matt Perez"}),
                    new pl.Customer(new{email=rand_email2, name="Matt Perez"})
                 }
             );
 
-            var get_account_1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
-            var get_account_2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
+            var get_account_1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
+            var get_account_2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
 
             Assert.NotNull(get_account_1);
             Assert.NotNull(get_account_2);
@@ -180,11 +180,11 @@ namespace Payload.Tests
             var rand_email1 = Fixtures.RandomString(10) + "@example.com";
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
-            var account = await this.session.Create(
+            var account = await this.session.CreateAsync(
                new pl.Customer(new { email = rand_email1, name = "Matt Perez" })
             );
 
-            var get_account = await this.session.Query<pl.Customer>().Get(account.id);
+            var get_account = await this.session.Query<pl.Customer>().GetAsync(account.id);
             Assert.NotNull(get_account);
             Assert.True(account.id == get_account.id);
         }
@@ -195,22 +195,22 @@ namespace Payload.Tests
             var rand_email1 = Fixtures.RandomString(10) + "@example.com";
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
-            var account = await this.session.Create(
+            var account = await this.session.CreateAsync(
                new pl.Customer(new { email = rand_email1, name = "Matt Perez" })
             );
 
-            var get_account1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
-            var get_account2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
+            var get_account1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
+            var get_account2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
             Assert.NotNull(get_account1);
             Assert.Null(get_account2);
 
-            await account.Update(new
+            await account.UpdateAsync(new
             {
                 email = rand_email2
             });
 
-            get_account1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
-            get_account2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
+            get_account1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
+            get_account2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
             Assert.Null(get_account1);
             Assert.NotNull(get_account2);
 
@@ -221,16 +221,16 @@ namespace Payload.Tests
         {
             var rand_email = Fixtures.RandomString(10) + "@example.com";
 
-            var account = await this.session.Create(
+            var account = await this.session.CreateAsync(
                new pl.Customer(new { email = rand_email, name = "Matt Perez" })
             );
 
-            var get_account = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email }).One();
+            var get_account = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email }).OneAsync();
             Assert.NotNull(get_account);
 
-            await this.session.Delete(account);
+            await this.session.DeleteAsync(account);
 
-            get_account = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email }).One();
+            get_account = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email }).OneAsync();
             Assert.Null(get_account);
         }
 
@@ -240,7 +240,7 @@ namespace Payload.Tests
             var rand_email1 = Fixtures.RandomString(10) + "@example.com";
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
-            var accounts = await this.session.Create(
+            var accounts = await this.session.CreateAsync(
                 new[]{
                    new pl.Customer(new{email=rand_email1, name="Matt Perez"}),
                    new pl.Customer(new{email=rand_email2, name="Matt Perez"})
@@ -248,16 +248,16 @@ namespace Payload.Tests
             );
 
 
-            var get_account_1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
-            var get_account_2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
+            var get_account_1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
+            var get_account_2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
 
             Assert.NotNull(get_account_1);
             Assert.NotNull(get_account_2);
 
-            await this.session.Delete(accounts);
+            await this.session.DeleteAsync(accounts);
 
-            get_account_1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
-            get_account_2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
+            get_account_1 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
+            get_account_2 = await this.session.Query<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
 
             Assert.Null(get_account_1);
             Assert.Null(get_account_2);

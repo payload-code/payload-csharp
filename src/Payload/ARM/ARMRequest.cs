@@ -226,8 +226,11 @@ namespace Payload.ARM
                 throw new ArgumentNullException("id cannot be empty");
             return await RequestAsync(new RequestArgs() { Method = "GET" }, id);
         }
+
+        public dynamic Get(string id) => GetAsync(id).GetAwaiter().GetResult();
+
         [Obsolete]
-        public dynamic get(string id) => Get(id).GetAwaiter().GetResult();
+        public dynamic get(string id) => Get(id);
 
         public T Get(string id) => GetAsync(id).GetAwaiter().GetResult();
 
@@ -302,8 +305,6 @@ namespace Payload.ARM
 
             return await RequestAllAsync(new RequestArgs() { Method = "PUT", Body = body });
         }
-        [Obsolete]
-        public dynamic create(dynamic data) => Create(data).GetAwaiter().GetResult();
 
         public List<T> UpdateAll(object[] updates) => UpdateAllAsync(updates).GetAwaiter().GetResult();
 
@@ -316,8 +317,6 @@ namespace Payload.ARM
 
             return await RequestAsync(new RequestArgs() { Method = "PUT", Parameters = new { mode = "query" }, Body = body }, id);
         }
-        [Obsolete]
-        public dynamic update(dynamic updates) => Update(updates).GetAwaiter().GetResult();
 
         public T Update(T update) => UpdateAsync(update).GetAwaiter().GetResult();
 
@@ -335,8 +334,11 @@ namespace Payload.ARM
             else
                 throw new Exception("Must set at least one filter to delete using query mode");
         }
+
+        public dynamic Delete(dynamic data = null) => DeleteAsync(data).GetAwaiter().GetResult();
+
         [Obsolete]
-        public dynamic delete(dynamic data = null) => Delete(data).GetAwaiter().GetResult();
+        public dynamic delete(dynamic data = null) => Delete(data);
 
         public List<T> DeleteAll(IEnumerable<T> obj) => DeleteAllAsync(obj).GetAwaiter().GetResult();
 
@@ -375,6 +377,7 @@ namespace Payload.ARM
 
             return this;
         }
+
         [Obsolete]
         public ARMRequest filter_by(params dynamic[] filters) => FilterBy(filters);
 
@@ -389,8 +392,6 @@ namespace Payload.ARM
             _filters["limit"] = limit;
             return this;
         }
-        [Obsolete]
-        public dynamic one() => One().GetAwaiter().GetResult();
 
         public ARMRequest<T> Range(int offset, int end)
         {
