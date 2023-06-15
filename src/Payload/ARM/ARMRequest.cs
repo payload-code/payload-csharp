@@ -227,11 +227,6 @@ namespace Payload.ARM
             return await RequestAsync(new RequestArgs() { Method = "GET" }, id);
         }
 
-        public dynamic Get(string id) => GetAsync(id).GetAwaiter().GetResult();
-
-        [Obsolete]
-        public dynamic get(string id) => Get(id);
-
         public T Get(string id) => GetAsync(id).GetAwaiter().GetResult();
 
         public ARMRequest<T> Select(params dynamic[] attrs)
@@ -335,11 +330,6 @@ namespace Payload.ARM
                 throw new Exception("Must set at least one filter to delete using query mode");
         }
 
-        public dynamic Delete(dynamic data = null) => DeleteAsync(data).GetAwaiter().GetResult();
-
-        [Obsolete]
-        public dynamic delete(dynamic data = null) => Delete(data);
-
         public List<T> DeleteAll(IEnumerable<T> obj) => DeleteAllAsync(obj).GetAwaiter().GetResult();
 
         public async Task<T> DeleteAsync(T data)
@@ -378,8 +368,7 @@ namespace Payload.ARM
             return this;
         }
 
-        [Obsolete]
-        public ARMRequest filter_by(params dynamic[] filters) => FilterBy(filters);
+        public async Task<List<T>> AllAsync() => await RequestAllAsync(new RequestArgs() { Method = "GET" });
 
         public ARMRequest<T> Offset(int offset)
         {
@@ -402,6 +391,19 @@ namespace Payload.ARM
         }
 
         public async Task<List<T>> AllAsync() => await RequestAllAsync(new RequestArgs() { Method = "GET" });
+
+        public List<T> All() => AllAsync().GetAwaiter().GetResult();
+
+        public async Task<T> OneAsync()
+        {
+            var data = await RequestAllAsync(new RequestArgs() { Method = "GET", Parameters = new { limit = 1 } });
+            if (data.Count() == 1)
+            {
+                return data.First();
+            }
+            else
+                return null;
+        }
 
         public List<T> All() => AllAsync().GetAwaiter().GetResult();
 

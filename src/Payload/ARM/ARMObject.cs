@@ -246,9 +246,6 @@ namespace Payload.ARM
             return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "PUT", Body = body }, (string)this["id"]);
         }
 
-        [Obsolete]
-        public string json() => Json();
-
         public T Update(object update) => UpdateAsync(update).GetAwaiter().GetResult();
 
         public async Task<T> DeleteAsync()
@@ -262,8 +259,6 @@ namespace Payload.ARM
         {
             return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "GET" }, id);
         }
-        [Obsolete]
-        public dynamic delete() => Delete().GetAwaiter().GetResult();
 
         public static T Get(string id, pl.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
 
@@ -283,9 +278,6 @@ namespace Payload.ARM
             return req;
         }
 
-        [Obsolete]
-        public static dynamic filter_by(params dynamic[] list) => FilterBy(list);
-
         public static ARMRequest<T> Select(params object[] list)
         {
             pl.Session session = (pl.Session)(list.Where(item => item is pl.Session).FirstOrDefault() ?? pl.DefaultSession);
@@ -301,9 +293,6 @@ namespace Payload.ARM
 
             return req;
         }
-
-        [Obsolete]
-        public static dynamic select(params dynamic[] list) => Select(list);
 
         public static async Task<List<T>> CreateAllAsync(IEnumerable<dynamic> objects, pl.Session session = null)
         {
@@ -326,10 +315,8 @@ namespace Payload.ARM
 
             return await new ARMRequest<T>(session).CreateAsync(obj);
         }
-        [Obsolete]
-        public static dynamic create(dynamic objects, pl.Session session = null) => Create(objects, session);
 
-        public static T Create(dynamic obj = null, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
+        public static T Create(dynamic obj, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
 
         public static async Task<List<T>> UpdateAllAsync(object[] updates, pl.Session session = null)
         {
