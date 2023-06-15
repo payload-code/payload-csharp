@@ -16,7 +16,7 @@ namespace Payload.Tests
             this.processing_account = Fixtures.processing_account();
             this.customer_account = Fixtures.customer_account();
 
-            this.billing_schedule = pl.BillingSchedule.create(new
+            this.billing_schedule = pl.BillingSchedule.Create(new
             {
                 start_date = "2019-01-01",
                 end_date = "2019-12-31",
@@ -42,7 +42,7 @@ namespace Payload.Tests
             Assert.True(this.billing_schedule.processing_id == processing_account.id);
             Assert.True(this.billing_schedule.charges[0].amount == 39.99);
 
-            this.billing_schedule.update(new { recurring_frequency = "quarterly" });
+            this.billing_schedule.Update(new { recurring_frequency = "quarterly" });
 
             Assert.True(this.billing_schedule.recurring_frequency == "quarterly");
         }
@@ -51,7 +51,7 @@ namespace Payload.Tests
         [Test]
         public void test_select_billing_charge()
         {
-            var billing_charge = pl.BillingSchedule.select("*", "charges").get(this.billing_schedule.id).charges[0];
+            var billing_charge = pl.BillingSchedule.Select("*", "charges").Get(this.billing_schedule.id).charges[0];
 
             Assert.AreEqual(typeof(pl.BillingCharge), billing_charge.GetType());
         }
@@ -60,16 +60,16 @@ namespace Payload.Tests
         [Test]
         public void test_billing_schedule_one()
         {
-            Assert.NotNull(pl.BillingSchedule.filter_by(new { type = this.billing_schedule.type }).one());
-            Assert.AreEqual(typeof(pl.BillingSchedule), pl.BillingSchedule.filter_by(new { type = billing_schedule.type }).one().GetType());
+            Assert.NotNull(pl.BillingSchedule.FilterBy(new { type = this.billing_schedule.type }).One());
+            Assert.AreEqual(typeof(pl.BillingSchedule), pl.BillingSchedule.FilterBy(new { type = billing_schedule.type }).One().GetType());
         }
 
         [Test]
         public void test_billing_charge_one()
         {
-            Assert.NotNull(pl.BillingCharge.filter_by(new { type = this.billing_schedule.charges[0].type }).one());
+            Assert.NotNull(pl.BillingCharge.FilterBy(new { type = this.billing_schedule.charges[0].type }).One());
 
-            Assert.AreEqual(typeof(pl.BillingCharge), pl.BillingCharge.filter_by(new { type = this.billing_schedule.charges[0].type }).one().GetType());
+            Assert.AreEqual(typeof(pl.BillingCharge), pl.BillingCharge.FilterBy(new { type = this.billing_schedule.charges[0].type }).One().GetType());
         }
     }
 }

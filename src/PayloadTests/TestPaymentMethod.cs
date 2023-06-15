@@ -5,7 +5,6 @@ namespace Payload.Tests
 {
     public class TestPaymentMethod
     {
-
         dynamic bank_payment_method;
         dynamic card_payment_method;
 
@@ -14,7 +13,7 @@ namespace Payload.Tests
         public void Setup()
         {
             PayloadTestSetup.initAPI();
-            this.card_payment_method = pl.Card.create(new
+            this.card_payment_method = pl.Card.Create(new
             {
                 account_holder = "John Smith",
                 card_number = "4242 4242 4242 4242",
@@ -26,7 +25,7 @@ namespace Payload.Tests
                 }
             });
 
-            this.bank_payment_method = pl.BankAccount.create(new
+            this.bank_payment_method = pl.BankAccount.Create(new
             {
                 account_number = "123456789",
                 routing_number = "036001808",
@@ -53,24 +52,21 @@ namespace Payload.Tests
         public void test_invalid_payment_method_type_invalid_attributes()
         {
             Assert.Throws<pl.InvalidAttributes>(
-               () => pl.Transaction.create(new { type = "invalid", card_number = "4242 4242 4242 4242" }));
+               () => pl.Transaction.Create(new { type = "invalid", card_number = "4242 4242 4242 4242" }));
         }
 
 
         [Test]
         public void test_card_payment_method_one()
         {
-            Assert.NotNull(pl.PaymentMethod.filter_by(new { type = this.card_payment_method.type }).one());
-            Assert.AreEqual(typeof(pl.Card), pl.PaymentMethod.filter_by(new { type = this.card_payment_method.type }).one().GetType());
+            Assert.NotNull(pl.PaymentMethod.FilterBy(new { this.card_payment_method.type }).One());
 
         }
 
         [Test]
         public void test_bank_payment_method_one()
         {
-            Assert.NotNull(pl.PaymentMethod.filter_by(new { type = this.bank_payment_method.type }).one());
-            Assert.AreEqual(typeof(pl.BankAccount), pl.PaymentMethod.filter_by(new { type = this.bank_payment_method.type }).one().GetType());
-
+            Assert.NotNull(pl.PaymentMethod.FilterBy(new { this.bank_payment_method.type }).One());
         }
     }
 }

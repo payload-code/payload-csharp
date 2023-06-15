@@ -1,27 +1,27 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Payload.Tests
 {
     public class Fixtures
     {
-
-        public static dynamic customer_account()
+        public static pl.Customer customer_account()
         {
-            dynamic customer = pl.Customer.Create(new { email = "customer@example.com", name = "Customer Account" });
+            var customer = pl.Customer.Create(new { email = "customer@example.com", name = "Customer Account" });
             return customer;
 
         }
 
 
-        public static dynamic processing_account()
+        public static pl.ProcessingAccount processing_account()
         {
             string id = Environment.GetEnvironmentVariable("PROCESSING_ID");
             if (id != null)
                 return pl.ProcessingAccount.Get(id);
 
-            dynamic processing_account = pl.ProcessingAccount.Create(new
+            var processing_account = pl.ProcessingAccount.Create(new
             {
                 name = "Processing Account",
                 legal_entity = new
@@ -58,7 +58,7 @@ namespace Payload.Tests
                         type = "owner",
                     }
                 },
-                payment_methods = new dynamic[]{
+                payment_methods = new pl.PaymentMethod[]{
                     new pl.PaymentMethod(new {
                         type = "bank_account",
                         bank_account = new {
@@ -75,11 +75,11 @@ namespace Payload.Tests
         }
 
 
-        public static dynamic card_payment()
+        public static pl.Payment card_payment()
         {
             Random random = new Random();
             int randomNumber = random.Next(1, 100);
-            dynamic card_payment = pl.Payment.Create(new
+            var card_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
@@ -90,11 +90,11 @@ namespace Payload.Tests
 
 
 
-        public static dynamic bank_payment()
+        public static pl.Payment bank_payment()
         {
             Random random = new Random();
             int randomNumber = random.Next(1, 100);
-            dynamic bank_payment = pl.Payment.Create(new
+            var bank_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
                 payment_method = new pl.BankAccount(new

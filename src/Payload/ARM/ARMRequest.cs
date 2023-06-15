@@ -15,15 +15,21 @@ using System.Net.Http.Headers;
 
 namespace Payload.ARM
 {
+    public class RequestArgs
+    {
+        public string Method { get; set; }
+        public object Parameters { get; set; }
+        public ExpandoObject Body { get; set; }
+    }
 
-    public class ARMRequest
+    public class ARMRequest<T> where T : ARMObjectBase<T>
     {
 
         public static bool DEBUG = false;
 
-        public dynamic Object = null;
+        public ARMObjectSpec Spec { get; set; }
         public Dictionary<string, dynamic> _filters;
-        public List<object> _attrs;
+        public List<dynamic> _attrs;
         public List<object> _group_by;
         private pl.Session session;
 
@@ -32,34 +38,35 @@ namespace Payload.ARM
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public ARMRequest(pl.Session session = null, Type type = null)
+        public ARMRequest(pl.Session session = null)
         {
-            if (type != null)
-                Object = (IARMObject)Activator.CreateInstance(type);
+            var obj = (T)Activator.CreateInstance(typeof(T));
+            Spec = obj.GetSpec();
             _filters = new Dictionary<string, dynamic>();
-            _attrs = new List<object>();
+            _attrs = new List<dynamic>();
             _group_by = new List<object>();
-            this.session = session != null ? session : pl.session;
+            this.session = session != null ? session : pl.DefaultSession;
         }
 
-        public async Task<dynamic> RequestAsync(string method, string id = null,
-                object parameters = null, object json = null)
+        private async Task<JSONObject> ExecuteRequestAsync(RequestArgs args, string id = null)
         {
-            var spec = this.Object.GetSpec();
+            var method = args.Method;
+            var parameters = args.Parameters;
+            var json = args.Body;
 
-            var endpoint = spec.GetType().GetProperty("endpoint") != null ? spec.endpoint : "/" + spec.sobject + "s";
+            var endpoint = Spec.Endpoint != null ? Spec.Endpoint : "/" + Spec.Object + "s";
             if (!string.IsNullOrEmpty(id))
                 endpoint += "/" + id;
 
-            for (int i = 0; i < this._attrs.Count; i++)
-                this._filters.Add("fields[" + i.ToString() + "]", (string)this._attrs[i]);
+            for (int i = 0; i < _attrs.Count; i++)
+                _filters.Add("fields[" + i.ToString() + "]", (string)_attrs[i]);
 
-            if (this._filters.Count > 0 || parameters != null)
+            if (_filters.Count > 0 || parameters != null)
                 endpoint += "?";
 
-            if (this._filters.Count > 0)
+            if (_filters.Count > 0)
             {
-                endpoint += Utils.ToQueryString(this._filters);
+                endpoint += Utils.ToQueryString(_filters);
                 if (parameters != null)
                     endpoint += "&";
             }
@@ -69,7 +76,7 @@ namespace Payload.ARM
 
             using (var http = new HttpClient())
             {
-                string _auth = string.Concat(this.session.api_key, ":");
+                string _auth = string.Concat(session.ApiKey, ":");
                 string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
                 string _cred = string.Concat("Basic ", _enc);
                 http.DefaultRequestHeaders.Authorization =
@@ -147,7 +154,7 @@ namespace Payload.ARM
                     content = null;
                 }
 
-                var response = await http.SendAsync(new HttpRequestMessage(new HttpMethod(method), this.session.api_url + endpoint) { Content = content });
+                var response = await http.SendAsync(new HttpRequestMessage(new HttpMethod(method), session.ApiUrl + endpoint) { Content = content });
 
                 string response_value = await response.Content.ReadAsStringAsync();
 
@@ -157,50 +164,50 @@ namespace Payload.ARM
                     Console.WriteLine(response_value);
                 }
 
-                var obj = JsonConvert.DeserializeObject<ARMObject<object>>(response_value);
+                var jsonObj = JsonConvert.DeserializeObject<JSONObject>(response_value);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-
-                    if (!string.IsNullOrEmpty(id) || (method == "POST" && !obj["object"].Equals("list")))
-                    {
-
-                        dynamic result = ARMObjectCache.GetOrCreate(obj, this.session);
-
-                        return result;
-                    }
-                    else
-                    {
-                        var return_list = new List<dynamic>();
-
-                        foreach (var i in (Newtonsoft.Json.Linq.JArray)obj["values"])
-                        {
-                            var item = i.ToObject<ARMObject<object>>();
-
-                            dynamic result = ARMObjectCache.GetOrCreate(item, this.session);
-
-                            return_list.Add(result);
-                        }
-
-                        return return_list;
-                    }
+                    return jsonObj;
                 }
                 else
                 {
-                    Type type = Utils.GetErrorClass(obj, (int)response.StatusCode);
+                    Type type = Utils.GetErrorClass(jsonObj, (int)response.StatusCode);
                     if (type != null)
-                        throw (PayloadError)Activator.CreateInstance(type, (string)obj["error_description"], obj);
-                    throw new pl.UnknownResponse((string)obj["error_description"], obj);
+                        throw (PayloadError)Activator.CreateInstance(type, (string)jsonObj["error_description"], jsonObj);
+                    throw new pl.UnknownResponse((string)jsonObj["error_description"], jsonObj);
                 }
             }
         }
 
-        public dynamic Request(string method, string id = null, object parameters = null, object json = null) =>
-            RequestAsync(method, id, parameters, json).GetAwaiter().GetResult();
-        
-        [Obsolete]
-        public dynamic request(string method, string id = null, object parameters = null, object json = null) =>
-            Request(method, id, parameters, json);
+        public async Task<List<T>> RequestAllAsync(RequestArgs args)
+        {
+            var obj = await ExecuteRequestAsync(args);
+
+            var return_list = new List<T>();
+
+            foreach (var i in (Newtonsoft.Json.Linq.JArray)obj["values"])
+            {
+                var item = i.ToObject<T>();
+
+                T result = ARMObjectCache.GetOrCreate(item, session);
+
+                return_list.Add(result);
+            }
+
+            return return_list;
+        }
+
+        public async Task<T> RequestAsync(RequestArgs args, string id = null)
+        {
+            var obj = await ExecuteRequestAsync(args, id);
+
+            T result = (T)Activator.CreateInstance(typeof(T), obj);
+
+            result = ARMObjectCache.GetOrCreate(result, session);
+
+            return result;
+        }
 
         private int WriteToStream(Stream s, string txt)
         {
@@ -213,198 +220,170 @@ namespace Payload.ARM
             return bytes.Length;
         }
 
-        public async Task<dynamic> GetAsync(string id)
+        public async Task<T> GetAsync(string id)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException("id cannot be empty");
-            return await RequestAsync("GET", id: id);
+            return await RequestAsync(new RequestArgs() { Method = "GET" }, id);
         }
 
-        public dynamic Get(string id) => GetAsync(id).GetAwaiter().GetResult();
+        public T Get(string id) => GetAsync(id).GetAwaiter().GetResult();
 
-        [Obsolete]
-        public dynamic get(string id) => Get(id);
-
-        public dynamic Select(params dynamic[] attrs)
+        public ARMRequest<T> Select(params dynamic[] attrs)
         {
             foreach (var attr in attrs)
                 _attrs.Add(attr.ToString());
             return this;
         }
 
-        [Obsolete]
-        public dynamic select(params dynamic[] attrs) => Select(attrs);
-
-        public async Task<dynamic> CreateAsync(dynamic data)
+        public async Task<List<T>> CreateAllAsync(IEnumerable<object> objects)
         {
+            var body = new ExpandoObject();
 
-            dynamic obj = new ExpandoObject();
-            if (data is IList<dynamic>)
+            var list = new List<ExpandoObject>();
+            foreach (var item in objects)
             {
-                var list = new List<dynamic>();
-                foreach (var item in data)
-                {
+                var row = new ExpandoObject();
+                Utils.PopulateExpando(row, item);
 
-                    CheckType(item);
+                if (Spec.Polymorphic != null)
+                    Utils.PopulateExpando(row, Spec.Polymorphic);
 
-                    dynamic row = new ExpandoObject();
-                    Utils.PopulateExpando(row, item);
-
-                    if (this.Object.GetSpec().GetType().GetProperty("polymorphic") != null)
-                        Utils.PopulateExpando(row, this.Object.GetSpec().polymorphic);
-
-                    list.Add(row);
-                }
-
-                ((IDictionary<string, object>)obj).Add("object", "list");
-                obj.values = list;
-
-            }
-            else
-            {
-                Utils.PopulateExpando(obj, data);
-
-                CheckType(data);
-
-                if (this.Object.GetSpec().GetType().GetProperty("polymorphic") != null)
-                    Utils.PopulateExpando(obj, this.Object.GetSpec().polymorphic);
-
+                list.Add(row);
             }
 
-            return await RequestAsync("POST", json: obj);
+            ((IDictionary<string, object>)body).Add("object", "list");
+            ((IDictionary<string, object>)body).Add("values", list);
+
+
+            return await RequestAllAsync(new RequestArgs() { Method = "POST", Body = body });
         }
 
-        public dynamic Create(dynamic data) => CreateAsync(data).GetAwaiter().GetResult();
+        public List<T> CreateAll(IEnumerable<object> objects) => CreateAllAsync(objects).GetAwaiter().GetResult();
 
-        [Obsolete]
-        public dynamic create(dynamic data) => Create(data);
-
-        public async Task<dynamic> UpdateAsync(dynamic updates)
+        public async Task<T> CreateAsync(object data)
         {
+            var body = new ExpandoObject();
 
-            if (updates is IList<dynamic>)
-            {
-                for (int i = 0; i < updates.Count; i++)
-                {
+            Utils.PopulateExpando(body, data);
 
-                    CheckType(updates[i][0]);
+            if (Spec.Polymorphic != null)
+                Utils.PopulateExpando(body, Spec.Polymorphic);
 
-                    var upd = new ExpandoObject();
-                    ((IDictionary<string, object>)upd).Add("id", updates[i][0]["id"]);
-                    Utils.PopulateExpando(upd, updates[i][1]);
-                    updates[i] = upd;
-                }
-
-                dynamic data = new ExpandoObject();
-                ((IDictionary<string, object>)data).Add("object", "list");
-                data.values = updates;
-
-                return await RequestAsync("PUT", json: data);
-            }
-
-            return await RequestAsync("PUT", parameters: new { mode = "query" }, json: updates);
+            return await RequestAsync(new RequestArgs() { Method = "POST", Body = body });
         }
 
-        public dynamic Update(dynamic updates) => UpdateAsync(updates).GetAwaiter().GetResult();
+        public T Create(object data) => CreateAsync(data).GetAwaiter().GetResult();
 
-        [Obsolete]
-        public dynamic update(dynamic updates) => Update(updates);
-
-        public async Task<dynamic> DeleteAsync(dynamic data = null)
+        public async Task<List<T>> UpdateAllAsync(object[] updates)
         {
-
-            if (data is IList<dynamic>)
+            var updateBody = new List<ExpandoObject>();
+            for (int i = 0; i < updates.Count(); i++)
             {
+                var upd = new ExpandoObject();
 
-                for (int i = 0; i < data.Count; i++)
-                    CheckType(data[i]);
+                if (((object[])updates[i])[0] is T obj)
+                {
+                    ((IDictionary<string, object>)upd).Add("id", (string)obj["id"]);
+                    Utils.PopulateExpando(upd, ((object[])updates[i])[1]);
+                }
+                else
+                    new Exception($"Object at index {i} is not the ARMObject class {typeof(T).Name}");
 
-                string id_query = String.Join("|",
-                    (from o in (List<dynamic>)data select o.id).ToArray());
-
-                return await RequestAsync("DELETE", parameters: new { mode = "query", id = id_query });
+                updateBody[i] = upd;
             }
-            else if (data != null)
+
+            var body = new ExpandoObject();
+
+            ((IDictionary<string, object>)body).Add("object", "list");
+            ((IDictionary<string, object>)body).Add("values", updates);
+
+            return await RequestAllAsync(new RequestArgs() { Method = "PUT", Body = body });
+        }
+
+        public List<T> UpdateAll(object[] updates) => UpdateAllAsync(updates).GetAwaiter().GetResult();
+
+        public async Task<T> UpdateAsync(T update)
+        {
+            string id = (string)update["id"];
+
+            var body = new ExpandoObject();
+            Utils.PopulateExpando(body, update);
+
+            return await RequestAsync(new RequestArgs() { Method = "PUT", Parameters = new { mode = "query" }, Body = body }, id);
+        }
+
+        public T Update(T update) => UpdateAsync(update).GetAwaiter().GetResult();
+
+        public async Task<List<T>> DeleteAllAsync(IEnumerable<T> deletes)
+        {
+            if (deletes.Any())
             {
-                if (string.IsNullOrEmpty(data.id))
-                    throw new ArgumentNullException("id cannot be empty");
+                string id_query = string.Join("|", deletes.Select(d => d.Data.id));
 
-                CheckType(data);
-
-                return await RequestAsync("DELETE", id: data.id);
+                return await RequestAllAsync(new RequestArgs() { Method = "DELETE", Parameters = new { mode = "query", id = id_query } });
             }
 
             if (_filters.Count > 0)
-                return await RequestAsync("DELETE", parameters: new { mode = "query" });
+                return await RequestAllAsync(new RequestArgs() { Method = "DELETE", Parameters = new { mode = "query" } });
             else
-                throw new Exception("Invalid delete request");
+                throw new Exception("Must set at least one filter to delete using query mode");
         }
 
-        public dynamic Delete(dynamic data = null) => DeleteAsync(data).GetAwaiter().GetResult();
+        public List<T> DeleteAll(IEnumerable<T> obj) => DeleteAllAsync(obj).GetAwaiter().GetResult();
 
-        [Obsolete]
-        public dynamic delete(dynamic data = null) => Delete(data);
+        public async Task<T> DeleteAsync(T data)
+        {
+            string id = (string)data["id"];
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentNullException("id cannot be empty");
 
-        public ARMRequest FilterBy(params dynamic[] filters)
+            return await RequestAsync(new RequestArgs() { Method = "DELETE" }, id);
+        }
+
+        public T Delete(T obj) => DeleteAsync(obj).GetAwaiter().GetResult();
+
+        public ARMRequest<T> FilterBy(params dynamic[] filters)
         {
             foreach (var filter in filters)
             {
                 if (filter.GetType() == typeof(Filter))
                 {
-                    this._filters.Add(filter.attr, filter.op + filter.val);
+                    _filters.Add(filter.attr, filter.op + filter.val);
+                }
+                else if (filter is Dynamo dynamo)
+                {
+                    foreach (var pi in dynamo.Properties)
+                        _filters.Add(pi.Key, pi.Value);
                 }
                 else
                 {
                     var properties = filter.GetType().GetProperties();
 
                     foreach (var pi in properties)
-                        this._filters.Add(pi.Name, pi.GetValue(filter, null));
+                        _filters.Add(pi.Name, pi.GetValue(filter, null));
                 }
             }
 
             return this;
         }
 
-        [Obsolete]
-        public ARMRequest filter_by(params dynamic[] filters) => FilterBy(filters);
+        public async Task<List<T>> AllAsync() => await RequestAllAsync(new RequestArgs() { Method = "GET" });
 
-        public async Task<dynamic> AllAsync() => await RequestAsync("GET");
+        public List<T> All() => AllAsync().GetAwaiter().GetResult();
 
-        public dynamic All() => AllAsync().GetAwaiter().GetResult();
-
-        [Obsolete]
-        public dynamic all() => All();
-
-        public async Task<dynamic> OneAsync()
+        public async Task<T> OneAsync()
         {
-            var data = await RequestAsync("GET", parameters: new { limit = 1 });
-            if (data.Count == 1)
+            var data = await RequestAllAsync(new RequestArgs() { Method = "GET", Parameters = new { limit = 1 } });
+            if (data.Count() == 1)
             {
-                return data[0];
+                return data.First();
             }
-            else return null;
+            else
+                return null;
         }
 
-        public dynamic One() => OneAsync().GetAwaiter().GetResult();
-
-        [Obsolete]
-        public dynamic one() => One();
-
-        private void CheckType(dynamic obj)
-        {
-
-            if (Utils.IsSubclassOfRawGeneric(typeof(ARMObject<>), obj.GetType()))
-            {
-                if (this.Object == null)
-                    this.Object = (IARMObject)Activator.CreateInstance(obj.GetType());
-                else if (this.Object.GetType() != obj.GetType())
-                    throw new Exception("Bulk create requires all objects to be of the same type");
-            }
-            else if (this.Object == null)
-            {
-                throw new Exception("Bulk create requires ARMObject object types");
-            }
-        }
+        public T One() => OneAsync().GetAwaiter().GetResult();
     }
 }
 

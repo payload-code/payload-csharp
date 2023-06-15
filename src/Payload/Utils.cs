@@ -11,15 +11,8 @@ namespace Payload
 {
     public class Utils
     {
-
-        static public Type GetObjectClass(ARMObject<object> obj)
-        {
-            return GetObjectClass((Dynamo)obj);
-        }
-
         static public Type GetObjectClass(Dynamo obj)
         {
-
             var typelist = from t in Assembly.GetExecutingAssembly().GetTypes()
                            where t.IsClass && t.Namespace == "Payload"
                            select t;
@@ -28,24 +21,23 @@ namespace Payload
 
             foreach (var type in typelist)
             {
-                if (!IsSubclassOfRawGeneric(typeof(ARMObject<>), type))
+                if (!IsSubclassOfRawGeneric(typeof(ARMObjectBase<>), type))
                     continue;
 
-                var obj_template = (IARMObject)Activator.CreateInstance(type);
+                IARMObject obj_template = (IARMObject)Convert.ChangeType(Activator.CreateInstance(type), type);
 
-                if (!obj_template.GetSpec().sobject.Equals(obj["object"]))
+                if (!obj.Properties.ContainsKey("object") || !obj_template.GetSpec().Object.Equals(obj["object"]))
                     continue;
 
-                if (obj_template.GetSpec().GetType().GetProperty("polymorphic") != null)
+                // If the object is polymorphic, check the properties to narrow down the type further
+                if (obj_template.GetSpec().Polymorphic != null)
                 {
                     bool found = true;
-                    var poly = obj_template.GetSpec().polymorphic;
+                    var poly = obj_template.GetSpec().Polymorphic;
 
-                    PropertyInfo[] properties = poly.GetType().GetProperties();
-                    foreach (PropertyInfo pi in properties)
+                    foreach (var pi in poly.Properties)
                     {
-                        if (string.IsNullOrEmpty((string)obj[pi.Name])
-                        || !string.Equals((string)obj[pi.Name], (string)pi.GetValue(poly, null)))
+                        if (string.IsNullOrEmpty((string)obj[pi.Key]) || (string)obj[pi.Key] != (string)pi.Value)
                         {
                             found = false;
                             break;
@@ -54,14 +46,13 @@ namespace Payload
                     if (found)
                     {
                         class_found = type;
-                        break;
                     }
                 }
                 else if (class_found == null)
                     class_found = type;
             }
 
-            return class_found;
+            return class_found ?? typeof(pl.ARMObject);
         }
 
         static public Type GetErrorClass(Dynamo obj, int code)
@@ -208,8 +199,6 @@ namespace Payload
 
         static public IDictionary<string, object> JSONFlatten(IDictionary<string, object> obj, string parent_key, dynamic val)
         {
-
-
             if (val == null && parent_key != null)
             {
                 obj[parent_key] = val;

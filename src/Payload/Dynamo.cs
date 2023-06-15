@@ -11,12 +11,7 @@ namespace Payload
     {
         public Dictionary<string, object> Properties = new Dictionary<string, object>();
 
-        object self;
-
-        public Dynamo()
-        {
-            self = this;
-        }
+        public dynamic Data => this;
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
@@ -31,7 +26,7 @@ namespace Payload
 
         public bool GetMember(string name, MemberTypes type, out object result)
         {
-            var members = self.GetType().GetMember(name,
+            var members = GetType().GetMember(name,
                 BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance);
 
             if (members == null || members.Length == 0 || members[0].MemberType != type)
@@ -40,7 +35,7 @@ namespace Payload
                 return false;
             }
 
-            result = ((PropertyInfo)members[0]).GetValue(self, null);
+            result = ((PropertyInfo)members[0]).GetValue(this, null);
             return true;
         }
 
@@ -56,19 +51,19 @@ namespace Payload
 
         public bool SetMember(string name, MemberTypes type, object value)
         {
-            var members = self.GetType().GetMember(name,
+            var members = GetType().GetMember(name,
                 BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.Instance);
 
             if (members == null || members.Length == 0 || members[0].MemberType != type)
                 return false;
 
-            ((PropertyInfo)members[0]).SetValue(self, value, null);
+            ((PropertyInfo)members[0]).SetValue(this, value, null);
             return true;
         }
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            var members = self.GetType().GetMember(binder.Name,
+            var members = GetType().GetMember(binder.Name,
                 BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance);
 
             if (members == null || members.Length == 0)
@@ -77,9 +72,17 @@ namespace Payload
                 return false;
             }
 
-            result = ((MethodInfo)members[0]).Invoke(self, args);
+            result = ((MethodInfo)members[0]).Invoke(this, args);
             return true;
         }
+
+        public bool HasObject(string key) => Properties.ContainsKey(key);
+
+        public Dynamo GetObject(string key) => (Dynamo)this[key];
+
+        public T GetProperty<T>(string key) => (T)this[key];
+
+        public void SetProperty(string key, dynamic val) => this[key] = val;
 
         public object this[string key]
         {
@@ -101,8 +104,6 @@ namespace Payload
                     Properties[key] = value;
             }
         }
-
-
     }
 }
 
