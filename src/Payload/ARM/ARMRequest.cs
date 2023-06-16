@@ -368,6 +368,26 @@ namespace Payload.ARM
             return this;
         }
 
+        public ARMRequest<T> Offset(int offset)
+        {
+            _filters["offset"] = offset;
+            return this;
+        }
+
+        public ARMRequest<T> Limit(int limit)
+        {
+            _filters["limit"] = limit;
+            return this;
+        }
+
+        public ARMRequest<T> Range(int offset, int end)
+        {
+            Offset(offset);
+            Limit(end - offset);
+
+            return this;
+        }
+
         public async Task<List<T>> AllAsync() => await RequestAllAsync(new RequestArgs() { Method = "GET" });
 
         public ARMRequest<T> Offset(int offset)
