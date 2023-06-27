@@ -297,6 +297,34 @@ namespace Payload
             };
             public PaymentMethod(object obj) : base(obj) { }
             public PaymentMethod() : base() { }
+
+            public bool IsCard(out Card card)
+            {
+                if ((string)this["type"] == "card")
+                {
+                    card = new Card(this);
+                }
+                else
+                {
+                    card = null;
+                }
+
+                return card != null;
+            }
+
+            public bool IsBankAccount(out BankAccount bankAccount)
+            {
+                if ((string)this["type"] == "bank_account")
+                {
+                    bankAccount = new BankAccount(this);
+                }
+                else
+                {
+                    bankAccount = null;
+                }
+
+                return bankAccount != null;
+            }
         }
 
         public class Card : ARMObjectBase<Card>
