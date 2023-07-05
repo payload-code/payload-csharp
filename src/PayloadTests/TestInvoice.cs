@@ -17,7 +17,7 @@ namespace Payload.Tests
             this.processing_account = Fixtures.processing_account();
             this.customer_account = Fixtures.customer_account();
 
-            this.invoice = pl.Invoice.create(new
+            this.invoice = pl.Invoice.Create(new
             {
                 type = "bill",
                 processing_id = processing_account.id,
@@ -41,9 +41,9 @@ namespace Payload.Tests
         public void test_pay_invoice()
         {
 
-            var cust = pl.Customer.create(new { email = "test2@gmail.com", name = "Test Account" });
+            dynamic cust = pl.Customer.Create(new { email = "test2@gmail.com", name = "Test Account" });
 
-            var card_on_file = pl.Card.create(new
+            var card_on_file = pl.Card.Create(new
             {
                 account_id = cust.id,
                 card_number = "4242 4242 4242 4242",
@@ -56,7 +56,7 @@ namespace Payload.Tests
                 }
             });
 
-            var invoice = pl.Invoice.create(new
+            dynamic invoice = pl.Invoice.Create(new
             {
                 due_date = new DateTime(2019, 5, 1),
                 items = new[]{
@@ -70,10 +70,10 @@ namespace Payload.Tests
 
             if (invoice.status != "paid")
             {
-                var payment = pl.Payment.create(new
+                var payment = pl.Payment.Create(new
                 {
                     amount = invoice.amount_due,
-                    customer_id = invoice.customer_id,
+                    invoice.customer_id,
                     allocations = new[]{
                     new pl.PaymentItem(new{
                         invoice_id=invoice.id
@@ -81,7 +81,7 @@ namespace Payload.Tests
                 }
                 });
 
-                var invoice_get = pl.Invoice.get(invoice.id);
+                var invoice_get = pl.Invoice.Get(invoice.id);
 
                 Assert.AreEqual("paid", invoice_get.status);
 
@@ -91,8 +91,8 @@ namespace Payload.Tests
         [Test]
         public void test_invoice_one()
         {
-            Assert.NotNull(pl.Invoice.filter_by(new { type = this.invoice.type }).one());
-            Assert.AreEqual(typeof(pl.Invoice), pl.Invoice.filter_by(new { type = this.invoice.type }).one().GetType());
+            Assert.NotNull(pl.Invoice.FilterBy(new { this.invoice.type }).One());
+            Assert.AreEqual(typeof(pl.Invoice), pl.Invoice.FilterBy(new { this.invoice.type }).One().GetType());
         }
     }
 }

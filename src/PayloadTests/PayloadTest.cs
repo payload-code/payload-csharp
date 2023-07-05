@@ -7,10 +7,10 @@ namespace Payload.Tests
     {
         public static void initAPI()
         {
-            pl.api_key = Environment.GetEnvironmentVariable("API_KEY");
+            pl.ApiKey = Environment.GetEnvironmentVariable("API_KEY");
             string url = Environment.GetEnvironmentVariable("API_URL");
             if (url != null)
-                pl.api_url = url;
+                pl.ApiUrl = url;
         }
     }
 }

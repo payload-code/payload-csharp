@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Payload.ARM;
 
 namespace Payload
@@ -8,220 +10,345 @@ namespace Payload
 
     public static class pl
     {
-
         public class Session
         {
             public const string URL = "https://api.payload.co";
             private string _url = URL;
-            public string api_key { get; set; }
-            public string api_url { get { return _url; } set { _url = value; } }
+            public string ApiKey { get; set; }
+            public string ApiUrl { get { return _url; } set { _url = value; } }
 
             public Session(string api_key)
             {
-                this.api_key = api_key;
+                ApiKey = api_key;
             }
 
-            public dynamic create(dynamic objects)
+            public override bool Equals(object obj)
             {
-                return new ARMRequest(this).create(objects);
+                return obj is Session session &&
+                       ApiKey == session.ApiKey &&
+                       ApiUrl == session.ApiUrl;
             }
 
-            public ARMRequest query<T>()
+            public async Task<List<T>> CreateAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
             {
-                return new ARMRequest(this, typeof(T));
+                return await new ARMRequest<T>(this).CreateAllAsync(objects);
             }
 
-            public dynamic update(dynamic objects)
+            public List<T> CreateAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
             {
-                return new ARMRequest(this).update(objects);
+                return CreateAllAsync(objects).GetAwaiter().GetResult();
             }
 
-            public dynamic delete(dynamic objects)
+            public async Task<T> CreateAsync<T>(T obj) where T : ARMObjectBase<T>
             {
-                return new ARMRequest(this).delete(objects);
+                return await new ARMRequest<T>(this).CreateAsync(obj);
+            }
+
+            public T Create<T>(T obj) where T : ARMObjectBase<T>
+            {
+                return CreateAsync(obj).GetAwaiter().GetResult();
+            }
+
+            public ARMRequest<T> Query<T>() where T : ARMObjectBase<T>
+            {
+                return new ARMRequest<T>(this);
+            }
+
+            public async Task<List<T>> UpdateAllAsync<T>(object[] updates) where T : ARMObjectBase<T>
+            {
+                return await new ARMRequest<T>(this).UpdateAllAsync(updates);
+            }
+
+            public List<T> UpdateAll<T>(object[] updates) where T : ARMObjectBase<T>
+            {
+                return UpdateAllAsync<T>(updates).GetAwaiter().GetResult();
+            }
+
+            public async Task<T> UpdateAsync<T>(T obj) where T : ARMObjectBase<T>
+            {
+                return await new ARMRequest<T>(this).UpdateAsync(obj);
+            }
+
+            public T Update<T>(T obj) where T : ARMObjectBase<T>
+            {
+                return UpdateAsync(obj).GetAwaiter().GetResult();
+            }
+
+            public async Task<List<T>> DeleteAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            {
+                return await new ARMRequest<T>(this).DeleteAllAsync(objects);
+            }
+
+            public List<T> DeleteAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            {
+                return DeleteAllAsync(objects).GetAwaiter().GetResult();
+            }
+
+            public async Task<T> DeleteAsync<T>(T obj) where T : ARMObjectBase<T>
+            {
+                return await new ARMRequest<T>(this).DeleteAsync(obj);
+            }
+
+            public T Delete<T>(T objects) where T : ARMObjectBase<T>
+            {
+                return DeleteAsync(objects).GetAwaiter().GetResult();
             }
         }
 
-        public static string api_key { get { return session.api_key; } set { session.api_key = value; } }
-        public static string api_url { get { return session.api_url; } set { session.api_url = value; } }
-        public static dynamic attr = new Attr(null);
-        public static Session session = new Session(null);
+        public static string ApiKey { get { return DefaultSession.ApiKey; } set { DefaultSession.ApiKey = value; } }
+        public static string ApiUrl { get { return DefaultSession.ApiUrl; } set { DefaultSession.ApiUrl = value; } }
+        public static dynamic Attr = new Attr(null);
+        public static Session DefaultSession = new Session(null);
 
-        public static dynamic create(dynamic objects)
+        public static async Task<List<T>> CreateAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
         {
-            return new ARMRequest(pl.session).create(objects);
+            return await new ARMRequest<T>(DefaultSession).CreateAllAsync(objects);
         }
 
-        public static dynamic update(dynamic objects)
+        public static List<T> CreateAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
         {
-            return new ARMRequest(pl.session).update(objects);
+            return CreateAllAsync(objects).GetAwaiter().GetResult();
         }
 
-        public static dynamic delete(dynamic objects)
+        public static async Task<T> CreateAsync<T>(T obj) where T : ARMObjectBase<T>
         {
-            return new ARMRequest(pl.session).delete(objects);
+            return await new ARMRequest<T>(DefaultSession).CreateAsync(obj);
         }
 
-        public class Account : ARMObject<Account>, IARMObject
+        public static T Create<T>(T obj) where T : ARMObjectBase<T>
         {
-            public override dynamic GetSpec()
+            return CreateAsync(obj).GetAwaiter().GetResult();
+        }
+
+        public static async Task<List<T>> UpdateAllAsync<T>(object[] objects) where T : ARMObjectBase<T>
+        {
+            return await new ARMRequest<T>(DefaultSession).UpdateAllAsync(objects);
+        }
+
+        public static List<T> UpdateAll<T>(object[] objects) where T : ARMObjectBase<T>
+        {
+            return UpdateAllAsync<T>(objects).GetAwaiter().GetResult();
+        }
+
+        public static async Task<T> UpdateAsync<T>(T obj) where T : ARMObjectBase<T>
+        {
+            return await new ARMRequest<T>(DefaultSession).UpdateAsync(obj);
+        }
+
+        public static T Update<T>(T obj) where T : ARMObjectBase<T>
+        {
+            return UpdateAsync(obj).GetAwaiter().GetResult();
+        }
+
+        public static async Task<T> DeleteAsync<T>(T obj) where T : ARMObjectBase<T>
+        {
+            return await new ARMRequest<T>(DefaultSession).DeleteAsync(obj);
+        }
+
+        public static T Delete<T>(T obj) where T : ARMObjectBase<T>
+        {
+            return DeleteAsync(obj).GetAwaiter().GetResult();
+        }
+
+        public class ARMObject : ARMObjectBase<ARMObject>
+        {
+            public ARMObject(object obj) : base(obj) { }
+            public ARMObject() : base() { }
+        }
+
+        public class Account : ARMObjectBase<Account>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "account" };
-            }
+                Object = "account"
+            };
+            public Account(object obj) : base(obj) { }
+            public Account() : base() { }
         }
 
-        public class Customer : ARMObject<Customer>, IARMObject
+        public class Customer : ARMObjectBase<Customer>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "customer" };
-            }
-            public Customer(dynamic obj) { Populate(obj); }
-            public Customer() { Populate(new { }); }
+                Object = "customer"
+            };
+            public Customer(object obj) : base(obj) { }
+            public Customer() : base() { }
 
-            public Payment charge(dynamic obj)
+            public Payment Charge(dynamic obj)
             {
                 dynamic data = new ExpandoObject();
                 Utils.PopulateExpando(data, obj);
                 data.customer_id = this["id"];
-                return Payment.create(data);
+                return Payment.Create(data);
             }
         }
 
-        public class ProcessingAccount : ARMObject<ProcessingAccount>, IARMObject
+        public class ProcessingAccount : ARMObjectBase<ProcessingAccount>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "processing_account" };
-            }
-            public ProcessingAccount(dynamic obj) { Populate(obj); }
-            public ProcessingAccount() { Populate(new { }); }
+                Object = "processing_account"
+            };
+            public ProcessingAccount(object obj) : base(obj) { }
+            public ProcessingAccount() : base() { }
         }
 
-        public class Org : ARMObject<Org>, IARMObject
+        public class Org : ARMObjectBase<Org>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "org", endpoint = "/accounts/orgs" };
-            }
-            public Org(dynamic obj) { Populate(obj); }
-            public Org() { Populate(new { }); }
+                Object = "org"
+            };
+            public Org(object obj) : base(obj) { }
+            public Org() : base() { }
         }
 
-        public class User : ARMObject<User>, IARMObject
+        public class User : ARMObjectBase<User>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "user" };
-            }
-            public User(dynamic obj) { Populate(obj); }
-            public User() { Populate(new { }); }
+                Object = "user"
+            };
+            public User(object obj) : base(obj) { }
+            public User() : base() { }
         }
 
-        public class Transaction : ARMObject<Transaction>, IARMObject
+        public class Transaction : ARMObjectBase<Transaction>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "transaction" };
-            }
-            public Transaction(dynamic obj) { Populate(obj); }
-            public Transaction() { Populate(new { }); }
+                Object = "transaction"
+            };
+            public Transaction(object obj) : base(obj) { }
+            public Transaction() : base() { }
         }
 
-        public class Payment : ARMObject<Payment>, IARMObject
+        public class Payment : ARMObjectBase<Payment>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "transaction", polymorphic = new { type = "payment" } };
-            }
-            public Payment(dynamic obj) { Populate(obj); }
-            public Payment() { Populate(new { }); }
+                Object = "transaction",
+                Polymorphic = new ARMObject(new { type = "payment" })
+            };
+            public Payment(object obj) : base(obj) { }
+            public Payment() : base() { }
 
-            public Refund refund()
+            public Refund Refund()
             {
-                return pl.Refund.select("*", pl.attr.ledger).create(new
+                return Select("*", Attr.ledger).create(new
                 {
                     amount = this["amount"],
                     ledger = new[]{
-                        new pl.Ledger(new{ assoc_transaction_id=this["id"] })
+                        new Ledger(new{ assoc_transaction_id=this["id"] })
                     }
                 });
             }
         }
 
-        public class Refund : ARMObject<Refund>, IARMObject
+        public class Refund : ARMObjectBase<Refund>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "transaction", polymorphic = new { type = "refund" } };
-            }
-            public Refund(dynamic obj) { Populate(obj); }
-            public Refund() { Populate(new { }); }
+                Object = "transaction",
+                Polymorphic = new ARMObject(new { type = "refund" })
+            };
+            public Refund(object obj) : base(obj) { }
+            public Refund() : base() { }
         }
 
-        public class Credit : ARMObject<Credit>, IARMObject
+        public class Credit : ARMObjectBase<Credit>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "transaction", polymorphic = new { type = "credit" } };
-            }
-            public Credit(dynamic obj) { Populate(obj); }
-            public Credit() { Populate(new { }); }
+                Object = "transaction",
+                Polymorphic = new ARMObject(new { type = "credit" })
+            };
+            public Credit(object obj) : base(obj) { }
+            public Credit() : base() { }
         }
 
-        public class Deposit : ARMObject<Deposit>, IARMObject
+        public class Deposit : ARMObjectBase<Deposit>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "transaction", polymorphic = new { type = "deposit" } };
-            }
-            public Deposit(dynamic obj) { Populate(obj); }
-            public Deposit() { Populate(new { }); }
+                Object = "transaction",
+                Polymorphic = new ARMObject(new { type = "deposit" })
+            };
+            public Deposit(object obj) : base(obj) { }
+            public Deposit() : base() { }
         }
 
-        public class Ledger : ARMObject<Ledger>, IARMObject
+        public class Ledger : ARMObjectBase<Ledger>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "transaction_ledger" };
-            }
-            public Ledger(dynamic obj) { Populate(obj); }
-            public Ledger() { Populate(new { }); }
+                Object = "transaction_ledger"
+            };
+            public Ledger(object obj) : base(obj) { }
+            public Ledger() : base() { }
         }
 
-        public class PaymentMethod : ARMObject<PaymentMethod>, IARMObject
+        public class PaymentMethod : ARMObjectBase<PaymentMethod>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "payment_method" };
+                Object = "payment_method"
+            };
+            public PaymentMethod(object obj) : base(obj) { }
+            public PaymentMethod() : base() { }
+
+            public bool IsCard(out Card card)
+            {
+                if ((string)this["type"] == "card")
+                {
+                    card = new Card(this);
+                }
+                else
+                {
+                    card = null;
+                }
+
+                return card != null;
             }
-            public PaymentMethod(dynamic obj) { Populate(obj); }
-            public PaymentMethod() { Populate(new { }); }
+
+            public bool IsBankAccount(out BankAccount bankAccount)
+            {
+                if ((string)this["type"] == "bank_account")
+                {
+                    bankAccount = new BankAccount(this);
+                }
+                else
+                {
+                    bankAccount = null;
+                }
+
+                return bankAccount != null;
+            }
         }
 
-        public class Card : ARMObject<Card>, IARMObject
+        public class Card : ARMObjectBase<Card>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "payment_method", polymorphic = new { type = "card" } };
-            }
-            public Card(dynamic obj) { Populate(obj); }
-            public Card() { Populate(new { }); }
+                Object = "payment_method",
+                Polymorphic = new ARMObject(new { type = "card" })
+            };
+            public Card(object obj) : base(obj) { }
+            public Card() : base() { }
 
             public string card_number
             {
                 get
                 {
-                    return (string)((Dynamo)this["card"])
-                        .Properties["card_number"];
+                    return GetObject("card").GetProperty<string>("card_number");
                 }
                 set
                 {
-                    if (!this.Properties.ContainsKey("card"))
+                    if (!HasObject("card"))
                         this["card"] = new Dynamo();
 
-                    ((Dynamo)this["card"])
-                        .Properties["card_number"] = value;
+                    GetObject("card")["card_number"] = value;
                 }
             }
 
@@ -229,16 +356,14 @@ namespace Payload
             {
                 get
                 {
-                    return (string)((Dynamo)this["card"])
-                        .Properties["card_code"];
+                    return GetObject("card").GetProperty<string>("card_code");
                 }
                 set
                 {
-                    if (!this.Properties.ContainsKey("card"))
+                    if (!HasObject("card"))
                         this["card"] = new Dynamo();
 
-                    ((Dynamo)this["card"])
-                        .Properties["card_code"] = value;
+                    GetObject("card")["card_code"] = value;
                 }
             }
 
@@ -246,45 +371,42 @@ namespace Payload
             {
                 get
                 {
-                    return (string)((Dynamo)this["card"])
-                        .Properties["expiry"];
+                    return GetObject("card").GetProperty<string>("expiry");
                 }
                 set
                 {
-                    if (!this.Properties.ContainsKey("card"))
+                    if (!HasObject("card"))
                         this["card"] = new Dynamo();
 
-                    ((Dynamo)this["card"])
-                        .Properties["expiry"] = value;
+                    GetObject("card")["expiry"] = value;
                 }
             }
 
 
         }
 
-        public class BankAccount : ARMObject<BankAccount>, IARMObject
+        public class BankAccount : ARMObjectBase<BankAccount>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "payment_method", polymorphic = new { type = "bank_account" } };
-            }
-            public BankAccount(dynamic obj) { Populate(obj); }
-            public BankAccount() { Populate(new { }); }
+                Object = "payment_method",
+                Polymorphic = new ARMObject(new { type = "bank_account" })
+            };
+            public BankAccount(object obj) : base(obj) { }
+            public BankAccount() : base() { }
 
             public string account_number
             {
                 get
                 {
-                    return (string)((Dynamo)this["bank_account"])
-                        .Properties["account_number"];
+                    return GetObject("bank_account").GetProperty<string>("account_number");
                 }
                 set
                 {
-                    if (!this.Properties.ContainsKey("bank_account"))
+                    if (!HasObject("bank_account"))
                         this["bank_account"] = new Dynamo();
 
-                    ((Dynamo)this["bank_account"])
-                        .Properties["account_number"] = value;
+                    GetObject("bank_account")["account_number"] = value;
                 }
             }
 
@@ -292,16 +414,14 @@ namespace Payload
             {
                 get
                 {
-                    return (string)((Dynamo)this["bank_account"])
-                        .Properties["routing_number"];
+                    return GetObject("bank_account").GetProperty<string>("routing_number");
                 }
                 set
                 {
-                    if (!this.Properties.ContainsKey("bank_account"))
+                    if (!HasObject("bank_account"))
                         this["bank_account"] = new Dynamo();
 
-                    ((Dynamo)this["bank_account"])
-                        .Properties["routing_number"] = value;
+                    GetObject("bank_account")["routing_number"] = value;
                 }
             }
 
@@ -309,187 +429,187 @@ namespace Payload
             {
                 get
                 {
-                    return (string)((Dynamo)this["bank_account"])
-                        .Properties["account_type"];
+                    return GetObject("bank_account").GetProperty<string>("account_type");
                 }
                 set
                 {
-                    if (!this.Properties.ContainsKey("bank_account"))
+                    if (!HasObject("bank_account"))
                         this["bank_account"] = new Dynamo();
 
-                    ((Dynamo)this["bank_account"])
-                        .Properties["account_type"] = value;
+                    GetObject("bank_account")["account_type"] = value;
                 }
             }
         }
 
-        public class BillingSchedule : ARMObject<BillingSchedule>, IARMObject
+        public class BillingSchedule : ARMObjectBase<BillingSchedule>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "billing_schedule" };
-            }
-            public BillingSchedule(dynamic obj) { Populate(obj); }
-            public BillingSchedule() { Populate(new { }); }
+                Object = "billing_schedule"
+            };
+            public BillingSchedule(object obj) : base(obj) { }
+            public BillingSchedule() : base() { }
         }
 
-        public class BillingCharge : ARMObject<BillingCharge>, IARMObject
+        public class BillingCharge : ARMObjectBase<BillingCharge>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "billing_charge" };
-            }
-            public BillingCharge(dynamic obj) { Populate(obj); }
-            public BillingCharge() { Populate(new { }); }
+                Object = "billing_charge"
+            };
+            public BillingCharge(object obj) : base(obj) { }
+            public BillingCharge() : base() { }
         }
 
-        public class Invoice : ARMObject<Invoice>, IARMObject
+        public class Invoice : ARMObjectBase<Invoice>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "invoice" };
-            }
-            public Invoice(dynamic obj) { Populate(obj); }
-            public Invoice() { Populate(new { }); }
+                Object = "invoice"
+            };
+            public Invoice(object obj) : base(obj) { }
+            public Invoice() : base() { }
         }
 
-        public class LineItem : ARMObject<LineItem>, IARMObject
+        public class LineItem : ARMObjectBase<LineItem>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "line_item" };
-            }
-            public LineItem(dynamic obj) { Populate(obj); }
-            public LineItem() { Populate(new { }); }
+                Object = "line_item"
+            };
+            public LineItem(object obj) : base(obj) { }
+            public LineItem() : base() { }
         }
 
-        public class ChargeItem : ARMObject<ChargeItem>, IARMObject
+        public class ChargeItem : ARMObjectBase<ChargeItem>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "line_item", polymorphic = new { entry_type = "charge" } };
-            }
-            public ChargeItem(dynamic obj) { Populate(obj); }
-            public ChargeItem() { Populate(new { }); }
+                Object = "line_item",
+                Polymorphic = new ARMObject(new { entry_type = "charge" })
+            };
+            public ChargeItem(object obj) : base(obj) { }
+            public ChargeItem() : base() { }
         }
 
-        public class PaymentItem : ARMObject<PaymentItem>, IARMObject
+        public class PaymentItem : ARMObjectBase<PaymentItem>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "line_item", polymorphic = new { entry_type = "payment" } };
-            }
-            public PaymentItem(dynamic obj) { Populate(obj); }
-            public PaymentItem() { Populate(new { }); }
+                Object = "line_item",
+                Polymorphic = new ARMObject(new { entry_type = "payment" })
+            };
+            public PaymentItem(object obj) : base(obj) { }
+            public PaymentItem() : base() { }
         }
 
-        public class Webhook : ARMObject<Webhook>, IARMObject
+        public class Webhook : ARMObjectBase<Webhook>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "webhook" };
-            }
-            public Webhook(dynamic obj) { Populate(obj); }
-            public Webhook() { Populate(new { }); }
+                Object = "webhook"
+            };
+            public Webhook(object obj) : base(obj) { }
+            public Webhook() : base() { }
         }
 
-        public class PaymentLink : ARMObject<PaymentLink>, IARMObject
+        public class PaymentLink : ARMObjectBase<PaymentLink>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "payment_link" };
-            }
-            public PaymentLink(dynamic obj) { Populate(obj); }
-            public PaymentLink() { Populate(new { }); }
+                Object = "payment_link"
+            };
+            public PaymentLink(object obj) : base(obj) { }
+            public PaymentLink() : base() { }
         }
 
-        public class OAuthToken : ARMObject<OAuthToken>, IARMObject
+        public class OAuthToken : ARMObjectBase<OAuthToken>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "oauth_token", endpoint = "/oauth/token" };
-            }
-            public OAuthToken(dynamic obj) { Populate(obj); }
-            public OAuthToken() { Populate(new { }); }
+                Object = "oauth_token"
+            };
+            public OAuthToken(object obj) : base(obj) { }
+            public OAuthToken() : base() { }
         }
 
-        public class PaymentActivation : ARMObject<PaymentActivation>, IARMObject
+        public class PaymentActivation : ARMObjectBase<PaymentActivation>
         {
-            public override dynamic GetSpec()
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                return new { sobject = "payment_activation" };
-            }
-            public PaymentActivation(dynamic obj) { Populate(obj); }
-            public PaymentActivation() { Populate(new { }); }
+                Object = "payment_activation"
+            };
+            public PaymentActivation(object obj) : base(obj) { }
+            public PaymentActivation() : base() { }
         }
 
         public class UnknownResponse : PayloadError
         {
             public UnknownResponse() { }
-            public UnknownResponse(string message, ARMObject<object> response) : base(message, response) { }
+            public UnknownResponse(string message, JSONObject response) : base(message, response) { }
         }
 
         public class BadRequest : PayloadError
         {
             public override int GetCode() { return 400; }
             public BadRequest() { }
-            public BadRequest(string message, ARMObject<object> response) : base(message, response) { }
+            public BadRequest(string message, JSONObject response) : base(message, response) { }
         }
 
         public class InvalidAttributes : PayloadError
         {
             public override int GetCode() { return 400; }
             public InvalidAttributes() { }
-            public InvalidAttributes(string message, ARMObject<object> response) : base(message, response) { }
+            public InvalidAttributes(string message, JSONObject response) : base(message, response) { }
         }
 
         public class TransactionDeclined : PayloadError
         {
             public override int GetCode() { return 400; }
             public TransactionDeclined() { }
-            public TransactionDeclined(string message, ARMObject<object> response) : base(message, response) { }
+            public TransactionDeclined(string message, JSONObject response) : base(message, response) { }
         }
 
         public class Unauthorized : PayloadError
         {
             public override int GetCode() { return 401; }
             public Unauthorized() { }
-            public Unauthorized(string message, ARMObject<object> response) : base(message, response) { }
+            public Unauthorized(string message, JSONObject response) : base(message, response) { }
         }
 
         public class NotPermitted : PayloadError
         {
             public override int GetCode() { return 403; }
             public NotPermitted() { }
-            public NotPermitted(string message, ARMObject<object> response) : base(message, response) { }
+            public NotPermitted(string message, JSONObject response) : base(message, response) { }
         }
 
         public class NotFound : PayloadError
         {
             public override int GetCode() { return 404; }
             public NotFound() { }
-            public NotFound(string message, ARMObject<object> response) : base(message, response) { }
+            public NotFound(string message, JSONObject response) : base(message, response) { }
         }
 
         public class TooManyRequests : PayloadError
         {
             public override int GetCode() { return 429; }
             public TooManyRequests() { }
-            public TooManyRequests(string message, ARMObject<object> response) : base(message, response) { }
+            public TooManyRequests(string message, JSONObject response) : base(message, response) { }
         }
 
         public class InternalServerError : PayloadError
         {
             public override int GetCode() { return 500; }
             public InternalServerError() { }
-            public InternalServerError(string message, ARMObject<object> response) : base(message, response) { }
+            public InternalServerError(string message, JSONObject response) : base(message, response) { }
         }
 
         public class ServiceUnavailable : PayloadError
         {
             public override int GetCode() { return 503; }
             public ServiceUnavailable() { }
-            public ServiceUnavailable(string message, ARMObject<object> response) : base(message, response) { }
+            public ServiceUnavailable(string message, JSONObject response) : base(message, response) { }
         }
     }
 }

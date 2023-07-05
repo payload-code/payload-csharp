@@ -35,23 +35,23 @@ namespace Payload.Tests
         [Test]
         public void test_customer_account_one()
         {
-            Assert.NotNull(pl.Customer.filter_by(new { email = customer_account.email }).one());
-            Assert.AreEqual(typeof(pl.Customer), pl.Customer.filter_by(new { email = customer_account.email }).one().GetType());
+            Assert.NotNull(pl.Customer.FilterBy(new { email = customer_account.email }).One());
+            Assert.AreEqual(typeof(pl.Customer), pl.Customer.FilterBy(new { email = customer_account.email }).One().GetType());
         }
 
         [Test]
         public void test_processing_account_one()
         {
-            Assert.NotNull(pl.ProcessingAccount.filter_by(new { name = processing_account.name }).one());
-            Assert.AreEqual(typeof(pl.ProcessingAccount), pl.ProcessingAccount.filter_by(new { name = processing_account.name }).one().GetType());
+            Assert.NotNull(pl.ProcessingAccount.FilterBy(new { name = processing_account.name }).One());
+            Assert.AreEqual(typeof(pl.ProcessingAccount), pl.ProcessingAccount.FilterBy(new { name = processing_account.name }).One().GetType());
         }
 
         [Test]
         public void test_delete()
         {
-            this.customer_account.delete();
+            this.customer_account.Delete();
             Assert.Throws<pl.NotFound>(
-               () => pl.Account.get(this.customer_account.id));
+               () => pl.Account.Get(this.customer_account.id));
         }
 
 
@@ -61,15 +61,15 @@ namespace Payload.Tests
             var rand_email1 = Fixtures.RandomString(10) + "@example.com";
             var rand_email2 = Fixtures.RandomString(10) + "@example.com";
 
-            var accounts = pl.create(
+            var accounts = pl.CreateAll(
                 new[]{
                new pl.Customer(new{email=rand_email1, name="Matt Perez"}),
                new pl.Customer(new{email=rand_email2, name="Andrea Kearney"})
                 }
             );
 
-            var get_account_1 = pl.Account.filter_by(new { email = rand_email1 }).all()[0];
-            var get_account_2 = pl.Account.filter_by(new { email = rand_email2 }).all()[0];
+            var get_account_1 = pl.Account.FilterBy(new { email = rand_email1 }).All()[0];
+            var get_account_2 = pl.Account.FilterBy(new { email = rand_email2 }).All()[0];
 
             Assert.NotNull(get_account_1);
             Assert.NotNull(get_account_2);
@@ -79,7 +79,7 @@ namespace Payload.Tests
         public void test_get_processing_account()
         {
             Assert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
-            Assert.NotNull(pl.ProcessingAccount.get(this.processing_account.id));
+            Assert.NotNull(pl.ProcessingAccount.Get(this.processing_account.id));
             Assert.AreEqual("pending", this.processing_account.status);
         }
 
@@ -87,16 +87,13 @@ namespace Payload.Tests
         [Test]
         public void test_paging_and_ordering_results()
         {
-            var accounts = pl.create(new
-                []
-                    {
+            dynamic accounts = pl.CreateAll(new[] {
                     new pl.Customer(new {email="account1@example.com", name="Randy Robson"}),
                     new pl.Customer(new {email="account2@example.com", name="Brandy Bobson"}),
-                    new pl.Customer(new {email="account3@example.com", name="Mandy Johnson"}),
-                    }
-            );
+                    new pl.Customer(new {email="account3@example.com", name="Mandy Johnson"})
+            });
 
-            var customers = pl.Customer.filter_by(new { order_by = "created_at", limit = 3, offset = 1 }).all();
+            dynamic customers = pl.Customer.FilterBy(new { order_by = "created_at", limit = 3, offset = 1 }).All();
 
             Assert.True(customers.Count == 3);
             Assert.True(Convert.ToDateTime(customers[0].created_at) <= Convert.ToDateTime(customers[1].created_at));
@@ -110,7 +107,7 @@ namespace Payload.Tests
         [Test]
         public void test_update_customer_account()
         {
-            this.customer_account.update(new { email = "test2@example.com" });
+            this.customer_account.Update(new { email = "test2@example.com" });
 
             Assert.True(this.customer_account.email == "test2@example.com");
         }
@@ -118,21 +115,21 @@ namespace Payload.Tests
 
         public void test_update_mult_acc()
         {
-            var customer_account_1 = pl.Customer.create(new
+            dynamic customer_account_1 = pl.Customer.Create(new
             {
                 name = "Brandy",
                 email = "brandy@example.com"
             });
 
-            var customer_account_2 = pl.Customer.create(new
+            dynamic customer_account_2 = pl.Customer.Create(new
             {
                 name = "Sandy",
                 email = "sandy@example.com"
             });
 
-            pl.update(new object[]{
-                new object[]{ customer_account_1, new { email="matt.perez@newwork.com" } },
-                new object[]{ customer_account_2, new { email="andrea.kearney@newwork.com" } }
+            pl.UpdateAll<pl.Customer>(new object[]{
+                new object[] { customer_account_1, new { email="matt.perez@newwork.com" } },
+                new object[] { customer_account_2, new { email="andrea.kearney@newwork.com" } }
             });
 
             Assert.True(customer_account_1.email == "brandy@example.com");
@@ -143,7 +140,7 @@ namespace Payload.Tests
         public void test_get_customer_account()
         {
             Assert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
-            Assert.NotNull(pl.Customer.get(this.customer_account.id));
+            Assert.NotNull(pl.Customer.Get(this.customer_account.id));
         }
 
 
@@ -151,7 +148,7 @@ namespace Payload.Tests
         [Test]
         public void test_select_cust_attr()
         {
-            var select_customer = pl.Customer.select("id").get(this.customer_account.id);
+            var select_customer = pl.Customer.Select("id").Get(this.customer_account.id);
 
             Assert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
             Assert.True(select_customer.id == this.customer_account.id);

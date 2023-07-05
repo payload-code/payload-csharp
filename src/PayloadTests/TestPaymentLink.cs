@@ -16,7 +16,7 @@ namespace Payload.Tests
         {
             PayloadTestSetup.initAPI();
             this.processing_account = Fixtures.processing_account();
-            this.payment_link = pl.PaymentLink.create(new
+            this.payment_link = pl.PaymentLink.Create(new
             {
                 type = "one_time",
                 description = "Payment Request",
@@ -35,7 +35,7 @@ namespace Payload.Tests
         [Test]
         public void test_payment_link_one()
         {
-            dynamic lnk = pl.PaymentLink.filter_by(new { type = this.payment_link.type }).one();
+            var lnk = pl.PaymentLink.FilterBy(new { type = this.payment_link.type }).One();
             Assert.NotNull(lnk);
             Assert.AreEqual(typeof(pl.PaymentLink), lnk.GetType());
         }
@@ -56,7 +56,7 @@ namespace Payload.Tests
 
             using (FileStream fs = File.Open(path, FileMode.Open))
             {
-                var lnk = pl.PaymentLink.create(new
+                dynamic lnk = pl.PaymentLink.Create(new
                 {
                     type = "one_time",
                     description = "Payment Request",

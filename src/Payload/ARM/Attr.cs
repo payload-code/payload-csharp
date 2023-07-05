@@ -22,7 +22,7 @@ namespace Payload.ARM
 
         public override string ToString()
         {
-            return String.Format("{0}{1}{2}", this.attr, this.op, this.val);
+            return String.Format("{0}{1}{2}", attr, op, val);
         }
     }
 
@@ -41,9 +41,9 @@ namespace Payload.ARM
             this.is_method = is_method;
 
             if (this.parent == null)
-                this.key = this.param;
+                key = this.param;
             else
-                this.key = String.Format("{0}[{1}]", this.parent.key, this.param);
+                key = String.Format("{0}[{1}]", this.parent.key, this.param);
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -60,9 +60,9 @@ namespace Payload.ARM
 
         public override string ToString()
         {
-            if (this.is_method)
-                return String.Format("{0}({1})", this.param, this.parent.key);
-            return this.key;
+            if (is_method)
+                return String.Format("{0}({1})", param, parent.key);
+            return key;
         }
 
         public Filter eq(string val)
@@ -99,6 +99,5 @@ namespace Payload.ARM
         {
             return new Filter(this, val, "?*");
         }
-
     }
 }

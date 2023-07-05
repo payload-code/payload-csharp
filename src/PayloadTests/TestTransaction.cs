@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading.Tasks;
 
 namespace Payload.Tests
 {
@@ -24,7 +24,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            var transaction = pl.Transaction.select("*", "ledger").get(this.card_payment.id);
+            dynamic transaction = pl.Transaction.Select("*", "ledger").Get(this.card_payment.id);
 
             Assert.IsEmpty(transaction.ledger);
         }
@@ -32,16 +32,16 @@ namespace Payload.Tests
         [Test]
         public void test_unified_payout_batching()
         {
-            pl.Refund.create(new
+            pl.Refund.Create(new
             {
                 amount = 10,
                 processing_id = this.processing_account.id,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
-            var transactions = pl.Transaction.select("*", "ledger")
-                .filter_by(new { type = "refund", processing_id = this.processing_account.id })
-                .all();
+            dynamic transactions = pl.Transaction.Select("*", "ledger")
+                .FilterBy(new { type = "refund", processing_id = this.processing_account.id })
+                .All();
 
 
             Assert.True(transactions.Count == 1);
@@ -53,7 +53,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            var transaction = pl.Transaction.get(card_payment.id);
+            var transaction = pl.Transaction.Get(card_payment.id);
 
             Assert.True(transaction.id == card_payment.id);
         }
@@ -63,8 +63,8 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            Assert.NotNull(pl.Transaction.filter_by(new { type = this.card_payment.type }).one());
-            Assert.AreEqual(typeof(pl.Payment), pl.Payment.filter_by(new { amount = this.card_payment.amount }).one().GetType());
+            Assert.NotNull(pl.Transaction.FilterBy(new { type = this.card_payment.type }).One());
+            Assert.AreEqual(typeof(pl.Payment), pl.Payment.FilterBy(new { amount = this.card_payment.amount }).One().GetType());
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            this.card_payment.update(new { status = "voided" });
+            this.card_payment.Update(new { status = "voided" });
             Assert.True(card_payment.status == "voided");
 
         }
@@ -89,7 +89,7 @@ namespace Payload.Tests
         public void test_transactions_not_found()
         {
             Assert.Throws<pl.NotFound>(
-              () => pl.Transaction.get("invalid"));
+              () => pl.Transaction.Get("invalid"));
         }
 
 
@@ -100,22 +100,22 @@ namespace Payload.Tests
             Random random = new Random();
             int randomNumber = random.Next(1, 100);
 
-            var card_payment = pl.Payment.create(new
+            dynamic card_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
                 description = rand_description,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
-            List<dynamic> payments = pl.Payment.filter_by(
-                pl.attr.amount.gt(0),
-                pl.attr.amount.lt(200),
-                pl.attr.description.contains(rand_description),
-                pl.attr.created_at.gt(new DateTime(2019, 2, 1))
-            ).all();
+            List<pl.Payment> payments = pl.Payment.FilterBy(new object[] {
+                pl.Attr.amount.gt(0),
+                pl.Attr.amount.lt(200),
+                pl.Attr.description.contains(rand_description),
+                pl.Attr.created_at.gt(new DateTime(2019, 2, 1))
+            }).All();
 
             Assert.True(payments.Count == 1);
-            Assert.True(payments.ElementAt(0).id == card_payment.id);
+            Assert.True(payments.ElementAt(0).Data.id == card_payment.id);
 
         }
 
@@ -124,7 +124,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            this.card_payment.update(new { status = "voided" });
+            ((pl.Payment)this.card_payment).Update(new { status = "voided" });
 
             Assert.AreEqual("voided", this.card_payment.status);
         }
@@ -134,7 +134,7 @@ namespace Payload.Tests
         {
             this.bank_payment = Fixtures.bank_payment();
 
-            this.bank_payment.update(new { status = "voided" });
+            ((pl.Payment)this.bank_payment).Update(new { status = "voided" });
             Assert.AreEqual("voided", this.bank_payment.status);
 
         }
@@ -144,7 +144,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            var refund = pl.Refund.create(new
+            dynamic refund = pl.Refund.Create(new
             {
                 amount = this.card_payment.amount,
                 ledger = new[] {
@@ -164,7 +164,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            var refund = pl.Refund.create(new
+            dynamic refund = pl.Refund.Create(new
             {
                 amount = 10.0,
                 ledger = new[] {
@@ -182,7 +182,7 @@ namespace Payload.Tests
         [Test]
         public void test_blind_refund_card_payment()
         {
-            var refund = pl.Refund.create(new
+            dynamic refund = pl.Refund.Create(new
             {
                 amount = 10.0,
                 processing_id = this.processing_account.id,
@@ -200,7 +200,7 @@ namespace Payload.Tests
         {
             this.bank_payment = Fixtures.bank_payment();
 
-            var refund = pl.Refund.create(new
+            dynamic refund = pl.Refund.Create(new
             {
                 amount = this.bank_payment.amount,
                 ledger = new[] {
@@ -220,7 +220,7 @@ namespace Payload.Tests
         {
             this.bank_payment = Fixtures.bank_payment();
 
-            var refund = pl.Refund.create(new
+            dynamic refund = pl.Refund.Create(new
             {
                 amount = 10.0,
                 ledger = new[] {
@@ -239,7 +239,7 @@ namespace Payload.Tests
         [Test]
         public void test_convenience_fee()
         {
-            var payment = pl.Payment.select("*", "fee", "conv_fee").create(new
+            dynamic payment = pl.Payment.Select("*", "fee", "conv_fee").Create(new
             {
                 amount = 100,
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })

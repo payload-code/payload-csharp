@@ -10,8 +10,8 @@ namespace Payload
     }
     public class PayloadError : Exception, IPayloadError
     {
-        public ARMObject<object> response;
-        public dynamic details;
+        public JSONObject Response;
+        public dynamic Details;
 
         public virtual int GetCode()
         {
@@ -20,15 +20,15 @@ namespace Payload
 
         public PayloadError() { }
 
-        public PayloadError(string message, ARMObject<object> response) : base(message)
+        public PayloadError(string message, JSONObject response) : base(message)
         {
-            this.response = response;
-            this.details = this.response["details"];
+            Response = response;
+            Details = Response["details"];
         }
 
         public string json()
         {
-            return this.response.json();
+            return Response.Json();
         }
     }
 }
