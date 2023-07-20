@@ -16,9 +16,9 @@ namespace Payload.Tests
         }
 
         [Test]
-        public void test_create_client_key()
+        public void test_create_client_token()
         {
-            var client_key = pl.ClientKey.Create();
+            var client_key = pl.ClientToken.Create();
             Assert.True(client_key.status == 'active');
             Assert.True(client_key.type == 'client');
 
