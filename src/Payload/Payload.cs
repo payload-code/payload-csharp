@@ -167,15 +167,15 @@ namespace Payload
             public AccessToken() : base() { }
         }
 
-        public class ClientKey : ARMObjectBase<ClientKey>
+        public class ClientToken : ARMObjectBase<ClientToken>
         {
             public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
                 Object = "access_token",
                 Polymorphic = new ARMObject(new { type = "client" })
             };
-            public ClientKey(object obj) : base(obj) { }
-            public ClientKey() : base() { }
+            public ClientToken(object obj) : base(obj) { }
+            public ClientToken() : base() { }
         }
 
         public class Account : ARMObjectBase<Account>
