@@ -316,7 +316,7 @@ namespace Payload.ARM
             return await new ARMRequest<T>(session).CreateAsync(obj);
         }
 
-        public static T Create(dynamic obj, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
+        public static T Create(dynamic obj = null, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
 
         public static async Task<List<T>> UpdateAllAsync(object[] updates, pl.Session session = null)
         {

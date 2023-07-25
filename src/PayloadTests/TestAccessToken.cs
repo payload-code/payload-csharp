@@ -18,9 +18,9 @@ namespace Payload.Tests
         [Test]
         public void test_create_client_token()
         {
-            var client_token = pl.ClientToken.Create();
-            Assert.True(client_token.status == 'active');
-            Assert.True(client_token.type == 'client');
+            dynamic client_token = pl.ClientToken.Create();
+            Assert.AreEqual(client_token.status, "active");
+            Assert.AreEqual(client_token.type, "client");
 
         }
 
