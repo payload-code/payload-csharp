@@ -275,7 +275,7 @@ namespace Payload.ARM
         {
             var body = new ExpandoObject();
 
-            Utils.PopulateExpando(body, data);
+            Utils.PopulateExpando(body, data ?? new { });
 
             if (Spec.Polymorphic != null)
                 Utils.PopulateExpando(body, Spec.Polymorphic);
@@ -414,41 +414,6 @@ namespace Payload.ARM
         }
 
         public async Task<List<T>> AllAsync() => await RequestAllAsync(RequestMethods.GET, GetRoute());
-
-        public ARMRequest<T> Offset(int offset)
-        {
-            _filters["offset"] = offset;
-            return this;
-        }
-
-        public ARMRequest<T> Limit(int limit)
-        {
-            _filters["limit"] = limit;
-            return this;
-        }
-
-        public ARMRequest<T> Range(int offset, int end)
-        {
-            Offset(offset);
-            Limit(end - offset);
-
-            return this;
-        }
-
-        public async Task<List<T>> AllAsync() => await RequestAllAsync(new RequestArgs() { Method = "GET" });
-
-        public List<T> All() => AllAsync().GetAwaiter().GetResult();
-
-        public async Task<T> OneAsync()
-        {
-            var data = await RequestAllAsync(new RequestArgs() { Method = "GET", Parameters = new { limit = 1 } });
-            if (data.Count() == 1)
-            {
-                return data.First();
-            }
-            else
-                return null;
-        }
 
         public List<T> All() => AllAsync().GetAwaiter().GetResult();
 

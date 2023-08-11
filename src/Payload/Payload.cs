@@ -29,15 +29,19 @@ namespace Payload
                        ApiUrl == session.ApiUrl;
             }
 
-            public async Task<List<T>> CreateAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> CreateAllAsync<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return await new ARMRequest<T>(this).CreateAllAsync(objects);
             }
 
-            public List<T> CreateAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> CreateAllAsync<T>(List<T> objects) where T : ARMObjectBase<T> => await CreateAllAsync(objects.ToArray());
+
+            public List<T> CreateAll<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return CreateAllAsync(objects).GetAwaiter().GetResult();
             }
+
+            public List<T> CreateAll<T>(List<T> objects) where T : ARMObjectBase<T> => CreateAllAsync(objects.ToArray()).GetAwaiter().GetResult();
 
             public async Task<T> CreateAsync<T>(T obj) where T : ARMObjectBase<T>
             {
@@ -69,7 +73,7 @@ namespace Payload
                 return await new ARMRequest<T>(this).DeleteAllAsync(objects);
             }
 
-            public async Task<List<T>> DeleteAllAsync<T>(List<T> objects) where T : ARMObjectBase<T> => await DeleteAllAsync(objects.ToList());
+            public async Task<List<T>> DeleteAllAsync<T>(List<T> objects) where T : ARMObjectBase<T> => await DeleteAllAsync(objects.ToArray());
 
             public List<T> DeleteAll<T>(params T[] objects) where T : ARMObjectBase<T>
             {
