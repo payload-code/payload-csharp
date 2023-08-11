@@ -33,7 +33,7 @@ keys are accessible from within the Payload dashboard.
 
 ```csharp
 using Payload;
-pl.api_key = "secret_key_3bW9JMZtPVDOfFNzwRdfE";
+pl.ApiKey = "secret_key_3bW9JMZtPVDOfFNzwRdfE";
 ```
 
 ### Creating an Object
@@ -43,18 +43,21 @@ creating a customer using the `pl.Customer` object.
 
 ```csharp
 // Create a Customer
-var customer = pl.Customer.create(new {
-    email="matt.perez@example.com",
-    name="Matt Perez"
+var customer = await pl.Customer.CreateAsync(new
+{
+    email = "matt.perez@example.com",
+    name = "Matt Perez"
 });
 ```
 
 ```csharp
 // Create a Payment
-var payment = pl.Payment.create(new {
-    amount=100.0,
-    payment_method=new pl.Card(new{
-        card_number="4242 4242 4242 4242"
+var payment = await pl.Payment.CreateAsync(new
+{
+    amount = 100.0,
+    payment_method = new pl.Card(new
+    {
+        card_number = "4242 4242 4242 4242"
     })
 });
 ```
@@ -64,17 +67,21 @@ var payment = pl.Payment.create(new {
 Object attributes are accessible through both dot and bracket notation.
 
 ```csharp
+// Dynamic
 Console.WriteLine(customer.name);
-Console.WriteLine(customer["email"]);
+
+// Compile-time checking
+Console.WriteLine(customer["email"]); 
+Console.WriteLine(customer.Data.email);
 ```
 
 ### Updating an Object
 
-Updating an object is a simple call to the `update` object method.
+Updating an object is a simple call to the `Update` object method.
 
 ```csharp
 // Updating a customer's email
-customer.update(new { email="matt.perez@newwork.com" });
+await customer.UpdateAsync(new { email = "matt.perez@newwork.com" });
 ```
 
 ### Selecting Objects
@@ -83,21 +90,23 @@ Objects can be selected using any of their attributes.
 
 ```csharp
 // Select a customer by email
-var customers = pl.Customer.filter_by(new {
-    email="matt.perez@example.com"
-});
+var customers = await pl.Customer
+    .FilterBy(new { email = "matt.perez@example.com" })
+    .OneAsync();
 ```
 
-Use the `pl.attr` attribute helper
-interface to write powerful queries with a little extra syntax sugar.
+Use the `pl.Attr` attribute helper interface to write powerful
+queries with a little extra syntax sugar.
 
 ```csharp
-var payments = pl.Payment.filter_by(
-    pl.attr.amount.gt(100),
-    pl.attr.amount.lt(200),
-    pl.attr.description.contains("Test"),
-    pl.attr.created_at.gt(new DateTime(2019,2,1))
-).all();
+var payments = await pl.Payment
+    .FilterBy(
+        pl.attr.amount.gt(100),
+        pl.attr.amount.lt(200),
+        pl.attr.description.contains("Test"),
+        pl.attr.created_at.gt(new DateTime(2019,2,1))
+    )
+    .AllAsync();
 ```
 
 ### Testing the Payload C# Library
