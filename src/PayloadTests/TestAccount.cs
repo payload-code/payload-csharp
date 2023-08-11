@@ -115,25 +115,25 @@ namespace Payload.Tests
 
         public void test_update_mult_acc()
         {
-            dynamic customer_account_1 = pl.Customer.Create(new
+            var customer_account_1 = pl.Customer.Create(new
             {
                 name = "Brandy",
                 email = "brandy@example.com"
             });
 
-            dynamic customer_account_2 = pl.Customer.Create(new
+            var customer_account_2 = pl.Customer.Create(new
             {
                 name = "Sandy",
                 email = "sandy@example.com"
             });
 
-            pl.UpdateAll<pl.Customer>(new object[]{
-                new object[] { customer_account_1, new { email="matt.perez@newwork.com" } },
-                new object[] { customer_account_2, new { email="andrea.kearney@newwork.com" } }
-            });
+            pl.UpdateAll(
+                (customer_account_1, new { email="matt.perez@newwork.com" }),
+                (customer_account_2, new { email="andrea.kearney@newwork.com" })
+            );
 
-            Assert.True(customer_account_1.email == "brandy@example.com");
-            Assert.True(customer_account_2.email == "sandy@example.com");
+            Assert.True(customer_account_1.Data.email == "brandy@example.com");
+            Assert.True(customer_account_2.Data.email == "sandy@example.com");
         }
 
         [Test]

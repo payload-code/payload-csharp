@@ -54,35 +54,29 @@ namespace Payload
                 return new ARMRequest<T>(this);
             }
 
-            public async Task<List<T>> UpdateAllAsync<T>(object[] updates) where T : ARMObjectBase<T>
+            public async Task<List<T>> UpdateAllAsync<T>((T, object)[] updates) where T : ARMObjectBase<T>
             {
                 return await new ARMRequest<T>(this).UpdateAllAsync(updates);
             }
 
-            public List<T> UpdateAll<T>(object[] updates) where T : ARMObjectBase<T>
+            public List<T> UpdateAll<T>((T, object)[] updates) where T : ARMObjectBase<T>
             {
                 return UpdateAllAsync<T>(updates).GetAwaiter().GetResult();
             }
 
-            public async Task<T> UpdateAsync<T>(T obj) where T : ARMObjectBase<T>
-            {
-                return await new ARMRequest<T>(this).UpdateAsync(obj);
-            }
-
-            public T Update<T>(T obj) where T : ARMObjectBase<T>
-            {
-                return UpdateAsync(obj).GetAwaiter().GetResult();
-            }
-
-            public async Task<List<T>> DeleteAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> DeleteAllAsync<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return await new ARMRequest<T>(this).DeleteAllAsync(objects);
             }
 
-            public List<T> DeleteAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> DeleteAllAsync<T>(List<T> objects) where T : ARMObjectBase<T> => await DeleteAllAsync(objects.ToList());
+
+            public List<T> DeleteAll<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return DeleteAllAsync(objects).GetAwaiter().GetResult();
             }
+
+            public List<T> DeleteAll<T>(List<T> objects) where T : ARMObjectBase<T> => DeleteAllAsync(objects.ToArray()).GetAwaiter().GetResult();
 
             public async Task<T> DeleteAsync<T>(T obj) where T : ARMObjectBase<T>
             {
@@ -120,24 +114,14 @@ namespace Payload
             return CreateAsync(obj).GetAwaiter().GetResult();
         }
 
-        public static async Task<List<T>> UpdateAllAsync<T>(object[] objects) where T : ARMObjectBase<T>
+        public static async Task<List<T>> UpdateAllAsync<T>((T, object)[] objects) where T : ARMObjectBase<T>
         {
             return await new ARMRequest<T>(DefaultSession).UpdateAllAsync(objects);
         }
 
-        public static List<T> UpdateAll<T>(object[] objects) where T : ARMObjectBase<T>
+        public static List<T> UpdateAll<T>(params (T, object)[] objects) where T : ARMObjectBase<T>
         {
-            return UpdateAllAsync<T>(objects).GetAwaiter().GetResult();
-        }
-
-        public static async Task<T> UpdateAsync<T>(T obj) where T : ARMObjectBase<T>
-        {
-            return await new ARMRequest<T>(DefaultSession).UpdateAsync(obj);
-        }
-
-        public static T Update<T>(T obj) where T : ARMObjectBase<T>
-        {
-            return UpdateAsync(obj).GetAwaiter().GetResult();
+            return UpdateAllAsync(objects).GetAwaiter().GetResult();
         }
 
         public static async Task<T> DeleteAsync<T>(T obj) where T : ARMObjectBase<T>

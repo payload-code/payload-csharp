@@ -243,21 +243,27 @@ namespace Payload.ARM
             var body = new ExpandoObject();
             Utils.PopulateExpando(body, update);
 
-            return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "PUT", Body = body }, (string)this["id"]);
+            var req = new ARMRequest<T>(session);
+
+            return await req.RequestAsync(RequestMethods.PUT, req.GetRoute((string)this["id"]), body);
         }
 
         public T Update(object update) => UpdateAsync(update).GetAwaiter().GetResult();
 
         public async Task<T> DeleteAsync()
         {
-            return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "DELETE" }, (string)this["id"]);
+            var req = new ARMRequest<T>(session);
+
+            return await req.RequestAsync(RequestMethods.DELETE, req.GetRoute((string)this["id"]));
         }
 
         public T Delete() => DeleteAsync().GetAwaiter().GetResult();
 
         public static async Task<T> GetAsync(string id, pl.Session session = null)
         {
-            return await new ARMRequest<T>(session).RequestAsync(new RequestArgs() { Method = "GET" }, id);
+            var req = new ARMRequest<T>(session);
+
+            return await req.RequestAsync(RequestMethods.GET, req.GetRoute(id));
         }
 
         public static T Get(string id, pl.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
@@ -288,9 +294,6 @@ namespace Payload.ARM
             foreach (var attr in attrs)
                 req = req.Select(attr);
 
-            if (req.Spec.Polymorphic != null)
-                req = req.FilterBy(req.Spec.Polymorphic);
-
             return req;
         }
 
@@ -318,12 +321,12 @@ namespace Payload.ARM
 
         public static T Create(dynamic obj, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
 
-        public static async Task<List<T>> UpdateAllAsync(object[] updates, pl.Session session = null)
+        public static async Task<List<T>> UpdateAllAsync((T, object)[] updates, pl.Session session = null)
         {
             return await new ARMRequest<T>(session).UpdateAllAsync(updates.ToArray());
         }
 
-        public static List<T> UpdateAll(object[] updates, pl.Session session = null) => UpdateAllAsync(updates, session).GetAwaiter().GetResult();
+        public static List<T> UpdateAll((T, object)[] updates, pl.Session session = null) => UpdateAllAsync(updates, session).GetAwaiter().GetResult();
 
         public static async Task<List<T>> DeleteAllAsync(List<T> objects, pl.Session session = null)
         {
