@@ -116,7 +116,6 @@ namespace Payload.Tests
 
             Assert.True(payments.Count == 1);
             Assert.True(payments.ElementAt(0).Data.id == card_payment.id);
-
         }
 
         [Test]
