@@ -8,9 +8,9 @@ using Payload.ARM;
 namespace Payload
 {
 
-    public static class pl
+    public static partial class pl
     {
-        public class Session
+        public partial class Session
         {
             public const string URL = "https://api.payload.co";
             private string _url = URL;
@@ -53,9 +53,9 @@ namespace Payload
                 return CreateAsync(obj).GetAwaiter().GetResult();
             }
 
-            public ARMRequest<T> Query<T>() where T : ARMObjectBase<T>
+            public ARMRequest<T> Select<T>(params object[] fields) where T : ARMObjectBase<T>
             {
-                return new ARMRequest<T>(this);
+                return new ARMRequest<T>(this).Select(fields);
             }
 
             public async Task<List<T>> UpdateAllAsync<T>((T, object)[] updates) where T : ARMObjectBase<T>
@@ -90,6 +90,15 @@ namespace Payload
             public T Delete<T>(T objects) where T : ARMObjectBase<T>
             {
                 return DeleteAsync(objects).GetAwaiter().GetResult();
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -1954838531;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_url);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiKey);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiUrl);
+                return hashCode;
             }
         }
 
@@ -143,7 +152,6 @@ namespace Payload
             public ARMObject(object obj) : base(obj) { }
             public ARMObject() : base() { }
         }
-
 
         public class AccessToken : ARMObjectBase<AccessToken>
         {
