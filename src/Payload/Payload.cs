@@ -8,9 +8,9 @@ using Payload.ARM;
 namespace Payload
 {
 
-    public static class pl
+    public static partial class pl
     {
-        public class Session
+        public partial class Session
         {
             public const string URL = "https://api.payload.co";
             private string _url = URL;
@@ -29,15 +29,19 @@ namespace Payload
                        ApiUrl == session.ApiUrl;
             }
 
-            public async Task<List<T>> CreateAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> CreateAllAsync<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return await new ARMRequest<T>(this).CreateAllAsync(objects);
             }
 
-            public List<T> CreateAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> CreateAllAsync<T>(List<T> objects) where T : ARMObjectBase<T> => await CreateAllAsync(objects.ToArray());
+
+            public List<T> CreateAll<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return CreateAllAsync(objects).GetAwaiter().GetResult();
             }
+
+            public List<T> CreateAll<T>(List<T> objects) where T : ARMObjectBase<T> => CreateAllAsync(objects.ToArray()).GetAwaiter().GetResult();
 
             public async Task<T> CreateAsync<T>(T obj) where T : ARMObjectBase<T>
             {
@@ -49,40 +53,34 @@ namespace Payload
                 return CreateAsync(obj).GetAwaiter().GetResult();
             }
 
-            public ARMRequest<T> Query<T>() where T : ARMObjectBase<T>
+            public ARMRequest<T> Select<T>(params object[] fields) where T : ARMObjectBase<T>
             {
-                return new ARMRequest<T>(this);
+                return new ARMRequest<T>(this).Select(fields);
             }
 
-            public async Task<List<T>> UpdateAllAsync<T>(object[] updates) where T : ARMObjectBase<T>
+            public async Task<List<T>> UpdateAllAsync<T>((T, object)[] updates) where T : ARMObjectBase<T>
             {
                 return await new ARMRequest<T>(this).UpdateAllAsync(updates);
             }
 
-            public List<T> UpdateAll<T>(object[] updates) where T : ARMObjectBase<T>
+            public List<T> UpdateAll<T>((T, object)[] updates) where T : ARMObjectBase<T>
             {
                 return UpdateAllAsync<T>(updates).GetAwaiter().GetResult();
             }
 
-            public async Task<T> UpdateAsync<T>(T obj) where T : ARMObjectBase<T>
-            {
-                return await new ARMRequest<T>(this).UpdateAsync(obj);
-            }
-
-            public T Update<T>(T obj) where T : ARMObjectBase<T>
-            {
-                return UpdateAsync(obj).GetAwaiter().GetResult();
-            }
-
-            public async Task<List<T>> DeleteAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> DeleteAllAsync<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return await new ARMRequest<T>(this).DeleteAllAsync(objects);
             }
 
-            public List<T> DeleteAll<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
+            public async Task<List<T>> DeleteAllAsync<T>(List<T> objects) where T : ARMObjectBase<T> => await DeleteAllAsync(objects.ToArray());
+
+            public List<T> DeleteAll<T>(params T[] objects) where T : ARMObjectBase<T>
             {
                 return DeleteAllAsync(objects).GetAwaiter().GetResult();
             }
+
+            public List<T> DeleteAll<T>(List<T> objects) where T : ARMObjectBase<T> => DeleteAllAsync(objects.ToArray()).GetAwaiter().GetResult();
 
             public async Task<T> DeleteAsync<T>(T obj) where T : ARMObjectBase<T>
             {
@@ -92,6 +90,15 @@ namespace Payload
             public T Delete<T>(T objects) where T : ARMObjectBase<T>
             {
                 return DeleteAsync(objects).GetAwaiter().GetResult();
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -1954838531;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_url);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiKey);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiUrl);
+                return hashCode;
             }
         }
 
@@ -120,24 +127,14 @@ namespace Payload
             return CreateAsync(obj).GetAwaiter().GetResult();
         }
 
-        public static async Task<List<T>> UpdateAllAsync<T>(object[] objects) where T : ARMObjectBase<T>
+        public static async Task<List<T>> UpdateAllAsync<T>((T, object)[] objects) where T : ARMObjectBase<T>
         {
             return await new ARMRequest<T>(DefaultSession).UpdateAllAsync(objects);
         }
 
-        public static List<T> UpdateAll<T>(object[] objects) where T : ARMObjectBase<T>
+        public static List<T> UpdateAll<T>(params (T, object)[] objects) where T : ARMObjectBase<T>
         {
-            return UpdateAllAsync<T>(objects).GetAwaiter().GetResult();
-        }
-
-        public static async Task<T> UpdateAsync<T>(T obj) where T : ARMObjectBase<T>
-        {
-            return await new ARMRequest<T>(DefaultSession).UpdateAsync(obj);
-        }
-
-        public static T Update<T>(T obj) where T : ARMObjectBase<T>
-        {
-            return UpdateAsync(obj).GetAwaiter().GetResult();
+            return UpdateAllAsync(objects).GetAwaiter().GetResult();
         }
 
         public static async Task<T> DeleteAsync<T>(T obj) where T : ARMObjectBase<T>
@@ -155,7 +152,6 @@ namespace Payload
             public ARMObject(object obj) : base(obj) { }
             public ARMObject() : base() { }
         }
-
 
         public class AccessToken : ARMObjectBase<AccessToken>
         {

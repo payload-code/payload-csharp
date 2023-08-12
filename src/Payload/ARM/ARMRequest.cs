@@ -12,15 +12,11 @@ using Payload;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Collections;
 
 namespace Payload.ARM
 {
-    public class RequestArgs
-    {
-        public string Method { get; set; }
-        public object Parameters { get; set; }
-        public ExpandoObject Body { get; set; }
-    }
+    public enum RequestMethods { GET, POST, PUT, DELETE, PATCH }
 
     public class ARMRequest<T> where T : ARMObjectBase<T>
     {
@@ -28,7 +24,7 @@ namespace Payload.ARM
         public static bool DEBUG = false;
 
         public ARMObjectSpec Spec { get; set; }
-        public Dictionary<string, dynamic> _filters;
+        public List<(string, object)> _filters;
         public List<dynamic> _attrs;
         public List<object> _group_by;
         private pl.Session session;
@@ -38,42 +34,57 @@ namespace Payload.ARM
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public ARMRequest(pl.Session session = null)
+        private void Init(pl.Session session = null)
         {
             var obj = (T)Activator.CreateInstance(typeof(T));
             Spec = obj.GetSpec();
-            _filters = new Dictionary<string, dynamic>();
-            _attrs = new List<dynamic>();
+            _filters = new List<(string, object)>();
+            _attrs = new List<object>();
             _group_by = new List<object>();
             this.session = session != null ? session : pl.DefaultSession;
         }
 
-        private async Task<JSONObject> ExecuteRequestAsync(RequestArgs args, string id = null)
+        public ARMRequest()
         {
-            var method = args.Method;
-            var parameters = args.Parameters;
-            var json = args.Body;
+            Init();
+        }
 
-            var endpoint = Spec.Endpoint != null ? Spec.Endpoint : "/" + Spec.Object + "s";
+        public ARMRequest(pl.Session session)
+        {
+            Init(session);
+        }
+
+        public string GetRoute(string id = null)
+        {
+            var route = Spec.Endpoint != null ? Spec.Endpoint : "/" + Spec.Object + "s";
             if (!string.IsNullOrEmpty(id))
-                endpoint += "/" + id;
+                route += "/" + id;
 
             for (int i = 0; i < _attrs.Count; i++)
-                _filters.Add("fields[" + i.ToString() + "]", (string)_attrs[i]);
+                _filters.Add(("fields[" + i.ToString() + "]", (string)_attrs[i]));
 
-            if (_filters.Count > 0 || parameters != null)
-                endpoint += "?";
+            if (_filters.Count > 0 || Spec.Polymorphic != null)
+                route += "?";
 
             if (_filters.Count > 0)
             {
-                endpoint += Utils.ToQueryString(_filters);
-                if (parameters != null)
-                    endpoint += "&";
+                route += Utils.ToQueryString(_filters);
             }
 
-            if (parameters != null)
-                endpoint += Utils.ToQueryString(parameters);
+            if (Spec.Polymorphic != null)
+            {
+                route += "&";
 
+                var polyObj = new ExpandoObject();
+                Utils.PopulateExpando(polyObj, Spec.Polymorphic);
+                route += Utils.ToQueryString(polyObj.Select(p => (p.Key, p.Value)));
+            }
+
+            return route;
+        }
+
+        public virtual async Task<JSONObject> ExecuteRequestAsync(RequestMethods method, string route, ExpandoObject body = null)
+        {
             using (var http = new HttpClient())
             {
                 string _auth = string.Concat(session.ApiKey, ":");
@@ -85,10 +96,10 @@ namespace Payload.ARM
                    new MediaTypeWithQualityHeaderValue("application/json"));
 
                 HttpContent content;
-                if (json != null)
+                if (body != null)
                 {
                     var use_multipart = false;
-                    var data = Utils.JSONFlatten(json);
+                    var data = Utils.JSONFlatten(body);
                     foreach (var item in data)
                     {
                         if (item.Value is FileStream)
@@ -135,7 +146,7 @@ namespace Payload.ARM
                     else
                     {
                         string post_data = JsonConvert.SerializeObject(
-                            json, Formatting.None, jsonsettings);
+                            body, Formatting.None, jsonsettings);
 
                         var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(post_data);
 
@@ -154,7 +165,7 @@ namespace Payload.ARM
                     content = null;
                 }
 
-                var response = await http.SendAsync(new HttpRequestMessage(new HttpMethod(method), session.ApiUrl + endpoint) { Content = content });
+                var response = await http.SendAsync(new HttpRequestMessage(new HttpMethod(method.ToString()), session.ApiUrl + route) { Content = content });
 
                 string response_value = await response.Content.ReadAsStringAsync();
 
@@ -180,9 +191,9 @@ namespace Payload.ARM
             }
         }
 
-        public async Task<List<T>> RequestAllAsync(RequestArgs args)
+        public async Task<List<T>> RequestAllAsync(RequestMethods method, string route, ExpandoObject body = null)
         {
-            var obj = await ExecuteRequestAsync(args);
+            var obj = await ExecuteRequestAsync(method, route, body);
 
             var return_list = new List<T>();
 
@@ -198,9 +209,9 @@ namespace Payload.ARM
             return return_list;
         }
 
-        public async Task<T> RequestAsync(RequestArgs args, string id = null)
+        public async Task<T> RequestAsync(RequestMethods method, string route, ExpandoObject body = null)
         {
-            var obj = await ExecuteRequestAsync(args, id);
+            var obj = await ExecuteRequestAsync(method, route, body);
 
             T result = (T)Activator.CreateInstance(typeof(T), obj);
 
@@ -224,15 +235,15 @@ namespace Payload.ARM
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException("id cannot be empty");
-            return await RequestAsync(new RequestArgs() { Method = "GET" }, id);
+            return await RequestAsync(RequestMethods.GET, GetRoute(id));
         }
 
         public T Get(string id) => GetAsync(id).GetAwaiter().GetResult();
 
-        public ARMRequest<T> Select(params dynamic[] attrs)
+        public ARMRequest<T> Select(params object[] fields)
         {
-            foreach (var attr in attrs)
-                _attrs.Add(attr.ToString());
+            _attrs.AddRange(fields.Select(v => v.ToString()));
+
             return this;
         }
 
@@ -255,8 +266,7 @@ namespace Payload.ARM
             ((IDictionary<string, object>)body).Add("object", "list");
             ((IDictionary<string, object>)body).Add("values", list);
 
-
-            return await RequestAllAsync(new RequestArgs() { Method = "POST", Body = body });
+            return await RequestAllAsync(RequestMethods.POST, GetRoute(), body);
         }
 
         public List<T> CreateAll(IEnumerable<object> objects) => CreateAllAsync(objects).GetAwaiter().GetResult();
@@ -265,72 +275,84 @@ namespace Payload.ARM
         {
             var body = new ExpandoObject();
 
-            Utils.PopulateExpando(body, data);
+            Utils.PopulateExpando(body, data ?? new { });
 
             if (Spec.Polymorphic != null)
                 Utils.PopulateExpando(body, Spec.Polymorphic);
 
-            return await RequestAsync(new RequestArgs() { Method = "POST", Body = body });
+            return await RequestAsync(RequestMethods.POST, GetRoute(), body);
         }
 
         public T Create(object data) => CreateAsync(data).GetAwaiter().GetResult();
 
-        public async Task<List<T>> UpdateAllAsync(object[] updates)
+        public async Task<List<T>> UpdateAllAsync((T, object)[] updates)
         {
-            var updateBody = new List<ExpandoObject>();
-            for (int i = 0; i < updates.Count(); i++)
+            var values = new List<ExpandoObject>();
+            foreach (var update in updates)
             {
-                var upd = new ExpandoObject();
+                var updateBody = new ExpandoObject();
 
-                if (((object[])updates[i])[0] is T obj)
-                {
-                    ((IDictionary<string, object>)upd).Add("id", (string)obj["id"]);
-                    Utils.PopulateExpando(upd, ((object[])updates[i])[1]);
-                }
-                else
-                    new Exception($"Object at index {i} is not the ARMObject class {typeof(T).Name}");
+                ((IDictionary<string, object>)updateBody).Add("id", (string)update.Item1["id"]);
+                Utils.PopulateExpando(updateBody, update.Item2);
 
-                updateBody[i] = upd;
+                values.Add(updateBody);
             }
 
             var body = new ExpandoObject();
 
             ((IDictionary<string, object>)body).Add("object", "list");
-            ((IDictionary<string, object>)body).Add("values", updates);
+            ((IDictionary<string, object>)body).Add("values", values);
 
-            return await RequestAllAsync(new RequestArgs() { Method = "PUT", Body = body });
+            return await RequestAllAsync(RequestMethods.PUT, GetRoute(), body);
         }
 
-        public List<T> UpdateAll(object[] updates) => UpdateAllAsync(updates).GetAwaiter().GetResult();
+        public List<T> UpdateAll(params (T, object)[] updates) => UpdateAllAsync(updates).GetAwaiter().GetResult();
 
-        public async Task<T> UpdateAsync(T update)
+        public async Task<List<T>> QueryUpdateAsync(object update)
         {
-            string id = (string)update["id"];
-
             var body = new ExpandoObject();
             Utils.PopulateExpando(body, update);
 
-            return await RequestAsync(new RequestArgs() { Method = "PUT", Parameters = new { mode = "query" }, Body = body }, id);
+            _filters.Add(("mode", "query"));
+
+            return await RequestAllAsync(RequestMethods.PUT, GetRoute(), body);
         }
 
-        public T Update(T update) => UpdateAsync(update).GetAwaiter().GetResult();
+        public List<T> QueryUpdate(object update) => QueryUpdateAsync(update).GetAwaiter().GetResult();
 
-        public async Task<List<T>> DeleteAllAsync(IEnumerable<T> deletes)
+        public async Task<List<T>> DeleteAllAsync(params T[] deletes)
         {
             if (deletes.Any())
             {
-                string id_query = string.Join("|", deletes.Select(d => d.Data.id));
+                _filters.Add(("mode", "query"));
 
-                return await RequestAllAsync(new RequestArgs() { Method = "DELETE", Parameters = new { mode = "query", id = id_query } });
+                string id_query = string.Join("|", deletes.Select(d => d.Data.id));
+                _filters.Add(("id", id_query));
+
+                return await RequestAllAsync(RequestMethods.DELETE, GetRoute());
             }
 
+            return new List<T>();
+        }
+
+        public async Task<List<T>> DeleteAllAsync(List<T> deletes) => await DeleteAllAsync(deletes.ToArray());
+
+        public List<T> DeleteAll(params T[] obj) => DeleteAllAsync(obj).GetAwaiter().GetResult();
+
+        public List<T> DeleteAll(List<T> obj) => DeleteAll(obj.ToList());
+
+        public async Task<List<T>> QueryDeleteAsync()
+        {
             if (_filters.Count > 0)
-                return await RequestAllAsync(new RequestArgs() { Method = "DELETE", Parameters = new { mode = "query" } });
+            {
+                _filters.Add(("mode", "query"));
+                return await RequestAllAsync(RequestMethods.DELETE, GetRoute());
+            }
             else
                 throw new Exception("Must set at least one filter to delete using query mode");
         }
 
-        public List<T> DeleteAll(IEnumerable<T> obj) => DeleteAllAsync(obj).GetAwaiter().GetResult();
+        public List<T> QueryDelete() => QueryDeleteAsync().GetAwaiter().GetResult();
 
         public async Task<T> DeleteAsync(T data)
         {
@@ -338,30 +360,33 @@ namespace Payload.ARM
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException("id cannot be empty");
 
-            return await RequestAsync(new RequestArgs() { Method = "DELETE" }, id);
+            return await RequestAsync(RequestMethods.DELETE, GetRoute(id));
         }
 
         public T Delete(T obj) => DeleteAsync(obj).GetAwaiter().GetResult();
 
-        public ARMRequest<T> FilterBy(params dynamic[] filters)
+        public ARMRequest<T> FilterBy(object filters)
         {
-            foreach (var filter in filters)
+            if (!(filters is IEnumerable))
+                filters = new[] { filters };
+
+            foreach (var filter in (IEnumerable<object>)filters)
             {
-                if (filter.GetType() == typeof(Filter))
+                if (filter is Filter f)
                 {
-                    _filters.Add(filter.attr, filter.op + filter.val);
+                    _filters.Add((f.attr, f.prefix + f.val));
                 }
                 else if (filter is Dynamo dynamo)
                 {
                     foreach (var pi in dynamo.Properties)
-                        _filters.Add(pi.Key, pi.Value);
+                        _filters.Add((pi.Key, pi.Value));
                 }
                 else
                 {
                     var properties = filter.GetType().GetProperties();
 
                     foreach (var pi in properties)
-                        _filters.Add(pi.Name, pi.GetValue(filter, null));
+                        _filters.Add((pi.Name, pi.GetValue(filter, null)));
                 }
             }
 
@@ -370,13 +395,13 @@ namespace Payload.ARM
 
         public ARMRequest<T> Offset(int offset)
         {
-            _filters["offset"] = offset;
+            _filters.Add(("offset", offset));
             return this;
         }
 
         public ARMRequest<T> Limit(int limit)
         {
-            _filters["limit"] = limit;
+            _filters.Add(("limit", limit));
             return this;
         }
 
@@ -388,13 +413,15 @@ namespace Payload.ARM
             return this;
         }
 
-        public async Task<List<T>> AllAsync() => await RequestAllAsync(new RequestArgs() { Method = "GET" });
+        public async Task<List<T>> AllAsync() => await RequestAllAsync(RequestMethods.GET, GetRoute());
 
         public List<T> All() => AllAsync().GetAwaiter().GetResult();
 
         public async Task<T> OneAsync()
         {
-            var data = await RequestAllAsync(new RequestArgs() { Method = "GET", Parameters = new { limit = 1 } });
+            _filters.Add(("limit", 1));
+
+            var data = await RequestAllAsync(RequestMethods.GET, GetRoute());
             if (data.Count() == 1)
             {
                 return data.First();

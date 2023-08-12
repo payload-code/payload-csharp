@@ -12,17 +12,19 @@ namespace Payload.ARM
     {
         public string attr;
         public string val;
-        public string op;
-        public Filter(Attr attr, string val, string op)
+        public string prefix;
+        public string suffix;
+        public Filter(Attr attr, string val, string prefix, string suffix = "")
         {
             this.attr = attr.ToString();
             this.val = val.ToString();
-            this.op = op;
+            this.prefix = prefix;
+            this.suffix = suffix;
         }
 
         public override string ToString()
         {
-            return String.Format("{0}{1}{2}", attr, op, val);
+            return string.Format("{0}{1}{2}{3}", attr, prefix, val, suffix);
         }
     }
 
@@ -54,7 +56,17 @@ namespace Payload.ARM
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            result = new Attr(binder.Name, this, true);
+            switch (binder.Name)
+            {
+                case "eq": result = new Filter(this, args[0].ToString(), ""); break;
+                case "ne": result = new Filter(this, args[0].ToString(), "!"); break;
+                case "gt": result = new Filter(this, args[0].ToString(), ">"); break;
+                case "lt": result = new Filter(this, args[0].ToString(), "<"); break;
+                case "ge": result = new Filter(this, args[0].ToString(), ">="); break;
+                case "le": result = new Filter(this, args[0].ToString(), "<="); break;
+                case "contains": result = new Filter(this, args[0].ToString(), "?*", "*"); break;
+                default: result = new Attr(binder.Name, this, true); break;
+            }
             return true;
         }
 
@@ -63,41 +75,6 @@ namespace Payload.ARM
             if (is_method)
                 return String.Format("{0}({1})", param, parent.key);
             return key;
-        }
-
-        public Filter eq(string val)
-        {
-            return new Filter(this, val, "");
-        }
-
-        public Filter ne(string val)
-        {
-            return new Filter(this, val, "!");
-        }
-
-        public Filter gt(string val)
-        {
-            return new Filter(this, val, ">");
-        }
-
-        public Filter lt(string val)
-        {
-            return new Filter(this, val, "<");
-        }
-
-        public Filter ge(string val)
-        {
-            return new Filter(this, val, ">=");
-        }
-
-        public Filter le(string val)
-        {
-            return new Filter(this, val, "<=");
-        }
-
-        public Filter contains(string val)
-        {
-            return new Filter(this, val, "?*");
         }
     }
 }

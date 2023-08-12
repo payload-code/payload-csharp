@@ -83,27 +83,30 @@ namespace Payload
             return class_found;
         }
 
-        static public void PopulateExpando(dynamic obj, dynamic data)
+        static public void PopulateExpando(dynamic obj, object data)
         {
             if (data == null) return;
             var dictionary = (IDictionary<string, object>)obj;
 
-            if (data is Dynamo)
+            if (data is Dynamo dynamo)
             {
-                foreach (var key in data.Properties.Keys)
+                foreach (var key in dynamo.Properties.Keys)
                 {
-                    SetExpandoProperty(dictionary, key, data.Properties[key]);
+                    SetExpandoProperty(dictionary, key, dynamo.Properties[key]);
                 }
             }
-            else if (data is ExpandoObject)
+            else if (data is ExpandoObject expando)
             {
-                var dict = (IDictionary<String, Object>)data;
+                var dict = (IDictionary<string, object>)expando;
                 foreach (var key in dict.Keys)
                     SetExpandoProperty(dictionary, key, dict[key]);
             }
             else
             {
                 var properties = data.GetType().GetProperties();
+
+                if (!properties.Any())
+                    throw new InvalidCastException("Object is not a Dynamo or ExpandoObject");
 
                 foreach (var pi in properties)
                     SetExpandoProperty(dictionary, pi.Name, pi.GetValue(data, null));
@@ -151,19 +154,11 @@ namespace Payload
             obj[key] = val;
         }
 
-        public static string ToQueryString(Dictionary<string, dynamic> parameters)
+        public static string ToQueryString(IEnumerable<(string, object)> parameters)
         {
-            var properties = from key in parameters.Keys
-                             select key + "=" + WebUtility.UrlEncode(string.Empty + parameters[key]);
-            return String.Join("&", properties.ToArray());
-        }
-
-        public static string ToQueryString(object parameters)
-        {
-            var properties = from p in parameters.GetType().GetProperties()
-                             where p.GetValue(parameters, null) != null
-                             select p.Name + "=" + WebUtility.UrlEncode(p.GetValue(parameters, null).ToString());
-            return String.Join("&", properties.ToArray());
+            var properties = from p in parameters
+                             select p.Item1 + "=" + WebUtility.UrlEncode(p.Item2.ToString());
+            return string.Join("&", properties.ToArray());
         }
 
         public static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
