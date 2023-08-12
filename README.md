@@ -77,7 +77,7 @@ Console.WriteLine(customer.Data.email);
 
 ### Updating an Object
 
-Updating an object is a simple call to the `Update` object method.
+Updating an object is a simple call to the `UpdateAsync` object method.
 
 ```csharp
 // Updating a customer's email
@@ -101,10 +101,10 @@ queries with a little extra syntax sugar.
 ```csharp
 var payments = await pl.Payment
     .FilterBy(
-        pl.attr.amount.gt(100),
-        pl.attr.amount.lt(200),
-        pl.attr.description.contains("Test"),
-        pl.attr.created_at.gt(new DateTime(2019,2,1))
+        pl.Attr.amount.gt(100),
+        pl.Attr.amount.lt(200),
+        pl.Attr.description.contains("Test"),
+        pl.Attr.created_at.gt(new DateTime(2019,2,1))
     )
     .AllAsync();
 ```
