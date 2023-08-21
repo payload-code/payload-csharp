@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Payload.ARM;
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,27 @@ namespace Payload.Tests
 {
     public class TestARMRequest
     {
+        [Test]
+        public void test_defaultparams()
+        {
+            pl.Customer.DefaultParams.Fields = new [] { "*", pl.Attr.name };
+            var mock = new Mock<ARMRequest<pl.Customer>> { CallBase = true };
+            var mockRespJson = new JSONObject();
+            mockRespJson["values"] = new JArray();
+
+            mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
+                .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
+                {
+                    Assert.AreEqual(RequestMethods.GET, method);
+                    Assert.AreEqual("/customers?fields[0]=*&fields[1]=name", route);
+                })
+                .ReturnsAsync(mockRespJson);
+
+            var req = mock.Object.All();
+
+            mock.Verify(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null), Times.Once);
+        }
+
         [Test]
         public void test_range()
         {
@@ -80,6 +102,55 @@ namespace Payload.Tests
                 {
                     processing_id = "acct_0a9s87df0987adsf"
                 }
+            }).All();
+
+            mock.Verify(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null), Times.Once);
+        }
+
+        [Test]
+        public void test_groupby()
+        {
+            var mock = new Mock<ARMRequest<pl.Customer>> { CallBase = true };
+            var mockRespJson = new JSONObject();
+            mockRespJson["values"] = new JArray();
+
+            mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
+                .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
+                {
+                    Assert.AreEqual(RequestMethods.GET, method);
+                    Assert.AreEqual("/customers?group_by[0]=name&group_by[1]=created_at", route);
+                })
+                .ReturnsAsync(mockRespJson);
+
+            var req = mock.Object.GroupBy(new[]
+            {
+                pl.Attr.name,
+                pl.Attr.created_at
+            }).All();
+
+            mock.Verify(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null), Times.Once);
+        }
+
+        [Test]
+        public void test_orderby()
+        {
+            var mock = new Mock<ARMRequest<pl.Customer>> { CallBase = true };
+            var mockRespJson = new JSONObject();
+            mockRespJson["values"] = new JArray();
+
+            mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
+                .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
+                {
+                    Assert.AreEqual(RequestMethods.GET, method);
+                    Assert.AreEqual("/customers?order_by[0]=asc(name)&order_by[1]=desc(created_at)&order_by[2]=attrs%5Btest%5D", route);
+                })
+                .ReturnsAsync(mockRespJson);
+
+            var req = mock.Object.OrderBy(new[]
+            {
+                pl.Attr.name.asc(),
+                pl.Attr.created_at.desc(),
+                pl.Attr.attrs.test
             }).All();
 
             mock.Verify(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null), Times.Once);

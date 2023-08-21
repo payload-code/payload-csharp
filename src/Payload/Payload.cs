@@ -147,6 +147,11 @@ namespace Payload
             return DeleteAsync(obj).GetAwaiter().GetResult();
         }
 
+        public class DefaultParams
+        {
+            public object[] Fields { get; set; } = new object[0];
+        }
+
         public class ARMObject : ARMObjectBase<ARMObject>
         {
             public ARMObject(object obj) : base(obj) { }
@@ -193,12 +198,17 @@ namespace Payload
             public Customer(object obj) : base(obj) { }
             public Customer() : base() { }
 
-            public Payment Charge(dynamic obj)
+            public async Task<Payment> ChargeAsync(dynamic obj)
             {
                 dynamic data = new ExpandoObject();
                 Utils.PopulateExpando(data, obj);
                 data.customer_id = this["id"];
-                return Payment.Create(data);
+                return await Payment.CreateAsync(data);
+            }
+            
+            public Payment Charge(dynamic obj)
+            {
+                return ChargeAsync(obj).GetAwaiter().GetResult();
             }
         }
 
@@ -252,16 +262,20 @@ namespace Payload
             public Payment(object obj) : base(obj) { }
             public Payment() : base() { }
 
-            public Refund Refund()
+            public async Task<Refund> RefundAsync()
             {
-                return Select("*", Attr.ledger).create(new
-                {
-                    amount = this["amount"],
-                    ledger = new[]{
-                        new Ledger(new{ assoc_transaction_id=this["id"] })
-                    }
-                });
+                return await pl.Refund
+                    .Select(new[] { "*", Attr.ledger })
+                    .CreateAsync(new
+                    {
+                        amount = this["amount"],
+                        ledger = new[] {
+                            new Ledger(new{ assoc_transaction_id=this["id"] })
+                        }
+                    });
             }
+
+            public Refund Refund() => RefundAsync().GetAwaiter().GetResult();
         }
 
         public class Refund : ARMObjectBase<Refund>
