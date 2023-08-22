@@ -89,7 +89,22 @@ namespace Payload.ARM
 
     public abstract class ARMObjectBase<T> : JSONObject, IARMObject where T : ARMObjectBase<T>
     {
+        private static Dictionary<Type, pl.DefaultParams> _defaultParams = new Dictionary<Type, pl.DefaultParams>();
         public pl.Session session = null;
+
+        public static pl.DefaultParams DefaultParams
+        {
+            get
+            {
+                if (!_defaultParams.ContainsKey(typeof(T)))
+                    _defaultParams[typeof(T)] = new pl.DefaultParams();
+                return _defaultParams[typeof(T)];
+            }
+            set
+            {
+                _defaultParams[typeof(T)] = value;
+            }
+        }
 
         public ARMObjectBase()
         {

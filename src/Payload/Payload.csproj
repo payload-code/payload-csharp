@@ -4,9 +4,9 @@
     <RootNamespace>Payload</RootNamespace>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyTitle>Payload</AssemblyTitle>
-    <VersionPrefix>1.0.2</VersionPrefix>
-    <Version>1.0.2</Version>
-    <Authors>Payload, Ian Halpern</Authors>
+    <VersionPrefix>1.0.3</VersionPrefix>
+    <Version>1.0.3</Version>
+    <Authors>Payload, Ian Halpern, Ben Ward</Authors>
     <AssemblyName>Payload</AssemblyName>
     <PackageId>payload-api</PackageId>
     <PackageTags>payload;payment;credit;cards;money;gateway</PackageTags>

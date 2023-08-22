@@ -25,8 +25,9 @@ namespace Payload.ARM
 
         public ARMObjectSpec Spec { get; set; }
         public List<(string, object)> _filters;
-        public List<dynamic> _attrs;
-        public List<object> _group_by;
+        public List<string> _fields;
+        public List<string> _group_by;
+        public List<string> _order_by;
         private pl.Session session;
 
         private static JsonSerializerSettings jsonsettings = new JsonSerializerSettings
@@ -39,9 +40,12 @@ namespace Payload.ARM
             var obj = (T)Activator.CreateInstance(typeof(T));
             Spec = obj.GetSpec();
             _filters = new List<(string, object)>();
-            _attrs = new List<object>();
-            _group_by = new List<object>();
+            _fields = new List<string>();
+            _group_by = new List<string>();
+            _order_by = new List<string>();
             this.session = session != null ? session : pl.DefaultSession;
+
+            _fields.AddRange(ARMObjectBase<T>.DefaultParams.Fields.Select(f => f.ToString()));
         }
 
         public ARMRequest()
@@ -60,8 +64,14 @@ namespace Payload.ARM
             if (!string.IsNullOrEmpty(id))
                 route += "/" + id;
 
-            for (int i = 0; i < _attrs.Count; i++)
-                _filters.Add(("fields[" + i.ToString() + "]", (string)_attrs[i]));
+            for (int i = 0; i < _fields.Count; i++)
+                _filters.Add(("fields[" + i.ToString() + "]", _fields[i]));
+
+            for (int i = 0; i < _group_by.Count; i++)
+                _filters.Add(("group_by[" + i.ToString() + "]", _group_by[i]));
+
+            for (int i = 0; i < _order_by.Count; i++)
+                _filters.Add(("order_by[" + i.ToString() + "]", _order_by[i]));
 
             if (_filters.Count > 0 || Spec.Polymorphic != null)
                 route += "?";
@@ -242,7 +252,7 @@ namespace Payload.ARM
 
         public ARMRequest<T> Select(params object[] fields)
         {
-            _attrs.AddRange(fields.Select(v => v.ToString()));
+            _fields.AddRange(fields.Select(v => v.ToString()));
 
             return this;
         }
@@ -389,6 +399,26 @@ namespace Payload.ARM
                         _filters.Add((pi.Name, pi.GetValue(filter, null)));
                 }
             }
+
+            return this;
+        }
+
+        public ARMRequest<T> GroupBy(object groupBy)
+        {
+            var groupBys = new List<object>();
+            if (!(groupBy is IEnumerable))
+                groupBys = new List<object>() { groupBy };
+            else
+                groupBys = ((IEnumerable<object>)groupBy).ToList();
+
+            _group_by.AddRange(groupBys.Select(gb => gb.ToString()));
+
+            return this;
+        }
+
+        public ARMRequest<T> OrderBy(object[] orderBys)
+        {
+            _order_by.AddRange(orderBys.Select(ob => ob.ToString()));
 
             return this;
         }
