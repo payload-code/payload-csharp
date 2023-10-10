@@ -67,6 +67,18 @@ namespace Payload.Tests
         }
 
         [Test]
+        public void test_client_token()
+        {
+            dynamic client_token = this.session.ClientToken.Create();
+            Assert.AreEqual(client_token.status, "active");
+            Assert.AreEqual(client_token.type, "client");
+
+            client_token = this.session.ClientToken.Create(new {});
+            Assert.AreEqual(client_token.status, "active");
+            Assert.AreEqual(client_token.type, "client");
+        }
+
+        [Test]
         public void test_create()
         {
             var rand_email = Fixtures.RandomString(10) + "@example.com";

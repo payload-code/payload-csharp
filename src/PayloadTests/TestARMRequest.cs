@@ -31,6 +31,7 @@ namespace Payload.Tests
             var req = mock.Object.All();
 
             mock.Verify(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null), Times.Once);
+            pl.Customer.DefaultParams.Fields = new object[0];
         }
 
         [Test]

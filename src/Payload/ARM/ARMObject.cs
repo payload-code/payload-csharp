@@ -329,9 +329,7 @@ namespace Payload.ARM
 
         public static async Task<T> CreateAsync(dynamic attributes, pl.Session session = null)
         {
-            T obj = (T)Activator.CreateInstance(typeof(T), attributes);
-
-            return await new ARMRequest<T>(session).CreateAsync(obj);
+            return await new ARMRequest<T>(session).CreateAsync(attributes);
         }
 
         public static T Create(dynamic obj = null, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();

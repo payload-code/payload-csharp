@@ -77,6 +77,9 @@ namespace Payload.Tests
             {
                 CompareWithEquals();
             }
+            catch (ArgumentException) {
+                CompareWithEquals();
+            }
         }
 
         private static void CompareEnumerables(string key, IEnumerable enumerable1, IEnumerable enumerable2)
