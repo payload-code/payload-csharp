@@ -281,11 +281,12 @@ namespace Payload.ARM
 
         public List<T> CreateAll(IEnumerable<object> objects) => CreateAllAsync(objects).GetAwaiter().GetResult();
 
-        public async Task<T> CreateAsync(object data)
+        public async Task<T> CreateAsync(dynamic attributes)
         {
+            object obj = (T)Activator.CreateInstance(typeof(T), attributes);
             var body = new ExpandoObject();
 
-            Utils.PopulateExpando(body, data ?? new { });
+            Utils.PopulateExpando(body, obj ?? new { });
 
             if (Spec.Polymorphic != null)
                 Utils.PopulateExpando(body, Spec.Polymorphic);
@@ -293,7 +294,7 @@ namespace Payload.ARM
             return await RequestAsync(RequestMethods.POST, GetRoute(), body);
         }
 
-        public T Create(object data) => CreateAsync(data).GetAwaiter().GetResult();
+        public T Create(object data = null) => CreateAsync(data).GetAwaiter().GetResult();
 
         public async Task<List<T>> UpdateAllAsync((T, object)[] updates)
         {
