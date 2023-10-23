@@ -23,7 +23,7 @@ jobs:
           refreshenv
 
       - name: Restore dependencies
-        run: nuget restore PayloadTest.csproj
+        run: nuget restore ../../src/PayloadTests/PayloadTests.csproj
 
       - name: Build
         run: msbuild /p:Configuration=Release
