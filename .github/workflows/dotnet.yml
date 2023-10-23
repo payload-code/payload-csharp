@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Setup .NET Framework
         run: |
@@ -23,12 +23,30 @@ jobs:
           refreshenv
 
       - name: Restore dependencies
-        run: nuget restore ../../src/PayloadTests/PayloadTests.csproj
+        run: nuget restore
 
       - name: Build
-        run: msbuild /p:Configuration=Release
+        run: dotnet build
 
-      - name: Test
+  test:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Framework
         run: |
-          nuget install NUnit.Console -Version 3.12.0 -OutputDirectory testrunner
-          testrunner/NUnit.Console.3.12.0/tools/nunit3-console.exe Test*.cs
+          choco install dotnetfx --version=4.7.2.20180712 -y
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+
+      - name: Run Tests
+        run: |
+          testFiles=$(Get-ChildItem ./src/PayloadTests -Filter *.cs)
+
+          for testFile in $testFiles; do
+            echo "Running tests in $testFile"
+            dotnet test ./src/PayloadTests/PayloadTests.csproj --filter "FullyQualifiedName~$testFile"
+          done
