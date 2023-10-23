@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup .NET Framework
         run: |
@@ -23,10 +23,10 @@ jobs:
           refreshenv
 
       - name: Restore dependencies
-        run: nuget restore
+        run: nuget restore ./src/PayloadTests/PayloadTests.csproj
 
       - name: Build
-        run: dotnet build
+        run: dotnet build ./src/PayloadTests/PayloadTests.csproj
 
   test:
     needs: build
