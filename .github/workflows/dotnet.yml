@@ -24,4 +24,4 @@ jobs:
 
       - name: Run Tests
         run: |
-          dotnet test ./src/PayloadTests/PayloadTests.csproj --parallel
+          dotnet test ./src/PayloadTests/PayloadTests.csproj
