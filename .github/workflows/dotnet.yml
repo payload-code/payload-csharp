@@ -19,6 +19,7 @@ jobs:
       - name: Setup .NET Framework
         run: |
           choco install dotnetfx --version=4.7.2.20180712 -y
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
           refreshenv
 
       - name: Restore dependencies
