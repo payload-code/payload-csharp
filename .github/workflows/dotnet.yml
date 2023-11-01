@@ -23,5 +23,8 @@ jobs:
           refreshenv
 
       - name: Run Tests
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
         run: |
+          echo $API_KEY
           dotnet test ./src/PayloadTests/PayloadTests.csproj
