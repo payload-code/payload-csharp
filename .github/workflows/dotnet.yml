@@ -1,0 +1,31 @@
+name: .NET Framework CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Framework
+        run: |
+          choco install dotnetfx --version=4.7.2.20180712 -y
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+
+      - name: Run Tests
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          PROCESSING_ID: ${{ secrets.PROCESSING_ID }}
+          run: refreshenv
+        run: |
+          dotnet test ./src/PayloadTests/PayloadTests.csproj

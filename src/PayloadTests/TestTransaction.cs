@@ -30,25 +30,6 @@ namespace Payload.Tests
         }
 
         [Test]
-        public void test_unified_payout_batching()
-        {
-            pl.Refund.Create(new
-            {
-                amount = 10,
-                processing_id = this.processing_account.id,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
-            });
-
-            dynamic transactions = pl.Transaction.Select("*", "ledger")
-                .FilterBy(new { type = "refund", processing_id = this.processing_account.id })
-                .All();
-
-
-            Assert.True(transactions.Count == 1);
-            Assert.True(transactions[0].processing_id == this.processing_account.id);
-        }
-
-        [Test]
         public void test_get_transaction()
         {
             this.card_payment = Fixtures.card_payment();

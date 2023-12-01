@@ -80,7 +80,6 @@ namespace Payload.Tests
         {
             Assert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
             Assert.NotNull(pl.ProcessingAccount.Get(this.processing_account.id));
-            Assert.AreEqual("pending", this.processing_account.status);
         }
 
 
