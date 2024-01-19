@@ -77,7 +77,8 @@ namespace Payload.Tests
             {
                 CompareWithEquals();
             }
-            catch (ArgumentException) {
+            catch (ArgumentException)
+            {
                 CompareWithEquals();
             }
         }

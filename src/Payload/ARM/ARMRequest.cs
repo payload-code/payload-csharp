@@ -28,14 +28,14 @@ namespace Payload.ARM
         public List<string> _fields;
         public List<string> _group_by;
         public List<string> _order_by;
-        private pl.Session session;
+        private Payload.Session session;
 
         private static JsonSerializerSettings jsonsettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        private void Init(pl.Session session = null)
+        private void Init(Payload.Session session = null)
         {
             var obj = (T)Activator.CreateInstance(typeof(T));
             Spec = obj.GetSpec();
@@ -53,7 +53,7 @@ namespace Payload.ARM
             Init();
         }
 
-        public ARMRequest(pl.Session session)
+        public ARMRequest(Payload.Session session)
         {
             Init(session);
         }

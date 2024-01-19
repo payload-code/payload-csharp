@@ -11,14 +11,14 @@ namespace Payload.Tests
 {
     public class TestSession
     {
-        pl.Session session;
+        Payload.Session session;
 
         [SetUp]
         public void Setup()
         {
             pl.ApiKey = null;
 
-            this.session = new pl.Session(Environment.GetEnvironmentVariable("API_KEY"));
+            this.session = new Payload.Session(Environment.GetEnvironmentVariable("API_KEY"));
             string url = Environment.GetEnvironmentVariable("API_URL");
             if (url != null)
                 this.session.ApiUrl = url;
@@ -43,7 +43,7 @@ namespace Payload.Tests
 
             var sessionObjects = new HashSet<string>();
 
-            foreach (PropertyInfo property in typeof(pl.Session).GetProperties())
+            foreach (PropertyInfo property in typeof(Payload.Session).GetProperties())
             {
                 if (property.PropertyType.IsGenericType &&
                     property.PropertyType.GetGenericTypeDefinition() == typeof(ARMRequest<>))
@@ -62,7 +62,7 @@ namespace Payload.Tests
             foreach (var globalObj in globalObjects)
             {
                 if (!sessionObjects.Contains(globalObj))
-                    throw new Exception($"pl.Session is missing the resource property '{globalObj}'");
+                    throw new Exception($"Payload.Session is missing the resource property '{globalObj}'");
             }
         }
 
@@ -73,7 +73,7 @@ namespace Payload.Tests
             Assert.AreEqual(client_token.status, "active");
             Assert.AreEqual(client_token.type, "client");
 
-            client_token = this.session.ClientToken.Create(new {});
+            client_token = this.session.ClientToken.Create(new { });
             Assert.AreEqual(client_token.status, "active");
             Assert.AreEqual(client_token.type, "client");
         }

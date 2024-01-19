@@ -22,7 +22,7 @@ namespace Payload.ARM
     {
         public static ConcurrentDictionary<string, object> _cache = new ConcurrentDictionary<string, object>();
 
-        public static dynamic GetOrCreate(Type type, Dynamo data, pl.Session session)
+        public static dynamic GetOrCreate(Type type, Dynamo data, Payload.Session session)
         {
             dynamic obj;
             if (type == data.GetType())
@@ -63,7 +63,7 @@ namespace Payload.ARM
             return obj;
         }
 
-        public static T GetOrCreate<T>(T data, pl.Session session) where T : ARMObjectBase<T>
+        public static T GetOrCreate<T>(T data, Payload.Session session) where T : ARMObjectBase<T>
         {
             return GetOrCreate(typeof(T), data, session);
         }
@@ -90,7 +90,7 @@ namespace Payload.ARM
     public abstract class ARMObjectBase<T> : JSONObject, IARMObject where T : ARMObjectBase<T>
     {
         private static Dictionary<Type, pl.DefaultParams> _defaultParams = new Dictionary<Type, pl.DefaultParams>();
-        public pl.Session session = null;
+        public Payload.Session session = null;
 
         public static pl.DefaultParams DefaultParams
         {
@@ -274,19 +274,19 @@ namespace Payload.ARM
 
         public T Delete() => DeleteAsync().GetAwaiter().GetResult();
 
-        public static async Task<T> GetAsync(string id, pl.Session session = null)
+        public static async Task<T> GetAsync(string id, Payload.Session session = null)
         {
             var req = new ARMRequest<T>(session);
 
             return await req.RequestAsync(RequestMethods.GET, req.GetRoute(id));
         }
 
-        public static T Get(string id, pl.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
+        public static T Get(string id, Payload.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
 
         public static ARMRequest<T> FilterBy(params object[] list)
         {
-            pl.Session session = (pl.Session)(list.Where(item => item is pl.Session).FirstOrDefault() ?? pl.DefaultSession);
-            List<dynamic> filters = list.Where(item => !(item is pl.Session)).ToList();
+            Payload.Session session = (Payload.Session)(list.Where(item => item is Payload.Session).FirstOrDefault() ?? pl.DefaultSession);
+            List<dynamic> filters = list.Where(item => !(item is Payload.Session)).ToList();
 
             var req = new ARMRequest<T>(session);
 
@@ -301,8 +301,8 @@ namespace Payload.ARM
 
         public static ARMRequest<T> Select(params object[] list)
         {
-            pl.Session session = (pl.Session)(list.Where(item => item is pl.Session).FirstOrDefault() ?? pl.DefaultSession);
-            List<dynamic> attrs = list.Where(item => !(item is pl.Session)).ToList();
+            Payload.Session session = (Payload.Session)(list.Where(item => item is Payload.Session).FirstOrDefault() ?? pl.DefaultSession);
+            List<dynamic> attrs = list.Where(item => !(item is Payload.Session)).ToList();
 
             var req = new ARMRequest<T>(session);
 
@@ -312,7 +312,7 @@ namespace Payload.ARM
             return req;
         }
 
-        public static async Task<List<T>> CreateAllAsync(IEnumerable<dynamic> objects, pl.Session session = null)
+        public static async Task<List<T>> CreateAllAsync(IEnumerable<dynamic> objects, Payload.Session session = null)
         {
             var lst = new List<dynamic>();
             foreach (dynamic obj in objects)
@@ -325,27 +325,27 @@ namespace Payload.ARM
             return await new ARMRequest<T>(session).CreateAllAsync(lst);
         }
 
-        public static List<T> CreateAll(IEnumerable<dynamic> objects, pl.Session session = null) => CreateAllAsync(objects.ToArray(), session).GetAwaiter().GetResult();
+        public static List<T> CreateAll(IEnumerable<dynamic> objects, Payload.Session session = null) => CreateAllAsync(objects.ToArray(), session).GetAwaiter().GetResult();
 
-        public static async Task<T> CreateAsync(dynamic attributes, pl.Session session = null)
+        public static async Task<T> CreateAsync(dynamic attributes, Payload.Session session = null)
         {
             return await new ARMRequest<T>(session).CreateAsync(attributes);
         }
 
-        public static T Create(dynamic obj = null, pl.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
+        public static T Create(dynamic obj = null, Payload.Session session = null) => CreateAsync(obj, session).GetAwaiter().GetResult();
 
-        public static async Task<List<T>> UpdateAllAsync((T, object)[] updates, pl.Session session = null)
+        public static async Task<List<T>> UpdateAllAsync((T, object)[] updates, Payload.Session session = null)
         {
             return await new ARMRequest<T>(session).UpdateAllAsync(updates.ToArray());
         }
 
-        public static List<T> UpdateAll((T, object)[] updates, pl.Session session = null) => UpdateAllAsync(updates, session).GetAwaiter().GetResult();
+        public static List<T> UpdateAll((T, object)[] updates, Payload.Session session = null) => UpdateAllAsync(updates, session).GetAwaiter().GetResult();
 
-        public static async Task<List<T>> DeleteAllAsync(List<T> objects, pl.Session session = null)
+        public static async Task<List<T>> DeleteAllAsync(List<T> objects, Payload.Session session = null)
         {
             return await new ARMRequest<T>(session).DeleteAllAsync(objects.ToArray());
         }
 
-        public static List<T> DeleteAll(List<T> objects, pl.Session session = null) => DeleteAllAsync(objects, session).GetAwaiter().GetResult();
+        public static List<T> DeleteAll(List<T> objects, Payload.Session session = null) => DeleteAllAsync(objects, session).GetAwaiter().GetResult();
     }
 }

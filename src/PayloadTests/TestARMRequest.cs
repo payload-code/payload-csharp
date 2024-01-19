@@ -15,7 +15,7 @@ namespace Payload.Tests
         [Test]
         public void test_defaultparams()
         {
-            pl.Customer.DefaultParams.Fields = new [] { "*", pl.Attr.name };
+            pl.Customer.DefaultParams.Fields = new[] { "*", pl.Attr.name };
             var mock = new Mock<ARMRequest<pl.Customer>> { CallBase = true };
             var mockRespJson = new JSONObject();
             mockRespJson["values"] = new JArray();

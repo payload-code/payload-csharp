@@ -8,7 +8,7 @@ using Payload.ARM;
 namespace Payload
 {
 
-    public static partial class pl
+    public static partial class Payload
     {
         public partial class Session
         {
@@ -25,8 +25,8 @@ namespace Payload
             public override bool Equals(object obj)
             {
                 return obj is Session session &&
-                       ApiKey == session.ApiKey &&
-                       ApiUrl == session.ApiUrl;
+                        ApiKey == session.ApiKey &&
+                        ApiUrl == session.ApiUrl;
             }
 
             public async Task<List<T>> CreateAllAsync<T>(params T[] objects) where T : ARMObjectBase<T>
@@ -101,11 +101,15 @@ namespace Payload
                 return hashCode;
             }
         }
+    }
+
+    public static partial class pl
+    {
 
         public static string ApiKey { get { return DefaultSession.ApiKey; } set { DefaultSession.ApiKey = value; } }
         public static string ApiUrl { get { return DefaultSession.ApiUrl; } set { DefaultSession.ApiUrl = value; } }
         public static dynamic Attr = new Attr(null);
-        public static Session DefaultSession = new Session(null);
+        public static Payload.Session DefaultSession = new Payload.Session(null);
 
         public static async Task<List<T>> CreateAllAsync<T>(IEnumerable<T> objects) where T : ARMObjectBase<T>
         {
@@ -205,7 +209,7 @@ namespace Payload
                 data.customer_id = this["id"];
                 return await Payment.CreateAsync(data);
             }
-            
+
             public Payment Charge(dynamic obj)
             {
                 return ChargeAsync(obj).GetAwaiter().GetResult();
