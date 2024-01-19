@@ -127,8 +127,8 @@ namespace Payload.Tests
             });
 
             pl.UpdateAll(
-                (customer_account_1, new { email="matt.perez@newwork.com" }),
-                (customer_account_2, new { email="andrea.kearney@newwork.com" })
+                (customer_account_1, new { email = "matt.perez@newwork.com" }),
+                (customer_account_2, new { email = "andrea.kearney@newwork.com" })
             );
 
             Assert.True(customer_account_1.Data.email == "brandy@example.com");

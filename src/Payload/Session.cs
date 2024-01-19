@@ -5,36 +5,36 @@ using System.Text;
 
 namespace Payload
 {
-    public partial class pl
+    public partial class Payload
     {
         public partial class Session
         {
-            public ARMRequest<AccessToken> AccessToken => new ARMRequest<AccessToken>(this);
-            public ARMRequest<ClientToken> ClientToken => new ARMRequest<ClientToken>(this);
-            public ARMRequest<Account> Account => new ARMRequest<Account>(this);
-            public ARMRequest<Customer> Customer => new ARMRequest<Customer>(this);
-            public ARMRequest<ProcessingAccount> ProcessingAccount => new ARMRequest<ProcessingAccount>(this);
-            public ARMRequest<Org> Org => new ARMRequest<Org>(this);
-            public ARMRequest<User> User => new ARMRequest<User>(this);
-            public ARMRequest<Transaction> Transaction => new ARMRequest<Transaction>(this);
-            public ARMRequest<Payment> Payment => new ARMRequest<Payment>(this);
-            public ARMRequest<Refund> Refund => new ARMRequest<Refund>(this);
-            public ARMRequest<Credit> Credit => new ARMRequest<Credit>(this);
-            public ARMRequest<Deposit> Deposit => new ARMRequest<Deposit>(this);
-            public ARMRequest<Ledger> Ledger => new ARMRequest<Ledger>(this);
-            public ARMRequest<PaymentMethod> PaymentMethod => new ARMRequest<PaymentMethod>(this);
-            public ARMRequest<Card> Card => new ARMRequest<Card>(this);
-            public ARMRequest<BankAccount> BankAccount => new ARMRequest<BankAccount>(this);
-            public ARMRequest<BillingSchedule> BillingSchedule => new ARMRequest<BillingSchedule>(this);
-            public ARMRequest<BillingCharge> BillingCharge => new ARMRequest<BillingCharge>(this);
-            public ARMRequest<Invoice> Invoice => new ARMRequest<Invoice>(this);
-            public ARMRequest<LineItem> LineItem => new ARMRequest<LineItem>(this);
-            public ARMRequest<ChargeItem> ChargeItem => new ARMRequest<ChargeItem>(this);
-            public ARMRequest<PaymentItem> PaymentItem => new ARMRequest<PaymentItem>(this);
-            public ARMRequest<Webhook> Webhook => new ARMRequest<Webhook>(this);
-            public ARMRequest<PaymentLink> PaymentLink => new ARMRequest<PaymentLink>(this);
-            public ARMRequest<OAuthToken> OAuthToken => new ARMRequest<OAuthToken>(this);
-            public ARMRequest<PaymentActivation> PaymentActivation => new ARMRequest<PaymentActivation>(this);
+            public ARMRequest<pl.AccessToken> AccessToken => new ARMRequest<pl.AccessToken>(this);
+            public ARMRequest<pl.ClientToken> ClientToken => new ARMRequest<pl.ClientToken>(this);
+            public ARMRequest<pl.Account> Account => new ARMRequest<pl.Account>(this);
+            public ARMRequest<pl.Customer> Customer => new ARMRequest<pl.Customer>(this);
+            public ARMRequest<pl.ProcessingAccount> ProcessingAccount => new ARMRequest<pl.ProcessingAccount>(this);
+            public ARMRequest<pl.Org> Org => new ARMRequest<pl.Org>(this);
+            public ARMRequest<pl.User> User => new ARMRequest<pl.User>(this);
+            public ARMRequest<pl.Transaction> Transaction => new ARMRequest<pl.Transaction>(this);
+            public ARMRequest<pl.Payment> Payment => new ARMRequest<pl.Payment>(this);
+            public ARMRequest<pl.Refund> Refund => new ARMRequest<pl.Refund>(this);
+            public ARMRequest<pl.Credit> Credit => new ARMRequest<pl.Credit>(this);
+            public ARMRequest<pl.Deposit> Deposit => new ARMRequest<pl.Deposit>(this);
+            public ARMRequest<pl.Ledger> Ledger => new ARMRequest<pl.Ledger>(this);
+            public ARMRequest<pl.PaymentMethod> PaymentMethod => new ARMRequest<pl.PaymentMethod>(this);
+            public ARMRequest<pl.Card> Card => new ARMRequest<pl.Card>(this);
+            public ARMRequest<pl.BankAccount> BankAccount => new ARMRequest<pl.BankAccount>(this);
+            public ARMRequest<pl.BillingSchedule> BillingSchedule => new ARMRequest<pl.BillingSchedule>(this);
+            public ARMRequest<pl.BillingCharge> BillingCharge => new ARMRequest<pl.BillingCharge>(this);
+            public ARMRequest<pl.Invoice> Invoice => new ARMRequest<pl.Invoice>(this);
+            public ARMRequest<pl.LineItem> LineItem => new ARMRequest<pl.LineItem>(this);
+            public ARMRequest<pl.ChargeItem> ChargeItem => new ARMRequest<pl.ChargeItem>(this);
+            public ARMRequest<pl.PaymentItem> PaymentItem => new ARMRequest<pl.PaymentItem>(this);
+            public ARMRequest<pl.Webhook> Webhook => new ARMRequest<pl.Webhook>(this);
+            public ARMRequest<pl.PaymentLink> PaymentLink => new ARMRequest<pl.PaymentLink>(this);
+            public ARMRequest<pl.OAuthToken> OAuthToken => new ARMRequest<pl.OAuthToken>(this);
+            public ARMRequest<pl.PaymentActivation> PaymentActivation => new ARMRequest<pl.PaymentActivation>(this);
         }
     }
 }
