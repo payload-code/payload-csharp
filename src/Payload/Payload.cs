@@ -563,7 +563,7 @@ namespace Payload
         {
             public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                Object = "oauth_token"
+                Object = "oauth_token",
                 Endpoint = "oauth/token"
             };
             public OAuthToken(object obj) : base(obj) { }
