@@ -1,0 +1,31 @@
+name: Publish Gem
+on:
+  release:
+    types: [published]
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Framework
+        run: |
+          choco install dotnetfx --version=4.7.2.20180712 -y
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+
+      - name: Pack
+        env:
+          run: refreshenv
+        run: |
+          dotnet pack src/Payload
+
+      - name: Run Tests
+        shell: bash
+        env:
+          API_KEY: ${{ secrets.NUGET_API_KEY }}
+          run: refreshenv
+        run: |
+          dotnet nuget push src/Payload/bin/Release/payload-api.*.nupkg --api-key $API_KEY --source https://api.nuget.org/v3/index.json
