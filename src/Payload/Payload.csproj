@@ -1,22 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Payload C# library for the Payload API (https://payload.co).</Description>
+    <Description>Payload C# library for the Payload API (https://payload.com).</Description>
     <RootNamespace>Payload</RootNamespace>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyTitle>Payload</AssemblyTitle>
-    <VersionPrefix>2.0.1</VersionPrefix>
-    <Version>2.0.1</Version>
+    <VersionPrefix>2.0.2</VersionPrefix>
+    <Version>2.0.2</Version>
     <Authors>Payload, Ian Halpern, Ben Ward</Authors>
     <AssemblyName>Payload</AssemblyName>
     <PackageId>payload-api</PackageId>
     <PackageTags>payload;payment;credit;cards;money;gateway</PackageTags>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/42856588</PackageIconUrl>
     <PackageProjectUrl>https://github.com/payload-code/payload-csharp</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-  </PropertyGroup>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />

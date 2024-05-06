@@ -1,6 +1,6 @@
 # Payload C# Library
 
-A C# library for integrating [Payload](https://payload.co).
+A C# library for integrating [Payload](https://payload.com).
 
 ## Installation
 
@@ -16,7 +16,7 @@ Include the **Payload** folder in your Visual Studio project.
 ### NuGet
 
 ```bash
-nuget install payload-api
+dotnet add package payload-api
 ```
 
 ## Get Started
@@ -121,4 +121,4 @@ API_KEY=your_test_secret_key dotnet test
 ## Documentation
 
 To get further information on Payload's C# library and API capabilities,
-visit the unabridged [Payload Documentation](https://docs.payload.co/?csharp).
+visit the unabridged [Payload Documentation](https://docs.payload.com/?csharp).

@@ -12,7 +12,7 @@ namespace Payload
     {
         public partial class Session
         {
-            public const string URL = "https://api.payload.co";
+            public const string URL = "https://api.payload.com";
             private string _url = URL;
             public string ApiKey { get; set; }
             public string ApiUrl { get { return _url; } set { _url = value; } }
