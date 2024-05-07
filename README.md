@@ -34,7 +34,7 @@ keys are accessible from within the Payload dashboard.
 ```csharp
 using Payload;
 
-var pl = new Payload.Session("secret_key_3bW9JMZtPVDOfFNzwRdfE")
+var pl = new Payload.Session("secret_key_3bW9JMZtPVDOfFNzwRdfE");
 ```
 
 ### Creating an Object
