@@ -229,14 +229,14 @@ namespace Payload.Tests
                 {
                     Assert.AreEqual(RequestMethods.POST, method);
                     Assert.AreEqual("/customers", route);
-                    DeepDiff.Diff(new { name = "Billy Bob", email = "billy.bob@payload.co" }, body);
+                    DeepDiff.Diff(new { name = "Billy Bob", email = "billy.bob@payload.com" }, body);
                 })
                 .ReturnsAsync(mockRespJson);
 
             var req = mock.Object.Create(new
             {
                 name = "Billy Bob",
-                email = "billy.bob@payload.co",
+                email = "billy.bob@payload.com",
             });
 
             mock.Verify(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), It.IsAny<ExpandoObject>()), Times.Once);
@@ -262,17 +262,17 @@ namespace Payload.Tests
                             new
                             {
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                             new
                             {
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                             new
                             {
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                         }
                     }, body);
@@ -284,17 +284,17 @@ namespace Payload.Tests
                 new
                 {
                     name = "Billy Bob",
-                    email = "billy.bob@payload.co",
+                    email = "billy.bob@payload.com",
                 },
                 new
                 {
                     name = "Billy Bob",
-                    email = "billy.bob@payload.co",
+                    email = "billy.bob@payload.com",
                 },
                 new
                 {
                     name = "Billy Bob",
-                    email = "billy.bob@payload.co",
+                    email = "billy.bob@payload.com",
                 },
             });
 

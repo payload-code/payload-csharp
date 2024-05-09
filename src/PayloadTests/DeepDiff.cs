@@ -212,19 +212,19 @@ namespace Payload.Tests
                             {
                                 id = 1,
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                             new
                             {
                                 id = 2,
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                             new
                             {
                                 id = 3,
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                         }
             }, new
@@ -236,19 +236,19 @@ namespace Payload.Tests
                             {
                                 id = 1,
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                             new
                             {
                                 id = 2,
                                 name = "Billy Joe",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                             new
                             {
                                 id = 3,
                                 name = "Billy Bob",
-                                email = "billy.bob@payload.co",
+                                email = "billy.bob@payload.com",
                             },
                         }
             }));
