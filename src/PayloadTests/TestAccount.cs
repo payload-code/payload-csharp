@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using System;
 
 namespace Payload.Tests
@@ -20,30 +21,30 @@ namespace Payload.Tests
         [Test]
         public void test_create_customer_account()
         {
-            Assert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
-            Assert.AreEqual("Customer Account", this.customer_account.name);
-            Assert.NotNull(this.customer_account.id);
+            ClassicAssert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
+            ClassicAssert.AreEqual("Customer Account", this.customer_account.name);
+            ClassicAssert.NotNull(this.customer_account.id);
         }
 
 
         public void test_create_processing_account()
         {
-            Assert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
-            Assert.NotNull(this.processing_account.id);
+            ClassicAssert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
+            ClassicAssert.NotNull(this.processing_account.id);
         }
 
         [Test]
         public void test_customer_account_one()
         {
-            Assert.NotNull(pl.Customer.FilterBy(new { email = customer_account.email }).One());
-            Assert.AreEqual(typeof(pl.Customer), pl.Customer.FilterBy(new { email = customer_account.email }).One().GetType());
+            ClassicAssert.NotNull(pl.Customer.FilterBy(new { email = customer_account.email }).One());
+            ClassicAssert.AreEqual(typeof(pl.Customer), pl.Customer.FilterBy(new { email = customer_account.email }).One().GetType());
         }
 
         [Test]
         public void test_processing_account_one()
         {
-            Assert.NotNull(pl.ProcessingAccount.FilterBy(new { name = processing_account.name }).One());
-            Assert.AreEqual(typeof(pl.ProcessingAccount), pl.ProcessingAccount.FilterBy(new { name = processing_account.name }).One().GetType());
+            ClassicAssert.NotNull(pl.ProcessingAccount.FilterBy(new { name = processing_account.name }).One());
+            ClassicAssert.AreEqual(typeof(pl.ProcessingAccount), pl.ProcessingAccount.FilterBy(new { name = processing_account.name }).One().GetType());
         }
 
         [Test]
@@ -71,15 +72,15 @@ namespace Payload.Tests
             var get_account_1 = pl.Account.FilterBy(new { email = rand_email1 }).All()[0];
             var get_account_2 = pl.Account.FilterBy(new { email = rand_email2 }).All()[0];
 
-            Assert.NotNull(get_account_1);
-            Assert.NotNull(get_account_2);
+            ClassicAssert.NotNull(get_account_1);
+            ClassicAssert.NotNull(get_account_2);
 
         }
         [Test]
         public void test_get_processing_account()
         {
-            Assert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
-            Assert.NotNull(pl.ProcessingAccount.Get(this.processing_account.id));
+            ClassicAssert.AreEqual(typeof(pl.ProcessingAccount), this.processing_account.GetType());
+            ClassicAssert.NotNull(pl.ProcessingAccount.Get(this.processing_account.id));
         }
 
 
@@ -94,9 +95,9 @@ namespace Payload.Tests
 
             dynamic customers = pl.Customer.FilterBy(new { order_by = "created_at", limit = 3, offset = 1 }).All();
 
-            Assert.True(customers.Count == 3);
-            Assert.True(Convert.ToDateTime(customers[0].created_at) <= Convert.ToDateTime(customers[1].created_at));
-            Assert.True(Convert.ToDateTime(customers[1].created_at) <= Convert.ToDateTime(customers[2].created_at));
+            ClassicAssert.True(customers.Count == 3);
+            ClassicAssert.True(Convert.ToDateTime(customers[0].created_at) <= Convert.ToDateTime(customers[1].created_at));
+            ClassicAssert.True(Convert.ToDateTime(customers[1].created_at) <= Convert.ToDateTime(customers[2].created_at));
 
 
         }
@@ -108,7 +109,7 @@ namespace Payload.Tests
         {
             this.customer_account.Update(new { email = "test2@example.com" });
 
-            Assert.True(this.customer_account.email == "test2@example.com");
+            ClassicAssert.True(this.customer_account.email == "test2@example.com");
         }
 
 
@@ -131,15 +132,15 @@ namespace Payload.Tests
                 (customer_account_2, new { email = "andrea.kearney@newwork.com" })
             );
 
-            Assert.True(customer_account_1.Data.email == "brandy@example.com");
-            Assert.True(customer_account_2.Data.email == "sandy@example.com");
+            ClassicAssert.True(customer_account_1.Data.email == "brandy@example.com");
+            ClassicAssert.True(customer_account_2.Data.email == "sandy@example.com");
         }
 
         [Test]
         public void test_get_customer_account()
         {
-            Assert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
-            Assert.NotNull(pl.Customer.Get(this.customer_account.id));
+            ClassicAssert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
+            ClassicAssert.NotNull(pl.Customer.Get(this.customer_account.id));
         }
 
 
@@ -149,8 +150,8 @@ namespace Payload.Tests
         {
             var select_customer = pl.Customer.Select("id").Get(this.customer_account.id);
 
-            Assert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
-            Assert.True(select_customer.id == this.customer_account.id);
+            ClassicAssert.AreEqual(typeof(pl.Customer), this.customer_account.GetType());
+            ClassicAssert.True(select_customer.id == this.customer_account.id);
         }
 
     }

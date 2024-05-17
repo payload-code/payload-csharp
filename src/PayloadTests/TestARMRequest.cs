@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Payload.ARM;
 using System;
 using System.Collections.Generic;
@@ -23,8 +24,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?fields[0]=*&fields[1]=name", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?fields[0]=*&fields[1]=name", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -44,8 +45,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?offset=5&limit=10", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?offset=5&limit=10", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -64,8 +65,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?fields[0]=processing%5Bname%5D&fields[1]=sum(amount)", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?fields[0]=processing%5Bname%5D&fields[1]=sum(amount)", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -88,8 +89,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?name=Jimmy+John&payment_method[uses]=%3E%3D1&payment_method[card_number][expiry_date]=%3E2015-01-01&payment_method[card_number][expiry_date]=%3C2015-12-31&processing_id=acct_0a9s87df0987adsf", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?name=Jimmy+John&payment_method[uses]=%3E%3D1&payment_method[card_number][expiry_date]=%3E2015-01-01&payment_method[card_number][expiry_date]=%3C2015-12-31&processing_id=acct_0a9s87df0987adsf", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -118,8 +119,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?group_by[0]=name&group_by[1]=created_at", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?group_by[0]=name&group_by[1]=created_at", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -142,8 +143,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?order_by[0]=asc(name)&order_by[1]=desc(created_at)&order_by[2]=attrs%5Btest%5D", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?order_by[0]=asc(name)&order_by[1]=desc(created_at)&order_by[2]=attrs%5Btest%5D", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -167,8 +168,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers?limit=1", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers?limit=1", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -187,8 +188,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -207,8 +208,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.GET, method);
-                    Assert.AreEqual("/customers/test_id", route);
+                    ClassicAssert.AreEqual(RequestMethods.GET, method);
+                    ClassicAssert.AreEqual("/customers/test_id", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -227,8 +228,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), It.IsAny<ExpandoObject>()))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.POST, method);
-                    Assert.AreEqual("/customers", route);
+                    ClassicAssert.AreEqual(RequestMethods.POST, method);
+                    ClassicAssert.AreEqual("/customers", route);
                     DeepDiff.Diff(new { name = "Billy Bob", email = "billy.bob@payload.com" }, body);
                 })
                 .ReturnsAsync(mockRespJson);
@@ -252,8 +253,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), It.IsAny<ExpandoObject>()))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.POST, method);
-                    Assert.AreEqual("/customers", route);
+                    ClassicAssert.AreEqual(RequestMethods.POST, method);
+                    ClassicAssert.AreEqual("/customers", route);
                     DeepDiff.Diff(new
                     {
                         @object = "list",
@@ -311,8 +312,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), It.IsAny<ExpandoObject>()))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.PUT, method);
-                    Assert.AreEqual("/customers", route);
+                    ClassicAssert.AreEqual(RequestMethods.PUT, method);
+                    ClassicAssert.AreEqual("/customers", route);
                     DeepDiff.Diff(new
                     {
                         @object = "list",
@@ -365,8 +366,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), It.IsAny<ExpandoObject>()))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.PUT, method);
-                    Assert.AreEqual("/customers?processing_id=acct_9s8d7f98s7dfsf&mode=query", route);
+                    ClassicAssert.AreEqual(RequestMethods.PUT, method);
+                    ClassicAssert.AreEqual("/customers?processing_id=acct_9s8d7f98s7dfsf&mode=query", route);
                     DeepDiff.Diff(new { email = "matt.perez@newwork.com" }, body);
                 })
                 .ReturnsAsync(mockRespJson);
@@ -388,8 +389,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.DELETE, method);
-                    Assert.AreEqual("/customers/acct_s9d87f9s8d7f9", route);
+                    ClassicAssert.AreEqual(RequestMethods.DELETE, method);
+                    ClassicAssert.AreEqual("/customers/acct_s9d87f9s8d7f9", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -416,8 +417,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.DELETE, method);
-                    Assert.AreEqual("/customers?mode=query&id=acct_s9d87f9s8d7f9%7Cacct_987gs09d87f9d", route);
+                    ClassicAssert.AreEqual(RequestMethods.DELETE, method);
+                    ClassicAssert.AreEqual("/customers?mode=query&id=acct_s9d87f9s8d7f9%7Cacct_987gs09d87f9d", route);
                 })
                 .ReturnsAsync(mockRespJson);
 
@@ -450,8 +451,8 @@ namespace Payload.Tests
             mock.Setup(m => m.ExecuteRequestAsync(It.IsAny<RequestMethods>(), It.IsAny<string>(), null))
                 .Callback<RequestMethods, string, ExpandoObject>((method, route, body) =>
                 {
-                    Assert.AreEqual(RequestMethods.DELETE, method);
-                    Assert.AreEqual("/customers?processing_id=acct_9s8d7f98s7dfsf&mode=query", route);
+                    ClassicAssert.AreEqual(RequestMethods.DELETE, method);
+                    ClassicAssert.AreEqual("/customers?processing_id=acct_9s8d7f98s7dfsf&mode=query", route);
                 })
                 .ReturnsAsync(mockRespJson);
 

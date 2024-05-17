@@ -9,6 +9,7 @@ namespace Payload
     {
         public partial class Session
         {
+            public dynamic Attr = new Attr(null);
             public ARMRequest<pl.AccessToken> AccessToken => new ARMRequest<pl.AccessToken>(this);
             public ARMRequest<pl.ClientToken> ClientToken => new ARMRequest<pl.ClientToken>(this);
             public ARMRequest<pl.Account> Account => new ARMRequest<pl.Account>(this);

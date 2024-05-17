@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Payload.ARM;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,20 @@ namespace Payload.Tests
             string url = Environment.GetEnvironmentVariable("API_URL");
             if (url != null)
                 this.session.ApiUrl = url;
+        }
+
+        [Test]
+        public void TestAttrToStringProperty()
+        {
+            // Arrange
+            var pl = this.session
+            var actual = pl.Attr.payment_method.card_number;
+
+            // Act
+            var result = actual.ToString();
+
+            // Assert
+            ClassicAssert.AreEqual("payment_method[card_number]", result);
         }
 
         [Test]
@@ -70,12 +85,12 @@ namespace Payload.Tests
         public void test_client_token()
         {
             dynamic client_token = this.session.ClientToken.Create();
-            Assert.AreEqual(client_token.status, "active");
-            Assert.AreEqual(client_token.type, "client");
+            ClassicAssert.AreEqual(client_token.status, "active");
+            ClassicAssert.AreEqual(client_token.type, "client");
 
             client_token = this.session.ClientToken.Create(new { });
-            Assert.AreEqual(client_token.status, "active");
-            Assert.AreEqual(client_token.type, "client");
+            ClassicAssert.AreEqual(client_token.status, "active");
+            ClassicAssert.AreEqual(client_token.type, "client");
         }
 
         [Test]
@@ -88,7 +103,7 @@ namespace Payload.Tests
             );
 
             var get_account = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email }).One();
-            Assert.NotNull(get_account);
+            ClassicAssert.NotNull(get_account);
         }
 
         [Test]
@@ -105,8 +120,8 @@ namespace Payload.Tests
             var get_account_1 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
             var get_account_2 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
 
-            Assert.NotNull(get_account_1);
-            Assert.NotNull(get_account_2);
+            ClassicAssert.NotNull(get_account_1);
+            ClassicAssert.NotNull(get_account_2);
         }
 
         [Test]
@@ -120,8 +135,8 @@ namespace Payload.Tests
             );
 
             dynamic get_account = this.session.Select<pl.Customer>().Get(account.id);
-            Assert.NotNull(get_account);
-            Assert.True(account.id == get_account.id);
+            ClassicAssert.NotNull(get_account);
+            ClassicAssert.True(account.id == get_account.id);
         }
 
         [Test]
@@ -136,8 +151,8 @@ namespace Payload.Tests
 
             var get_account1 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
             var get_account2 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
-            Assert.NotNull(get_account1);
-            Assert.Null(get_account2);
+            ClassicAssert.NotNull(get_account1);
+            ClassicAssert.Null(get_account2);
 
             account.Update(new
             {
@@ -146,8 +161,8 @@ namespace Payload.Tests
 
             get_account1 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
             get_account2 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
-            Assert.Null(get_account1);
-            Assert.NotNull(get_account2);
+            ClassicAssert.Null(get_account1);
+            ClassicAssert.NotNull(get_account2);
 
         }
 
@@ -161,12 +176,12 @@ namespace Payload.Tests
             );
 
             var get_account = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email }).One();
-            Assert.NotNull(get_account);
+            ClassicAssert.NotNull(get_account);
 
             this.session.Delete(account);
 
             get_account = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email }).One();
-            Assert.Null(get_account);
+            ClassicAssert.Null(get_account);
         }
 
         [Test]
@@ -186,16 +201,16 @@ namespace Payload.Tests
             var get_account_1 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
             var get_account_2 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
 
-            Assert.NotNull(get_account_1);
-            Assert.NotNull(get_account_2);
+            ClassicAssert.NotNull(get_account_1);
+            ClassicAssert.NotNull(get_account_2);
 
             this.session.DeleteAll(accounts);
 
             get_account_1 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).One();
             get_account_2 = this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).One();
 
-            Assert.Null(get_account_1);
-            Assert.Null(get_account_2);
+            ClassicAssert.Null(get_account_1);
+            ClassicAssert.Null(get_account_2);
         }
 
         [Test]
@@ -208,7 +223,7 @@ namespace Payload.Tests
             );
 
             var get_account = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email }).OneAsync();
-            Assert.NotNull(get_account);
+            ClassicAssert.NotNull(get_account);
         }
 
         [Test]
@@ -225,8 +240,8 @@ namespace Payload.Tests
             var get_account_1 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
             var get_account_2 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
 
-            Assert.NotNull(get_account_1);
-            Assert.NotNull(get_account_2);
+            ClassicAssert.NotNull(get_account_1);
+            ClassicAssert.NotNull(get_account_2);
         }
 
         [Test]
@@ -240,8 +255,8 @@ namespace Payload.Tests
            );
 
             var get_account = await this.session.Select<pl.Customer>().GetAsync(account.Data.id);
-            Assert.NotNull(get_account);
-            Assert.True(account.Data.id == get_account.id);
+            ClassicAssert.NotNull(get_account);
+            ClassicAssert.True(account.Data.id == get_account.id);
         }
 
         [Test]
@@ -256,8 +271,8 @@ namespace Payload.Tests
 
             var get_account1 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
             var get_account2 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
-            Assert.NotNull(get_account1);
-            Assert.Null(get_account2);
+            ClassicAssert.NotNull(get_account1);
+            ClassicAssert.Null(get_account2);
 
             await account.UpdateAsync(new
             {
@@ -266,8 +281,8 @@ namespace Payload.Tests
 
             get_account1 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
             get_account2 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
-            Assert.Null(get_account1);
-            Assert.NotNull(get_account2);
+            ClassicAssert.Null(get_account1);
+            ClassicAssert.NotNull(get_account2);
 
         }
 
@@ -281,12 +296,12 @@ namespace Payload.Tests
             );
 
             var get_account = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email }).OneAsync();
-            Assert.NotNull(get_account);
+            ClassicAssert.NotNull(get_account);
 
             await this.session.DeleteAsync(account);
 
             get_account = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email }).OneAsync();
-            Assert.Null(get_account);
+            ClassicAssert.Null(get_account);
         }
 
         [Test]
@@ -306,16 +321,16 @@ namespace Payload.Tests
             var get_account_1 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
             var get_account_2 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
 
-            Assert.NotNull(get_account_1);
-            Assert.NotNull(get_account_2);
+            ClassicAssert.NotNull(get_account_1);
+            ClassicAssert.NotNull(get_account_2);
 
             await this.session.DeleteAllAsync(accounts);
 
             get_account_1 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email1 }).OneAsync();
             get_account_2 = await this.session.Select<pl.Customer>().FilterBy(new { email = rand_email2 }).OneAsync();
 
-            Assert.Null(get_account_1);
-            Assert.Null(get_account_2);
+            ClassicAssert.Null(get_account_1);
+            ClassicAssert.Null(get_account_2);
         }
     }
 }

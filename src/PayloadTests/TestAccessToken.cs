@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using System;
 using System.IO;
 using System.Text;
@@ -19,8 +20,8 @@ namespace Payload.Tests
         public void test_create_client_token()
         {
             dynamic client_token = pl.ClientToken.Create();
-            Assert.AreEqual(client_token.status, "active");
-            Assert.AreEqual(client_token.type, "client");
+            ClassicAssert.AreEqual(client_token.status, "active");
+            ClassicAssert.AreEqual(client_token.type, "client");
 
         }
 
