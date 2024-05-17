@@ -29,7 +29,7 @@ namespace Payload.Tests
         public void TestAttrToStringProperty()
         {
             // Arrange
-            var pl = this.session
+            var pl = this.session;
             var actual = pl.Attr.payment_method.card_number;
 
             // Act
