@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using System;
 using System.IO;
 using System.Text;
@@ -29,15 +30,15 @@ namespace Payload.Tests
         [Test]
         public void test_create_payment_link()
         {
-            Assert.True(payment_link.processing_id == this.processing_account.id);
+            ClassicAssert.True(payment_link.processing_id == this.processing_account.id);
         }
 
         [Test]
         public void test_payment_link_one()
         {
             var lnk = pl.PaymentLink.FilterBy(new { type = this.payment_link.type }).One();
-            Assert.NotNull(lnk);
-            Assert.AreEqual(typeof(pl.PaymentLink), lnk.GetType());
+            ClassicAssert.NotNull(lnk);
+            ClassicAssert.AreEqual(typeof(pl.PaymentLink), lnk.GetType());
         }
 
 
@@ -78,9 +79,9 @@ namespace Payload.Tests
                     },
                     attachments = new[] { new { file = fs } }
                 });
-                Assert.True(lnk.processing_id == this.processing_account.id);
-                Assert.True(lnk.attachments.Count == 1);
-                Assert.False(lnk.checkout_options.billing_address);
+                ClassicAssert.True(lnk.processing_id == this.processing_account.id);
+                ClassicAssert.True(lnk.attachments.Count == 1);
+                ClassicAssert.False(lnk.checkout_options.billing_address);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(lnk.attachments[0].url);
 
@@ -92,7 +93,7 @@ namespace Payload.Tests
                     content = reader.ReadToEnd();
                 }
 
-                Assert.True(content.Equals("This is some text in the file."));
+                ClassicAssert.True(content.Equals("This is some text in the file."));
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Payload;
 using Payload.ARM;
 using System;
@@ -130,7 +131,7 @@ namespace Payload.Tests
             obj2.Age = 30;
 
             var ex = Assert.Throws<AssertionException>(() => DeepDiff.Diff(obj1, obj2));
-            Assert.AreEqual("Property 'Age' mismatch. Expected: 25, Actual: 30", ex.Message);
+            ClassicAssert.AreEqual("Property 'Age' mismatch. Expected: 25, Actual: 30", ex.Message);
         }
 
         [Test]
@@ -144,7 +145,7 @@ namespace Payload.Tests
             obj2.Age = 30;
 
             var ex = Assert.Throws<AssertionException>(() => DeepDiff.Diff(obj1, obj2));
-            Assert.AreEqual("Property 'Age' exists in the second object but not in the first.", ex.Message);
+            ClassicAssert.AreEqual("Property 'Age' exists in the second object but not in the first.", ex.Message);
         }
 
         [Test]
@@ -163,7 +164,7 @@ namespace Payload.Tests
             obj2.Details = nested2;
 
             var ex = Assert.Throws<AssertionException>(() => DeepDiff.Diff(obj1, obj2));
-            Assert.AreEqual("Property 'City' mismatch. Expected: New York, Actual: Los Angeles", ex.Message);
+            ClassicAssert.AreEqual("Property 'City' mismatch. Expected: New York, Actual: Los Angeles", ex.Message);
         }
 
         [Test]
@@ -178,7 +179,7 @@ namespace Payload.Tests
             obj2.Numbers = new List<int> { 1, 2, 4 };
 
             var ex = Assert.Throws<AssertionException>(() => DeepDiff.Diff(obj1, obj2));
-            Assert.AreEqual("List item '[2]' mismatch. Expected: 3, Actual: 4", ex.Message);
+            ClassicAssert.AreEqual("List item '[2]' mismatch. Expected: 3, Actual: 4", ex.Message);
         }
 
         [Test]
@@ -197,7 +198,7 @@ namespace Payload.Tests
             obj2.DetailsList = new List<ExpandoObject> { nestedItem2 };
 
             var ex = Assert.Throws<AssertionException>(() => DeepDiff.Diff(obj1, obj2));
-            Assert.AreEqual("Property 'City' mismatch. Expected: New York, Actual: Los Angeles", ex.Message);
+            ClassicAssert.AreEqual("Property 'City' mismatch. Expected: New York, Actual: Los Angeles", ex.Message);
         }
 
         [Test]
@@ -252,7 +253,7 @@ namespace Payload.Tests
                             },
                         }
             }));
-            Assert.AreEqual("Property 'name' mismatch. Expected: Billy Bob, Actual: Billy Joe", ex.Message);
+            ClassicAssert.AreEqual("Property 'name' mismatch. Expected: Billy Bob, Actual: Billy Joe", ex.Message);
         }
     }
 }

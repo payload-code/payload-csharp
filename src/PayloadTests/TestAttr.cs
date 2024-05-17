@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Payload.ARM;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Payload.Tests
             var result = actual.ToString();
 
             // Assert
-            Assert.AreEqual("payment_method[card_number]", result);
+            ClassicAssert.AreEqual("payment_method[card_number]", result);
         }
 
         [Test]
@@ -41,7 +42,7 @@ namespace Payload.Tests
             var result = actual.ToString();
 
             // Assert
-            Assert.AreEqual("sum(amount)", result);
+            ClassicAssert.AreEqual("sum(amount)", result);
         }
 
         [Test]
@@ -54,7 +55,7 @@ namespace Payload.Tests
             var result = actual.ToString();
 
             // Assert
-            Assert.AreEqual("payment_method[card_number][expiry_date]", result);
+            ClassicAssert.AreEqual("payment_method[card_number][expiry_date]", result);
         }
     }
 }

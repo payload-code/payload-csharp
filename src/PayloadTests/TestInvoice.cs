@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using System;
 
 namespace Payload.Tests
@@ -32,9 +33,9 @@ namespace Payload.Tests
         [Test]
         public void test_create_invoice()
         {
-            Assert.AreEqual(typeof(pl.Invoice), this.invoice.GetType());
-            Assert.True(this.invoice.due_date == "2019-05-01");
-            Assert.True(this.invoice.status == "unpaid");
+            ClassicAssert.AreEqual(typeof(pl.Invoice), this.invoice.GetType());
+            ClassicAssert.True(this.invoice.due_date == "2019-05-01");
+            ClassicAssert.True(this.invoice.status == "unpaid");
         }
 
         [Test]
@@ -65,8 +66,8 @@ namespace Payload.Tests
                 customer_id = cust.id
             });
 
-            Assert.AreEqual(typeof(pl.Invoice), invoice.GetType());
-            Assert.AreEqual(cust.id, invoice.customer_id);
+            ClassicAssert.AreEqual(typeof(pl.Invoice), invoice.GetType());
+            ClassicAssert.AreEqual(cust.id, invoice.customer_id);
 
             if (invoice.status != "paid")
             {
@@ -83,7 +84,7 @@ namespace Payload.Tests
 
                 var invoice_get = pl.Invoice.Get(invoice.id);
 
-                Assert.AreEqual("paid", invoice_get.status);
+                ClassicAssert.AreEqual("paid", invoice_get.status);
 
             }
         }
@@ -91,8 +92,8 @@ namespace Payload.Tests
         [Test]
         public void test_invoice_one()
         {
-            Assert.NotNull(pl.Invoice.FilterBy(new { this.invoice.type }).One());
-            Assert.AreEqual(typeof(pl.Invoice), pl.Invoice.FilterBy(new { this.invoice.type }).One().GetType());
+            ClassicAssert.NotNull(pl.Invoice.FilterBy(new { this.invoice.type }).One());
+            ClassicAssert.AreEqual(typeof(pl.Invoice), pl.Invoice.FilterBy(new { this.invoice.type }).One().GetType());
         }
     }
 }

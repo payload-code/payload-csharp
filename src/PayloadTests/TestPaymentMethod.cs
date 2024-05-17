@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 
 namespace Payload.Tests
@@ -36,15 +37,15 @@ namespace Payload.Tests
         [Test]
         public void test_create_payment_method_card()
         {
-            Assert.AreEqual(typeof(pl.Card), this.card_payment_method.GetType());
-            Assert.AreEqual("xxxxxxxxxxxx4242", this.card_payment_method.card_number);
+            ClassicAssert.AreEqual(typeof(pl.Card), this.card_payment_method.GetType());
+            ClassicAssert.AreEqual("xxxxxxxxxxxx4242", this.card_payment_method.card_number);
         }
 
         [Test]
         public void test_create_payment_method_bank()
         {
-            Assert.AreEqual(typeof(pl.BankAccount), this.bank_payment_method.GetType());
-            Assert.AreEqual("checking", this.bank_payment_method.account_type);
+            ClassicAssert.AreEqual(typeof(pl.BankAccount), this.bank_payment_method.GetType());
+            ClassicAssert.AreEqual("checking", this.bank_payment_method.account_type);
 
         }
 
@@ -59,14 +60,14 @@ namespace Payload.Tests
         [Test]
         public void test_card_payment_method_one()
         {
-            Assert.NotNull(pl.PaymentMethod.FilterBy(new { this.card_payment_method.type }).One());
+            ClassicAssert.NotNull(pl.PaymentMethod.FilterBy(new { this.card_payment_method.type }).One());
 
         }
 
         [Test]
         public void test_bank_payment_method_one()
         {
-            Assert.NotNull(pl.PaymentMethod.FilterBy(new { this.bank_payment_method.type }).One());
+            ClassicAssert.NotNull(pl.PaymentMethod.FilterBy(new { this.bank_payment_method.type }).One());
         }
     }
 }

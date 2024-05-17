@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Payload.Tests
 
             dynamic transaction = pl.Transaction.Select("*", "ledger").Get(this.card_payment.id);
 
-            Assert.IsEmpty(transaction.ledger);
+            ClassicAssert.IsEmpty(transaction.ledger);
         }
 
         [Test]
@@ -36,7 +37,7 @@ namespace Payload.Tests
 
             var transaction = pl.Transaction.Get(card_payment.id);
 
-            Assert.True(transaction.id == card_payment.id);
+            ClassicAssert.True(transaction.id == card_payment.id);
         }
 
         [Test]
@@ -44,8 +45,8 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            Assert.NotNull(pl.Transaction.FilterBy(new { type = this.card_payment.type }).One());
-            Assert.AreEqual(typeof(pl.Payment), pl.Payment.FilterBy(new { amount = this.card_payment.amount }).One().GetType());
+            ClassicAssert.NotNull(pl.Transaction.FilterBy(new { type = this.card_payment.type }).One());
+            ClassicAssert.AreEqual(typeof(pl.Payment), pl.Payment.FilterBy(new { amount = this.card_payment.amount }).One().GetType());
         }
 
         [Test]
@@ -53,7 +54,7 @@ namespace Payload.Tests
         {
             this.card_payment = Fixtures.card_payment();
 
-            Assert.True(this.card_payment.risk_flag == "allowed");
+            ClassicAssert.True(this.card_payment.risk_flag == "allowed");
         }
 
         [Test]
@@ -62,7 +63,7 @@ namespace Payload.Tests
             this.card_payment = Fixtures.card_payment();
 
             this.card_payment.Update(new { status = "voided" });
-            Assert.True(card_payment.status == "voided");
+            ClassicAssert.True(card_payment.status == "voided");
 
         }
 
@@ -95,8 +96,8 @@ namespace Payload.Tests
                 pl.Attr.created_at.gt(new DateTime(2019, 2, 1))
             }).All();
 
-            Assert.True(payments.Count == 1);
-            Assert.True(payments.ElementAt(0).Data.id == card_payment.id);
+            ClassicAssert.True(payments.Count == 1);
+            ClassicAssert.True(payments.ElementAt(0).Data.id == card_payment.id);
         }
 
         [Test]
@@ -106,7 +107,7 @@ namespace Payload.Tests
 
             ((pl.Payment)this.card_payment).Update(new { status = "voided" });
 
-            Assert.AreEqual("voided", this.card_payment.status);
+            ClassicAssert.AreEqual("voided", this.card_payment.status);
         }
 
         [Test]
@@ -115,7 +116,7 @@ namespace Payload.Tests
             this.bank_payment = Fixtures.bank_payment();
 
             ((pl.Payment)this.bank_payment).Update(new { status = "voided" });
-            Assert.AreEqual("voided", this.bank_payment.status);
+            ClassicAssert.AreEqual("voided", this.bank_payment.status);
 
         }
 
@@ -134,9 +135,9 @@ namespace Payload.Tests
                 }
             });
 
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == this.card_payment.amount);
-            Assert.True(refund.status_code == "approved");
+            ClassicAssert.True(refund.type == "refund");
+            ClassicAssert.True(refund.amount == this.card_payment.amount);
+            ClassicAssert.True(refund.status_code == "approved");
         }
 
         [Test]
@@ -154,9 +155,9 @@ namespace Payload.Tests
                 }
             });
 
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 10);
-            Assert.True(refund.status_code == "approved");
+            ClassicAssert.True(refund.type == "refund");
+            ClassicAssert.True(refund.amount == 10);
+            ClassicAssert.True(refund.status_code == "approved");
         }
 
         [Test]
@@ -169,9 +170,9 @@ namespace Payload.Tests
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 10);
-            Assert.True(refund.status_code == "approved");
+            ClassicAssert.True(refund.type == "refund");
+            ClassicAssert.True(refund.amount == 10);
+            ClassicAssert.True(refund.status_code == "approved");
 
         }
 
@@ -190,9 +191,9 @@ namespace Payload.Tests
                 }
             });
 
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == this.bank_payment.amount);
-            Assert.True(refund.status_code == "approved");
+            ClassicAssert.True(refund.type == "refund");
+            ClassicAssert.True(refund.amount == this.bank_payment.amount);
+            ClassicAssert.True(refund.status_code == "approved");
         }
 
         [Test]
@@ -210,9 +211,9 @@ namespace Payload.Tests
                 }
             });
 
-            Assert.True(refund.type == "refund");
-            Assert.True(refund.amount == 10);
-            Assert.True(refund.status_code == "approved");
+            ClassicAssert.True(refund.type == "refund");
+            ClassicAssert.True(refund.amount == 10);
+            ClassicAssert.True(refund.status_code == "approved");
         }
 
 
@@ -225,8 +226,8 @@ namespace Payload.Tests
                 payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
             });
 
-            Assert.NotNull(payment.fee);
-            Assert.NotNull(payment.conv_fee);
+            ClassicAssert.NotNull(payment.fee);
+            ClassicAssert.NotNull(payment.conv_fee);
         }
     }
 }
