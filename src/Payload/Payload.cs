@@ -580,6 +580,18 @@ namespace Payload
             public PaymentActivation() : base() { }
         }
 
+        public class Operation : ARMObjectBase<Operation>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "operation",
+                Endpoint = "/v2/transaction_operations"
+
+            };
+            public Operation(object obj) : base(obj) { }
+            public Operation() : base() { }
+        }
+
         public class UnknownResponse : PayloadError
         {
             public UnknownResponse() { }
