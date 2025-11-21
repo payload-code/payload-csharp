@@ -585,7 +585,6 @@ namespace Payload
             public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
                 Object = "operation",
-                Endpoint = "/v2/transaction_operations"
 
             };
             public Operation(object obj) : base(obj) { }
