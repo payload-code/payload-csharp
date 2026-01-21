@@ -28,7 +28,7 @@ namespace Payload.ARM
         public List<string> _fields;
         public List<string> _group_by;
         public List<string> _order_by;
-        private Payload.Session session;        
+        private Payload.Session session;
         internal HttpMessageHandler _httpMessageHandler;
         private static JsonSerializerSettings jsonsettings = new JsonSerializerSettings
         {
