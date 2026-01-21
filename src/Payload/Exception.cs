@@ -23,7 +23,7 @@ namespace Payload
         public PayloadError(string message, JSONObject response) : base(message)
         {
             Response = response;
-            Details = Response["details"];
+            Details = Response.HasObject("details") ? Response["details"] : null;
         }
 
         public string json()

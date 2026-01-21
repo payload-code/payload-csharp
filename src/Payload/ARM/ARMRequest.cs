@@ -29,7 +29,7 @@ namespace Payload.ARM
         public List<string> _group_by;
         public List<string> _order_by;
         private Payload.Session session;
-
+        internal HttpMessageHandler _httpMessageHandler;
         private static JsonSerializerSettings jsonsettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore
@@ -95,7 +95,11 @@ namespace Payload.ARM
 
         public virtual async Task<JSONObject> ExecuteRequestAsync(RequestMethods method, string route, ExpandoObject body = null)
         {
-            using (var http = new HttpClient())
+            var http = _httpMessageHandler != null 
+                ? new HttpClient(_httpMessageHandler, false)
+                : new HttpClient();
+                
+            using (http)
             {
                 string _auth = string.Concat(session.ApiKey, ":");
                 string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
@@ -104,6 +108,11 @@ namespace Payload.ARM
                     new AuthenticationHeaderValue("Basic", _enc);
                 http.DefaultRequestHeaders.Accept.Add(
                    new MediaTypeWithQualityHeaderValue("application/json"));
+
+                if (!string.IsNullOrEmpty(session.ApiVersion))
+                {
+                    http.DefaultRequestHeaders.Add("X-API-Version", session.ApiVersion);
+                }
 
                 HttpContent content;
                 if (body != null)
