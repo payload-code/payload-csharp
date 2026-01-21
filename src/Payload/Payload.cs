@@ -4,6 +4,9 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Payload.ARM;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("PayloadTests")]
 
 namespace Payload
 {
@@ -16,17 +19,20 @@ namespace Payload
             private string _url = URL;
             public string ApiKey { get; set; }
             public string ApiUrl { get { return _url; } set { _url = value; } }
+            public string ApiVersion { get; set; }
 
-            public Session(string api_key)
+            public Session(string api_key, string api_version = null)
             {
                 ApiKey = api_key;
+                ApiVersion = api_version;
             }
 
             public override bool Equals(object obj)
             {
                 return obj is Session session &&
                         ApiKey == session.ApiKey &&
-                        ApiUrl == session.ApiUrl;
+                        ApiUrl == session.ApiUrl &&
+                        ApiVersion == session.ApiVersion;
             }
 
             public async Task<List<T>> CreateAllAsync<T>(params T[] objects) where T : ARMObjectBase<T>
@@ -98,6 +104,7 @@ namespace Payload
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_url);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiKey);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiUrl);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ApiVersion);
                 return hashCode;
             }
         }
@@ -108,6 +115,8 @@ namespace Payload
 
         public static string ApiKey { get { return DefaultSession.ApiKey; } set { DefaultSession.ApiKey = value; } }
         public static string ApiUrl { get { return DefaultSession.ApiUrl; } set { DefaultSession.ApiUrl = value; } }
+        public static string ApiVersion { get { return DefaultSession.ApiVersion; } set { DefaultSession.ApiVersion = value; } }
+        
         public static dynamic Attr = new Attr(null);
         public static Payload.Session DefaultSession = new Payload.Session(null);
 
@@ -230,7 +239,8 @@ namespace Payload
         {
             public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                Object = "org"
+                Object = "org",
+                Endpoint = "/accounts/orgs"
             };
             public Org(object obj) : base(obj) { }
             public Org() : base() { }
@@ -250,7 +260,8 @@ namespace Payload
         {
             public override ARMObjectSpec GetSpec() => new ARMObjectSpec
             {
-                Object = "transaction"
+                Object = "transaction",
+                Endpoint = "/transactions"
             };
             public Transaction(object obj) : base(obj) { }
             public Transaction() : base() { }
@@ -579,6 +590,163 @@ namespace Payload
             public PaymentActivation(object obj) : base(obj) { }
             public PaymentActivation() : base() { }
         }
+
+        public class Operation : ARMObjectBase<Operation>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "operation",
+
+            };
+            public Operation(object obj) : base(obj) { }
+            public Operation() : base() { }
+        }
+
+
+        // ============================================
+        // API V2 Objects
+        // ============================================
+        public class Profile : ARMObjectBase<Profile>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "profile"
+            };
+            public Profile(object obj) : base(obj) { }
+            public Profile() : base() { }
+        }
+
+        public class BillingItem : ARMObjectBase<BillingItem>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "billing_item"
+            };
+            public BillingItem(object obj) : base(obj) { }
+            public BillingItem() : base() { }
+        }
+
+        public class Intent : ARMObjectBase<Intent>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "intent"
+            };
+            public Intent(object obj) : base(obj) { }
+            public Intent() : base() { }
+        }
+
+        public class InvoiceItem : ARMObjectBase<InvoiceItem>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "invoice_item"
+            };
+            public InvoiceItem(object obj) : base(obj) { }
+            public InvoiceItem() : base() { }
+        }
+
+        public class PaymentAllocation : ARMObjectBase<PaymentAllocation>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "payment_allocation"
+            };
+            public PaymentAllocation(object obj) : base(obj) { }
+            public PaymentAllocation() : base() { }
+        }
+
+        public class Entity : ARMObjectBase<Entity>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "entity",
+                Endpoint = "/entities"
+            };
+            public Entity(object obj) : base(obj) { }
+            public Entity() : base() { }
+        }
+
+        public class Stakeholder : ARMObjectBase<Stakeholder>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "stakeholder"
+            };
+            public Stakeholder(object obj) : base(obj) { }
+            public Stakeholder() : base() { }
+        }
+
+        public class ProcessingAgreement : ARMObjectBase<ProcessingAgreement>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "processing_agreement"
+            };
+            public ProcessingAgreement(object obj) : base(obj) { }
+            public ProcessingAgreement() : base() { }
+        }
+
+        public class Transfer : ARMObjectBase<Transfer>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "transfer"
+            };
+            public Transfer(object obj) : base(obj) { }
+            public Transfer() : base() { }
+        }
+
+        public class TransactionOperation : ARMObjectBase<TransactionOperation>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "transaction_operation"
+            };
+            public TransactionOperation(object obj) : base(obj) { }
+            public TransactionOperation() : base() { }
+        }
+
+        public class CheckFront : ARMObjectBase<CheckFront>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "check_front"
+            };
+            public CheckFront(object obj) : base(obj) { }
+            public CheckFront() : base() { }
+        }
+
+        public class CheckBack : ARMObjectBase<CheckBack>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "check_back"
+            };
+            public CheckBack(object obj) : base(obj) { }
+            public CheckBack() : base() { }
+        }
+
+        public class ProcessingRule : ARMObjectBase<ProcessingRule>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "processing_rule"
+            };
+            public ProcessingRule(object obj) : base(obj) { }
+            public ProcessingRule() : base() { }
+        }
+
+        public class ProcessingSettings : ARMObjectBase<ProcessingSettings>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "processing_settings"
+            };
+            public ProcessingSettings(object obj) : base(obj) { }
+            public ProcessingSettings() : base() { }
+        }
+
 
         public class UnknownResponse : PayloadError
         {

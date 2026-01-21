@@ -36,6 +36,7 @@ namespace Payload.Tests
                     state_incorporated = "NY",
                     postal_code = "11238",
                     phone_number = "(111) 222-3333",
+                    country = "US",
                     website = "https://payload.com",
                     start_date = "05/01/2015",
                     contact_name = "Test Person",
@@ -61,6 +62,7 @@ namespace Payload.Tests
                 payment_methods = new pl.PaymentMethod[]{
                     new pl.PaymentMethod(new {
                         type = "bank_account",
+                        account_holder = "Test User",
                         bank_account = new {
                             account_number = "123456789",
                             routing_number = "036001808",
@@ -82,7 +84,14 @@ namespace Payload.Tests
             var card_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
+                payment_method = new { 
+                    type = "card",
+                    card = new {
+                        card_number = "4242 4242 4242 4242", 
+                        expiry = "12/28",
+                        card_code = "123"
+                    }
+                }
             });
 
             return card_payment;
@@ -97,11 +106,14 @@ namespace Payload.Tests
             var bank_payment = pl.Payment.Create(new
             {
                 amount = randomNumber,
-                payment_method = new pl.BankAccount(new
-                {
-                    account_number = "123456789",
-                    routing_number = "036001808",
-                    account_type = "checking"
+                payment_method = new pl.PaymentMethod(new {
+                    account_holder = "Test User",
+                    type = "bank_account",
+                    bank_account = new {
+                        account_number = "123456789",
+                        routing_number = "036001808",
+                        account_type = "checking"
+                    }
                 })
             });
 

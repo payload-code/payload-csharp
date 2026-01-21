@@ -36,6 +36,21 @@ namespace Payload
             public ARMRequest<pl.PaymentLink> PaymentLink => new ARMRequest<pl.PaymentLink>(this);
             public ARMRequest<pl.OAuthToken> OAuthToken => new ARMRequest<pl.OAuthToken>(this);
             public ARMRequest<pl.PaymentActivation> PaymentActivation => new ARMRequest<pl.PaymentActivation>(this);
+            public ARMRequest<pl.Operation> Operation => new ARMRequest<pl.Operation>(this);
+            public ARMRequest<pl.Profile> Profile => new ARMRequest<pl.Profile>(this);
+            public ARMRequest<pl.BillingItem> BillingItem => new ARMRequest<pl.BillingItem>(this);
+            public ARMRequest<pl.Intent> Intent => new ARMRequest<pl.Intent>(this);
+            public ARMRequest<pl.InvoiceItem> InvoiceItem => new ARMRequest<pl.InvoiceItem>(this);
+            public ARMRequest<pl.PaymentAllocation> PaymentAllocation => new ARMRequest<pl.PaymentAllocation>(this);
+            public ARMRequest<pl.Entity> Entity => new ARMRequest<pl.Entity>(this);
+            public ARMRequest<pl.Stakeholder> Stakeholder => new ARMRequest<pl.Stakeholder>(this);
+            public ARMRequest<pl.ProcessingAgreement> ProcessingAgreement => new ARMRequest<pl.ProcessingAgreement>(this);
+            public ARMRequest<pl.Transfer> Transfer => new ARMRequest<pl.Transfer>(this);
+            public ARMRequest<pl.TransactionOperation> TransactionOperation => new ARMRequest<pl.TransactionOperation>(this);
+            public ARMRequest<pl.CheckFront> CheckFront => new ARMRequest<pl.CheckFront>(this);
+            public ARMRequest<pl.CheckBack> CheckBack => new ARMRequest<pl.CheckBack>(this);
+            public ARMRequest<pl.ProcessingRule> ProcessingRule => new ARMRequest<pl.ProcessingRule>(this);
+            public ARMRequest<pl.ProcessingSettings> ProcessingSettings => new ARMRequest<pl.ProcessingSettings>(this);
         }
     }
 }

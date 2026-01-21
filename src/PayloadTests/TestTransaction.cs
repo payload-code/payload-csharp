@@ -86,7 +86,7 @@ namespace Payload.Tests
             {
                 amount = randomNumber,
                 description = rand_description,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/29", card_code = "123"})
             });
 
             List<pl.Payment> payments = pl.Payment.FilterBy(new object[] {
@@ -147,7 +147,7 @@ namespace Payload.Tests
 
             dynamic refund = pl.Refund.Create(new
             {
-                amount = 10.0,
+                amount = 1.0,
                 ledger = new[] {
                     new pl.Ledger(new {
                         assoc_transaction_id=this.card_payment.id
@@ -156,7 +156,7 @@ namespace Payload.Tests
             });
 
             ClassicAssert.True(refund.type == "refund");
-            ClassicAssert.True(refund.amount == 10);
+            ClassicAssert.True(refund.amount == 1.0);
             ClassicAssert.True(refund.status_code == "approved");
         }
 
@@ -167,7 +167,7 @@ namespace Payload.Tests
             {
                 amount = 10.0,
                 processing_id = this.processing_account.id,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/29", card_code = "123" })
             });
 
             ClassicAssert.True(refund.type == "refund");
@@ -223,7 +223,7 @@ namespace Payload.Tests
             dynamic payment = pl.Payment.Select("*", "fee", "conv_fee").Create(new
             {
                 amount = 100,
-                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/25" })
+                payment_method = new pl.Card(new { card_number = "4242 4242 4242 4242", expiry = "12/29", card_code = "123" }),
             });
 
             ClassicAssert.NotNull(payment.fee);
