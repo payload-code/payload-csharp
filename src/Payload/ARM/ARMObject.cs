@@ -283,12 +283,12 @@ namespace Payload.ARM
 
         public static T Get(string id, Payload.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
 
-        private static ARMRequest<T> BuildRequest(params object[] list)
+        private static ARMRequest<T> BuildRequest(object[] list, bool applyPolymorphic = false)
         {
             Payload.Session session = (Payload.Session)(list.Where(item => item is Payload.Session).FirstOrDefault() ?? pl.DefaultSession);
             var req = new ARMRequest<T>(session);
 
-            if (req.Spec.Polymorphic != null)
+            if (applyPolymorphic && req.Spec.Polymorphic != null)
                 req = req.FilterBy(req.Spec.Polymorphic);
 
             return req;
@@ -301,7 +301,7 @@ namespace Payload.ARM
 
         public static ARMRequest<T> FilterBy(params object[] list)
         {
-            var req = BuildRequest(list);
+            var req = BuildRequest(list, applyPolymorphic: true);
 
             foreach (var filter in ExtractArgs(list))
                 req = req.FilterBy(filter);
@@ -321,7 +321,7 @@ namespace Payload.ARM
 
         public static ARMRequest<T> GroupBy(params object[] list)
         {
-            var req = BuildRequest(list);
+            var req = BuildRequest(list, applyPolymorphic: true);
 
             foreach (var groupBy in ExtractArgs(list))
                 req = req.GroupBy(groupBy);
@@ -341,7 +341,7 @@ namespace Payload.ARM
 
         public static async Task<List<T>> AllAsync(Payload.Session session = null)
         {
-            return await BuildRequest(session).AllAsync();
+            return await BuildRequest(new object[] { session }, applyPolymorphic: true).AllAsync();
         }
 
         public static List<T> All(Payload.Session session = null) => AllAsync(session).GetAwaiter().GetResult();
