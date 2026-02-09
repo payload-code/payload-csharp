@@ -283,15 +283,10 @@ namespace Payload.ARM
 
         public static T Get(string id, Payload.Session session = null) => GetAsync(id, session).GetAwaiter().GetResult();
 
-        public static ARMRequest<T> FilterBy(params object[] list)
+        private static ARMRequest<T> BuildRequest(params object[] list)
         {
             Payload.Session session = (Payload.Session)(list.Where(item => item is Payload.Session).FirstOrDefault() ?? pl.DefaultSession);
-            List<dynamic> filters = list.Where(item => !(item is Payload.Session)).ToList();
-
             var req = new ARMRequest<T>(session);
-
-            foreach (var filter in filters)
-                req = req.FilterBy(filter);
 
             if (req.Spec.Polymorphic != null)
                 req = req.FilterBy(req.Spec.Polymorphic);
@@ -299,18 +294,57 @@ namespace Payload.ARM
             return req;
         }
 
+        private static List<dynamic> ExtractArgs(object[] list)
+        {
+            return list.Where(item => !(item is Payload.Session)).ToList();
+        }
+
+        public static ARMRequest<T> FilterBy(params object[] list)
+        {
+            var req = BuildRequest(list);
+
+            foreach (var filter in ExtractArgs(list))
+                req = req.FilterBy(filter);
+
+            return req;
+        }
+
         public static ARMRequest<T> Select(params object[] list)
         {
-            Payload.Session session = (Payload.Session)(list.Where(item => item is Payload.Session).FirstOrDefault() ?? pl.DefaultSession);
-            List<dynamic> attrs = list.Where(item => !(item is Payload.Session)).ToList();
+            var req = BuildRequest(list);
 
-            var req = new ARMRequest<T>(session);
-
-            foreach (var attr in attrs)
+            foreach (var attr in ExtractArgs(list))
                 req = req.Select(attr);
 
             return req;
         }
+
+        public static ARMRequest<T> GroupBy(params object[] list)
+        {
+            var req = BuildRequest(list);
+
+            foreach (var groupBy in ExtractArgs(list))
+                req = req.GroupBy(groupBy);
+
+            return req;
+        }
+
+        public static ARMRequest<T> OrderBy(params object[] list)
+        {
+            var req = BuildRequest(list);
+
+            foreach (var orderBy in ExtractArgs(list))
+                req = req.OrderBy(new[] { orderBy });
+
+            return req;
+        }
+
+        public static async Task<List<T>> AllAsync(Payload.Session session = null)
+        {
+            return await BuildRequest(session).AllAsync();
+        }
+
+        public static List<T> All(Payload.Session session = null) => AllAsync(session).GetAwaiter().GetResult();
 
         public static async Task<List<T>> CreateAllAsync(IEnumerable<dynamic> objects, Payload.Session session = null)
         {

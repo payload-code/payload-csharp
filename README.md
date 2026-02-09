@@ -45,8 +45,8 @@ The Payload API supports multiple versions. You can specify which version to use
 using Payload;
 
 var pl = new Payload.Session(
-    "secret_key_3bW9JMZtPVDOfFNzwRdfE",
-    api_version: "v2"
+    "secret_key_3bW9J...",
+    apiVersion: "v2"
 );
 ```
 
