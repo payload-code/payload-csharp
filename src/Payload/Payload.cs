@@ -21,10 +21,10 @@ namespace Payload
             public string ApiUrl { get { return _url; } set { _url = value; } }
             public string ApiVersion { get; set; }
 
-            public Session(string api_key, string api_version = null)
+            public Session(string apiKey, string apiVersion = null)
             {
-                ApiKey = api_key;
-                ApiVersion = api_version;
+                ApiKey = apiKey;
+                ApiVersion = apiVersion;
             }
 
             public override bool Equals(object obj)
@@ -747,72 +747,74 @@ namespace Payload
             public ProcessingSettings() : base() { }
         }
 
+        public class InvoiceAttachment : ARMObjectBase<InvoiceAttachment>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "invoice_attachment"
+            };
+            public InvoiceAttachment(object obj) : base(obj) { }
+            public InvoiceAttachment() : base() { }
+        }
 
-        public class UnknownResponse : PayloadError
+
+        // Type aliases for backward compatibility - use Payload.Exceptions namespace instead
+        public class UnknownResponse : Exceptions.UnknownResponse
         {
             public UnknownResponse() { }
             public UnknownResponse(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class BadRequest : PayloadError
+        public class BadRequest : Exceptions.BadRequest
         {
-            public override int GetCode() { return 400; }
             public BadRequest() { }
             public BadRequest(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class InvalidAttributes : PayloadError
+        public class InvalidAttributes : Exceptions.InvalidAttributes
         {
-            public override int GetCode() { return 400; }
             public InvalidAttributes() { }
             public InvalidAttributes(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class TransactionDeclined : PayloadError
+        public class TransactionDeclined : Exceptions.TransactionDeclined
         {
-            public override int GetCode() { return 400; }
             public TransactionDeclined() { }
             public TransactionDeclined(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class Unauthorized : PayloadError
+        public class Unauthorized : Exceptions.Unauthorized
         {
-            public override int GetCode() { return 401; }
             public Unauthorized() { }
             public Unauthorized(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class NotPermitted : PayloadError
+        public class NotPermitted : Exceptions.NotPermitted
         {
-            public override int GetCode() { return 403; }
             public NotPermitted() { }
             public NotPermitted(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class NotFound : PayloadError
+        public class NotFound : Exceptions.NotFound
         {
-            public override int GetCode() { return 404; }
             public NotFound() { }
             public NotFound(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class TooManyRequests : PayloadError
+        public class TooManyRequests : Exceptions.TooManyRequests
         {
-            public override int GetCode() { return 429; }
             public TooManyRequests() { }
             public TooManyRequests(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class InternalServerError : PayloadError
+        public class InternalServerError : Exceptions.InternalServerError
         {
-            public override int GetCode() { return 500; }
             public InternalServerError() { }
             public InternalServerError(string message, JSONObject response) : base(message, response) { }
         }
 
-        public class ServiceUnavailable : PayloadError
+        public class ServiceUnavailable : Exceptions.ServiceUnavailable
         {
-            public override int GetCode() { return 503; }
             public ServiceUnavailable() { }
             public ServiceUnavailable(string message, JSONObject response) : base(message, response) { }
         }

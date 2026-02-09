@@ -1,6 +1,7 @@
 ﻿using Payload.ARM;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 
 namespace Payload
@@ -9,6 +10,7 @@ namespace Payload
     {
         public partial class Session
         {
+            internal HttpMessageHandler _httpMessageHandler;
             public dynamic Attr = new Attr(null);
             public ARMRequest<pl.AccessToken> AccessToken => new ARMRequest<pl.AccessToken>(this);
             public ARMRequest<pl.ClientToken> ClientToken => new ARMRequest<pl.ClientToken>(this);
@@ -51,6 +53,7 @@ namespace Payload
             public ARMRequest<pl.CheckBack> CheckBack => new ARMRequest<pl.CheckBack>(this);
             public ARMRequest<pl.ProcessingRule> ProcessingRule => new ARMRequest<pl.ProcessingRule>(this);
             public ARMRequest<pl.ProcessingSettings> ProcessingSettings => new ARMRequest<pl.ProcessingSettings>(this);
+            public ARMRequest<pl.InvoiceAttachment> InvoiceAttachment => new ARMRequest<pl.InvoiceAttachment>(this);
         }
     }
 }

@@ -29,7 +29,6 @@ namespace Payload.ARM
         public List<string> _group_by;
         public List<string> _order_by;
         private Payload.Session session;
-        internal HttpMessageHandler _httpMessageHandler;
         private static JsonSerializerSettings jsonsettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore
@@ -60,7 +59,7 @@ namespace Payload.ARM
 
         public string GetRoute(string id = null)
         {
-            var route = Spec.Endpoint != null ? Spec.Endpoint : "/" + Spec.Object + "s";
+            var route = Spec.Endpoint != null ? Spec.Endpoint : "/" + Spec.Object + (Spec.Object.EndsWith("s") ? "" : "s");
             if (!string.IsNullOrEmpty(id))
                 route += "/" + id;
 
@@ -95,8 +94,9 @@ namespace Payload.ARM
 
         public virtual async Task<JSONObject> ExecuteRequestAsync(RequestMethods method, string route, ExpandoObject body = null)
         {
-            var http = _httpMessageHandler != null 
-                ? new HttpClient(_httpMessageHandler, false)
+            var handler = session?._httpMessageHandler;
+            var http = handler != null
+                ? new HttpClient(handler, false)
                 : new HttpClient();
                 
             using (http)
@@ -416,7 +416,7 @@ namespace Payload.ARM
         public ARMRequest<T> GroupBy(object groupBy)
         {
             var groupBys = new List<object>();
-            if (!(groupBy is IEnumerable))
+            if (groupBy is string || !(groupBy is IEnumerable))
                 groupBys = new List<object>() { groupBy };
             else
                 groupBys = ((IEnumerable<object>)groupBy).ToList();

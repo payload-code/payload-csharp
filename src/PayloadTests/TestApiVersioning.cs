@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using Payload.ARM;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -32,11 +31,10 @@ namespace Payload.Tests
         public void test_no_api_version_header_when_not_set()
         {
             var mockHandler = new MockHttpMessageHandler();
-            var session = new Payload.Session("test_key", api_version: null);
-            var request = new ARMRequest<pl.Customer>(session);
-            request._httpMessageHandler = mockHandler;
+            var session = new Payload.Session("test_key", apiVersion: null);
+            session._httpMessageHandler = mockHandler;
 
-            try { request.Get("cust_test123"); } catch { }
+            try { session.Customer.Get("cust_test123"); } catch { }
 
             var capturedRequest = mockHandler.CapturedRequest;
             ClassicAssert.IsNotNull(capturedRequest);
@@ -47,11 +45,10 @@ namespace Payload.Tests
         public void test_api_version_header_with_other_headers()
         {
             var mockHandler = new MockHttpMessageHandler();
-            var session = new Payload.Session("test_key", api_version: "v2.0");
-            var request = new ARMRequest<pl.Customer>(session);
-            request._httpMessageHandler = mockHandler;
+            var session = new Payload.Session("test_key", apiVersion: "v2.0");
+            session._httpMessageHandler = mockHandler;
 
-            try { request.Create(new { email = "test@example.com" }); } catch { }
+            try { session.Customer.Create(new { email = "test@example.com" }); } catch { }
 
             var capturedRequest = mockHandler.CapturedRequest;
             ClassicAssert.IsNotNull(capturedRequest);
@@ -70,11 +67,10 @@ namespace Payload.Tests
         public void test_different_api_version_values(string version)
         {
             var mockHandler = new MockHttpMessageHandler();
-            var session = new Payload.Session("test_key", api_version: version);
-            var request = new ARMRequest<pl.Customer>(session);
-            request._httpMessageHandler = mockHandler;
+            var session = new Payload.Session("test_key", apiVersion: version);
+            session._httpMessageHandler = mockHandler;
 
-            try { request.Get("cust_test123"); } catch { }
+            try { session.Customer.Get("cust_test123"); } catch { }
 
             var capturedRequest = mockHandler.CapturedRequest;
             ClassicAssert.IsNotNull(capturedRequest);
@@ -90,27 +86,26 @@ namespace Payload.Tests
         public void test_api_version_on_all_http_methods(string httpMethod)
         {
             var mockHandler = new MockHttpMessageHandler();
-            var session = new Payload.Session("test_key", api_version: "v2.0");
-            var request = new ARMRequest<pl.Customer>(session);
-            request._httpMessageHandler = mockHandler;
+            var session = new Payload.Session("test_key", apiVersion: "v2.0");
+            session._httpMessageHandler = mockHandler;
 
             try
             {
                 switch (httpMethod)
                 {
                     case "GET":
-                        request.Get("cust_test123");
+                        session.Customer.Get("cust_test123");
                         break;
                     case "POST":
-                        request.Create(new { email = "test@example.com" });
+                        session.Customer.Create(new { email = "test@example.com" });
                         break;
                     case "PUT":
                         var customer1 = new pl.Customer(new { id = "cust_123", name = "Test" });
-                        request.UpdateAll((customer1, new { email = "new@example.com" }));
+                        session.Customer.UpdateAll((customer1, new { email = "new@example.com" }));
                         break;
                     case "DELETE":
                         var customer2 = new pl.Customer(new { id = "cust_123", name = "Test" });
-                        request.Delete(customer2);
+                        session.Customer.Delete(customer2);
                         break;
                 }
             }
@@ -128,17 +123,17 @@ namespace Payload.Tests
         {
             var mockHandler = new MockHttpMessageHandler();
             pl.ApiVersion = "v2.5";
-            var request = new ARMRequest<pl.Customer>();
-            request._httpMessageHandler = mockHandler;
+            pl.DefaultSession._httpMessageHandler = mockHandler;
 
-            try { request.Get("cust_test123"); } catch { }
+            try { pl.DefaultSession.Customer.Get("cust_test123"); } catch { }
 
             var capturedRequest = mockHandler.CapturedRequest;
             ClassicAssert.IsNotNull(capturedRequest);
             ClassicAssert.IsTrue(capturedRequest.Headers.Contains("X-API-Version"));
             ClassicAssert.AreEqual("v2.5", capturedRequest.Headers.GetValues("X-API-Version").First());
-            
+
             pl.ApiVersion = null;
+            pl.DefaultSession._httpMessageHandler = null;
         }
     }
 }

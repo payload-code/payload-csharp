@@ -19,8 +19,8 @@ namespace Payload.Tests
 
             this.billing_schedule = pl.BillingSchedule.Create(new
             {
-                start_date = "2019-01-01",
-                end_date = "2019-12-31",
+                start_date = "2026-01-01",
+                end_date = "2026-12-31",
                 recurring_frequency = "monthly",
                 type = "subscription",
                 customer_id = this.customer_account.id,
