@@ -39,6 +39,7 @@ namespace Payload
             public ARMRequest<pl.OAuthToken> OAuthToken => new ARMRequest<pl.OAuthToken>(this);
             public ARMRequest<pl.PaymentActivation> PaymentActivation => new ARMRequest<pl.PaymentActivation>(this);
             public ARMRequest<pl.Operation> Operation => new ARMRequest<pl.Operation>(this);
+            public ARMRequest<pl.Statement> Statement => new ARMRequest<pl.Statement>(this);
             public ARMRequest<pl.Profile> Profile => new ARMRequest<pl.Profile>(this);
             public ARMRequest<pl.BillingItem> BillingItem => new ARMRequest<pl.BillingItem>(this);
             public ARMRequest<pl.Intent> Intent => new ARMRequest<pl.Intent>(this);
