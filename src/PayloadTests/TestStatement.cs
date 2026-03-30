@@ -27,14 +27,14 @@ namespace Payload.Tests
 
             dynamic created_statement = pl.Statement.Create(new
             {
-                processing_id = this.processing_account.id,
+                account_id = this.processing_account.id,
                 start_date = start_date,
                 end_date = end_date
             });
 
             ClassicAssert.AreEqual(typeof(pl.Statement), created_statement.GetType());
             ClassicAssert.NotNull(created_statement.id);
-            ClassicAssert.AreEqual(this.processing_account.id, created_statement.processing_id);
+            ClassicAssert.AreEqual(this.processing_account.id, created_statement.account_id);
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace Payload.Tests
 
             this.statement = pl.Statement.Create(new
             {
-                processing_id = this.processing_account.id,
+                account_id = this.processing_account.id,
                 start_date = start_date,
                 end_date = end_date
             });
@@ -73,13 +73,13 @@ namespace Payload.Tests
 
             this.statement = pl.Statement.Create(new
             {
-                processing_id = this.processing_account.id,
+                account_id = this.processing_account.id,
                 start_date = start_date,
                 end_date = end_date
             });
 
             dynamic statements = pl.Statement
-                .FilterBy(new { processing_id = this.processing_account.id })
+                .FilterBy(new { account_id = this.processing_account.id })
                 .All();
 
             ClassicAssert.True(statements.Count > 0);
@@ -95,7 +95,7 @@ namespace Payload.Tests
 
             this.statement = pl.Statement.Create(new
             {
-                processing_id = this.processing_account.id,
+                account_id = this.processing_account.id,
                 start_date = start_date,
                 end_date = end_date
             });
@@ -116,7 +116,7 @@ namespace Payload.Tests
 
             this.statement = pl.Statement.Create(new
             {
-                processing_id = this.processing_account.id,
+                account_id = this.processing_account.id,
                 start_date = start_date,
                 end_date = end_date
             });
@@ -137,16 +137,16 @@ namespace Payload.Tests
 
             this.statement = pl.Statement.Create(new
             {
-                processing_id = this.processing_account.id,
+                account_id = this.processing_account.id,
                 start_date = start_date,
                 end_date = end_date
             });
 
-            dynamic selected_statement = pl.Statement.Select("id", "processing_id").Get(this.statement.id);
+            dynamic selected_statement = pl.Statement.Select("id", "account_id").Get(this.statement.id);
 
             ClassicAssert.AreEqual(typeof(pl.Statement), selected_statement.GetType());
             ClassicAssert.True(selected_statement.id == this.statement.id);
-            ClassicAssert.NotNull(selected_statement.processing_id);
+            ClassicAssert.NotNull(selected_statement.account_id);
         }
     }
 }
