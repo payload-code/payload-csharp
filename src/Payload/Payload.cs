@@ -602,6 +602,16 @@ namespace Payload
             public Operation() : base() { }
         }
 
+        public class Statement : ARMObjectBase<Statement>
+        {
+            public override ARMObjectSpec GetSpec() => new ARMObjectSpec
+            {
+                Object = "statement"
+            };
+            public Statement(object obj) : base(obj) { }
+            public Statement() : base() { }
+        }
+
 
         // ============================================
         // API V2 Objects
